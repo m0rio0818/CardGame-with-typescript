@@ -1,10 +1,6 @@
 import Card from "./Card";
-
 export default class Deck {
-    public gameType: string;
-    public cards: Card[];
-
-    constructor(gameType: string) {
+    constructor(gameType) {
         this.gameType = gameType;
         this.cards = [];
         // ゲームタイプによって、カードを初期化してください。
@@ -12,10 +8,9 @@ export default class Deck {
             this.cards = this.generateDeck();
         }
     }
-
-    generateDeck(): Card[] {
-        const suits: string[] = ["H", "D", "C", "S"];
-        const ranks: string[] = [
+    generateDeck() {
+        const suits = ["H", "D", "C", "S"];
+        const ranks = [
             "A",
             "2",
             "3",
@@ -30,9 +25,7 @@ export default class Deck {
             "Q",
             "K",
         ];
-
-        let deck: Card[] = [];
-
+        let deck = [];
         for (let i = 0; i < suits.length; i++) {
             let currSuit = suits[i];
             for (let j = 0; j < ranks.length; j++) {
@@ -42,24 +35,21 @@ export default class Deck {
         }
         return deck;
     }
-
-    resetDeck(): void {
+    resetDeck() {
         this.cards = [];
         this.cards = this.generateDeck();
         this.shuffleDeck();
     }
-
-    shuffleDeck(): void {
+    shuffleDeck() {
         for (let i = this.cards.length - 1; i >= 0; i--) {
-            let j = Math.floor(Math.random() * (i+1));
-
+            let j = Math.floor(Math.random() * (i + 1));
             let temp = this.cards[i];
             this.cards[i] = this.cards[j];
             this.cards[j] = temp;
         }
     }
-
-    drawOne(): Card {
-        return this.cards.pop()!;
+    drawOne() {
+        return this.cards.pop();
     }
 }
+//# sourceMappingURL=Deck.js.map
