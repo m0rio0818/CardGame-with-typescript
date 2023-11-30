@@ -1,6 +1,6 @@
-import Card from "./Card.js";
+import { Card } from "./Card.js";
 
-export default class Deck {
+export class Deck {
     public gameType: string;
     public cards: Card[];
 
@@ -22,7 +22,6 @@ export default class Deck {
             "4",
             "5",
             "6",
-            
             "7",
             "8",
             "9",
@@ -52,7 +51,7 @@ export default class Deck {
 
     shuffleDeck(): void {
         for (let i = this.cards.length - 1; i >= 0; i--) {
-            let j = Math.floor(Math.random() * (i+1));
+            let j = Math.floor(Math.random() * (i + 1));
 
             let temp = this.cards[i];
             this.cards[i] = this.cards[j];

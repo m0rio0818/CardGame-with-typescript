@@ -1,9 +1,8 @@
-import Card from "./Card.js";
-export default class Deck {
+import { Card } from "./Card.js";
+export class Deck {
     constructor(gameType) {
         this.gameType = gameType;
         this.cards = [];
-        // ゲームタイプによって、カードを初期化してください。
         if (this.gameType == "blackjack") {
             this.cards = this.generateDeck();
         }

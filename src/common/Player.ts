@@ -1,4 +1,4 @@
-import Card from "./Card";
+import { Card } from "./Card.js";
 
 export class Player {
     public name: string; // 名前
@@ -31,18 +31,15 @@ export class Player {
         ?Number userData: モデル外から渡されるパラメータ。nullになることもあります。
         return GameDecision: 状態を考慮した上で、プレイヤーが行った意思決定。
     */
-        promptPlayer(userData : number)
-        {
-            //TODO: ここからコードを書きましょう
-        }
-    
-    
-        /*
+    promptPlayer(userData: number) {
+        //TODO: ここからコードを書きましょう
+    }
+
+    /*
             return Number : 手札の合計
             合計が21を超える場合、手札の各エースについて、合計が21以下になるまで10を引きます。
         */
-        getHandScore()
-        {
-            //TODO: ここからコードを書きましょう
-        }
+    getHandScore() {
+        //TODO: ここからコードを書きましょう
+    }
 }
