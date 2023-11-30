@@ -1,4 +1,4 @@
-export default class Player {
+export class Player {
     // ブラックジャックの場合、最初の状態は「betting」です。
     constructor(name, type, gameType, chips = 400) {
         this.name = name;

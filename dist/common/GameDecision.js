@@ -1,4 +1,4 @@
-export default class GameDecision {
+export class GameDecision {
     /*
         String action: プレイヤーのアクションの選択（ブラックジャックでは、hit、stand等）
         Number amount: プレイヤーが選択する数値
@@ -9,4 +9,4 @@ export default class GameDecision {
         this.amount = amount;
     }
 }
-//# sourceMappingURL=gameDecision.js.map
+//# sourceMappingURL=GameDecision.js.map

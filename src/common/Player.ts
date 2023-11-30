@@ -1,6 +1,6 @@
 import Card from "./Card";
 
-export default class Player {
+export class Player {
     public name: string; // 名前
     public type: string; // タイプ(AI, ハウス or ユーザー)
     public gameType: string; // {'blackjack'}から選択。プレイヤーの初期化方法を決定するために使用されます。

@@ -1,6 +1,6 @@
-import Player from "./Player";
+import { Player } from "./Player";
 
-export default class Table {
+export class Table {
     public gameType: string;
     public betDenominatoins: number[];
     public turnCounter: number;
@@ -29,17 +29,17 @@ export default class Table {
     evaluateMove(userDate: number): void {}
 
     // 現在のターンが誰のものかを返す
-    getTurnPlayer(): Player {}
+    // getTurnPlayer(): Player {}
 
     // ブラックジャックゲームの各ターンを管理する役割
     haveTurn(userData: number): void {}
 
-    blackjackEvaluateAndGetRoundResults(): string {}
+    // blackjackEvaluateAndGetRoundResults(): string {}
 
     // 現在のプレイヤーがプレイヤーの配列の最後のプレイヤーであるかどうか
-    onLastPlayer(): boolean {}
+    // onLastPlayer(): boolean {}
 
-    onFirstPlayer(): boolean {}
+    // onFirstPlayer(): boolean {}
 
-    allPlayerActionsResolved(): boolean {}
+    // allPlayerActionsResolved(): boolean {}
 }

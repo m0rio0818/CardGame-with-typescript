@@ -1,4 +1,4 @@
-export default class Table {
+export class Table {
     constructor(gameType, betDenominations = [5, 20, 50, 100]) {
         this.gameType = gameType;
         this.betDenominatoins = betDenominations;
@@ -14,13 +14,8 @@ export default class Table {
     // それに応じてゲームの状態（プレイヤーの手札、ベット、ゲームの状態、チップなど）を更新
     evaluateMove(userDate) { }
     // 現在のターンが誰のものかを返す
-    getTurnPlayer() { }
+    // getTurnPlayer(): Player {}
     // ブラックジャックゲームの各ターンを管理する役割
     haveTurn(userData) { }
-    blackjackEvaluateAndGetRoundResults() { }
-    // 現在のプレイヤーがプレイヤーの配列の最後のプレイヤーであるかどうか
-    onLastPlayer() { }
-    onFirstPlayer() { }
-    allPlayerActionsResolved() { }
 }
 //# sourceMappingURL=Table.js.map

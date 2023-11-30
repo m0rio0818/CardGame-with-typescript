@@ -1,4 +1,4 @@
-export default class GameDecision {
+export class GameDecision {
     public action: string;
     public amount: number;
     /*

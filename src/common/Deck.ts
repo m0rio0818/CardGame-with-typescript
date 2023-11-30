@@ -1,4 +1,4 @@
-import Card from "./Card";
+import Card from "./Card.js";
 
 export default class Deck {
     public gameType: string;
@@ -22,6 +22,7 @@ export default class Deck {
             "4",
             "5",
             "6",
+            
             "7",
             "8",
             "9",
