@@ -1,5 +1,5 @@
 export class GameDecision {
-    constructor(action, amount) {
+    constructor(action, amount = -1) {
         this.action = action;
         this.amount = amount;
     }
