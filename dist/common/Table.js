@@ -1,7 +1,7 @@
 import { Player } from "./Player.js";
 import { Deck } from "./Deck.js";
 export class Table {
-    constructor(gameType, betDenominations = [5, 20, 50, 100]) {
+    constructor(gameType, betDenominations = [1, 5, 20, 50, 100]) {
         this.gameType = gameType;
         this.betDenominatoins = betDenominations;
         this.deck = new Deck(this.gameType);
@@ -11,44 +11,28 @@ export class Table {
         this.gamePhase = "betting";
         this.resultsLog = [];
     }
-    evaluateMove(player) {
-        let inputBet = 20;
-        let gamedecistion = player.promptPlayer(inputBet);
-        if (gamedecistion.action == "bet") {
-        }
-        else if (gamedecistion.action == "hit") {
-            let totalCard = player.getHandScore();
-        }
-        else if (gamedecistion.action == "stand") {
-        }
-        else if (gamedecistion.action == "surrender") {
-        }
-        else {
-        }
-    }
     blackjackEvaluateAndGetRoundResults() {
-        let status = [];
-        for (let i = 0; i < this.players.length; i++) {
-            let playerStatus = this.players[i].gameStatus;
+        let status = "";
+        for (let player of this.players) {
+            let playerStatus = player.gameStatus;
             if (playerStatus == "bust" ||
                 playerStatus == "broken" ||
                 playerStatus == "surrender")
-                status.push(playerStatus);
+                status += player.name + ":" + playerStatus + ",";
             else {
             }
-            ;
         }
         this.resultsLog.push(status);
         return status;
     }
     blackjackAssignPlayerHands() {
-        for (let i = 0; i < this.players.length; i++) {
-            let currPlayer = this.players[i];
-            if (currPlayer.type == "house") {
+        for (let player of this.players) {
+            if (player.type == "house") {
+                player.hand.push(this.deck.drawOne());
             }
             else {
                 for (let i = 0; i < 2; i++) {
-                    currPlayer.hand.push(this.deck.drawOne());
+                    player.hand.push(this.deck.drawOne());
                 }
             }
         }
@@ -62,18 +46,45 @@ export class Table {
     getTurnPlayer() {
         return this.players[this.turnCounter];
     }
-    haveTurn(userData) {
+    evaluateMove(player) {
+        let inputBet = 20;
+        let gamedecistion = player.promptPlayer(inputBet);
+        if (gamedecistion.action == "bet") {
+            player.chips -= inputBet;
+        }
+        else if (gamedecistion.action == "double") {
+            player.chips -= inputBet * 2;
+        }
+        else if (gamedecistion.action == "hit") {
+            let totalCard = player.getHandScore();
+        }
+        else if (gamedecistion.action == "stand") {
+        }
+        else if (gamedecistion.action == "surrender") {
+        }
+        else if (gamedecistion.action == "wait") {
+        }
+    }
+    haveTurn() {
+        let currentPlayer = this.getTurnPlayer();
         if (this.gamePhase == "betting") {
+            if (this.onLastPlayer())
+                this.gamePhase = "acting";
         }
         else if (this.gamePhase == "acting") {
+            if (this.onLastPlayer()) {
+                this.gamePhase = "evaluateWinners";
+            }
+        }
+        else if (this.gamePhase == "evaluateWinners") {
+            this.blackjackEvaluateAndGetRoundResults();
+            this.gamePhase = "roundOver";
         }
         else if (this.gamePhase == "roundOver") {
-            this.blackjackEvaluateAndGetRoundResults();
+            this.blackjackClearPlayerHandsAndBets();
         }
         else {
         }
-        let currentPlayer = this.getTurnPlayer();
-        currentPlayer.promptPlayer(userData);
         this.evaluateMove(currentPlayer);
         this.turnCounter++;
     }

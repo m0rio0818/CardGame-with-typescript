@@ -11,19 +11,21 @@ export class Player {
         this.gameStatus = "betting";
     }
     promptPlayer(userData) {
-        if ((this.gameStatus = "bet")) {
+        let score = this.getHandScore();
+        if ((this.gameStatus = "betting")) {
             if (this.type == "house") {
-                return new GameDecision("pass");
+                return new GameDecision("wait");
             }
             else if (this.type == "ai") {
-                return new GameDecision("bet", 10);
+                this.bet = Math.floor(Math.random() * this.chips);
+                return new GameDecision("bet", this.bet);
             }
             else
                 return new GameDecision("bet", userData);
         }
-        else {
+        else if (this.gameStatus == "acting") {
             if (this.type == "ai" || this.type == "house") {
-                if (this.getHandScore() < 17) {
+                if (score < 17) {
                     return new GameDecision("hit");
                 }
                 else {
@@ -31,8 +33,11 @@ export class Player {
                 }
             }
             else {
-                return new GameDecision("hit");
+                return new GameDecision(userData);
             }
+        }
+        else {
+            return new GameDecision(userData);
         }
     }
     getHandScore() {

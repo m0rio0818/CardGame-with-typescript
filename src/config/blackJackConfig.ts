@@ -10,4 +10,9 @@ export type BlackJackActionType =
 
 export type BlackJackStatusType = BlackJackActionType | "blackjack" | "bust";
 
-export type BlackJackGamePhaseType = "betting" | "acting" | "evaluateWinners" | "gameOver" | "roundOver";
+export type BlackJackGamePhaseType =
+    | "betting"
+    | "acting"
+    | "evaluateWinners"
+    | "gameOver"
+    | "roundOver";

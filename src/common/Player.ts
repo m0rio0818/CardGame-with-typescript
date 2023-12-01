@@ -1,20 +1,25 @@
 import { Game } from "phaser";
 import { Card } from "./Card.js";
 import { GameDecision } from "./GameDecision.js";
+import {
+    BlackJackActionType,
+    BlackJackPlayerType,
+} from "../config/blackJackConfig.js";
 
 export class Player {
     public name: string; // name
-    public type: string; // type : "ai", "house", "use"
+    public type: BlackJackPlayerType; // type : "ai", "house", "use"
     public gameType: string; // {'blackjack'}から選択。プレイヤーの初期化方法を決定するために使用されます。
     public chips: number; //ゲーム開始に必要なチップ。デフォルトは400。
     public hand: Card[]; // プレイヤーの手札
     public bet: number; // 現在のラウンドでのベットしているチップ
     public winAmount: number; // 勝利金額。正の数にも負の数にもなります。
     public gameStatus: string; // プレイヤーのゲームの状態やアクション. 最初の状態は「betting」です。
+    // "betting" | "acting" | "evaluateWinners" | "gameOver"  | "roundOver";
 
     constructor(
         name: string,
-        type: string,
+        type: BlackJackPlayerType,
         gameType: string,
         chips: number = 400
     ) {
@@ -32,25 +37,29 @@ export class Player {
         ?Number userData: モデル外から渡されるパラメータ。nullになることもあります。
         return GameDecision: 状態を考慮した上で、プレイヤーが行った意思決定。
     */
-    promptPlayer(userData: number): GameDecision {
-        // 意思決定を決めてもらう。 betの時
-        if ((this.gameStatus = "bet")) {
+    promptPlayer(userData: number | BlackJackActionType): GameDecision {
+        // 意思決定を決めてもらう。
+        let score: number = this.getHandScore();
+
+        if ((this.gameStatus = "betting")) {
             if (this.type == "house") {
-                return new GameDecision("pass");
+                return new GameDecision("wait");
             } else if (this.type == "ai") {
-                return new GameDecision("bet", 10);
-            } else return new GameDecision("bet", userData);
-        } else {
+                this.bet = Math.floor(Math.random() * this.chips);
+                return new GameDecision("bet", this.bet);
+            } else return new GameDecision("bet", userData as number);
+        } else if (this.gameStatus == "acting") {
             if (this.type == "ai" || this.type == "house") {
-                if (this.getHandScore() < 17) {
+                if (score < 17) {
                     return new GameDecision("hit");
                 } else {
                     return new GameDecision("stand");
                 }
             } else {
-                // 自分で選択する。
-                return new GameDecision("hit");
+                return new GameDecision(userData as string);
             }
+        } else {
+            return new GameDecision(userData as string);
         }
     }
 
