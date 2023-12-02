@@ -2,13 +2,22 @@ export type BlackJackPlayerType = "house" | "ai" | "player";
 
 export type BlackJackActionType =
     | "bet"
-    | "surrender"
-    | "stand"
     | "hit"
+    | "stand"
     | "double"
-    | "wait";
+    | "surrender"
+    | "insurance"
+    | "wait";   // dealerのみ
 
-export type BlackJackStatusType = BlackJackActionType | "blackjack" | "bust";
+export type BlackjackStatusType =
+    | ""
+    | "betting"
+    | "waiting"   // dealerのみ
+    | "acting"
+    | "stand"
+    | "bust"
+    | "blackjack"
+    | "surrender";
 
 export type BlackJackGamePhaseType =
     | "betting"

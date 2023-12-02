@@ -1,5 +1,7 @@
+import { BlackJackActionType } from "../config/blackJackConfig";
+
 export class GameDecision {
-    public action: string;
+    public action: BlackJackActionType;
     public amount: number;
     /*
         String action: プレイヤーのアクションの選択 ('bet', 'surrender', 'stand', 'hit', 'double')
@@ -7,7 +9,7 @@ export class GameDecision {
         Player.promptPlayer() メソッドが常に GameDecision オブジェクトを返します
     */
 
-    constructor(action: string, amount: number = -1) {
+    constructor(action: BlackJackActionType, amount: number = 0) {
         this.action = action;
         this.amount = amount;
     }

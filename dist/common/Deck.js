@@ -5,6 +5,7 @@ export class Deck {
         this.cards = [];
         if (this.gameType == "blackjack") {
             this.cards = this.generateDeck();
+            this.shuffleDeck();
         }
     }
     generateDeck() {

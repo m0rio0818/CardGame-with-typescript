@@ -4,10 +4,11 @@ import { Table } from "./common/Table.js";
     前回作成したコードを使ってください。
 */
 
-let table1 = new Table("blackjack");
-while(table1.gamePhase != 'roundOver'){
-    table1.haveTurn();
+let table = new Table("blackjack");
+console.log(table);
+while(table.gamePhase != 'roundOver'){
+    table.haveTurn();
 }
 
 // 初期状態では、ハウスと2人以上のA.Iプレーヤーが戦います。
-console.log(table1.resultsLog);
+console.log(table.resultsLog);

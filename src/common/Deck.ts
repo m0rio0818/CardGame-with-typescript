@@ -10,6 +10,7 @@ export class Deck {
         // ゲームタイプによって、カードを初期化してください。
         if (this.gameType == "blackjack") {
             this.cards = this.generateDeck();
+            this.shuffleDeck();
         }
     }
 

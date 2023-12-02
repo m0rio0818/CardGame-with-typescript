@@ -12,7 +12,8 @@ export class Player {
     }
     promptPlayer(userData) {
         let score = this.getHandScore();
-        if ((this.gameStatus = "betting")) {
+        console.log(this.type, " : ", this.gameStatus, this.hand, score, userData);
+        if (this.gameStatus == "betting") {
             if (this.type == "house") {
                 return new GameDecision("wait");
             }
@@ -37,6 +38,7 @@ export class Player {
             }
         }
         else {
+            console.log("lelse!!!!!", userData);
             return new GameDecision(userData);
         }
     }

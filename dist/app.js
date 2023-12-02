@@ -1,7 +1,8 @@
 import { Table } from "./common/Table.js";
-let table1 = new Table("blackjack");
-while (table1.gamePhase != 'roundOver') {
-    table1.haveTurn();
+let table = new Table("blackjack");
+console.log(table);
+while (table.gamePhase != 'roundOver') {
+    table.haveTurn();
 }
-console.log(table1.resultsLog);
+console.log(table.resultsLog);
 //# sourceMappingURL=app.js.map
