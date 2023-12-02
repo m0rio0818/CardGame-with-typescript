@@ -18,11 +18,12 @@ export class Table {
     blackjackEvaluateAndGetRoundResults() {
         console.log("ここから勝敗判定を行なっていきます。");
         for (let player of this.players) {
-            console.log(player.name, player.getHandScore());
+            console.log(player.name, player.getHandScore(), player.gameStatus, player.hand);
         }
         const dealer = this.players[0];
         const dealerScore = dealer.getHandScore();
         const dealerStatus = dealer.gameStatus;
+        console.log(dealerScore, dealerStatus, dealer.hand);
         let statusLog = [];
         for (let i = 1; i < this.players.length; i++) {
             let currPlayer = this.players[i];
@@ -30,36 +31,75 @@ export class Table {
             let playerScore = currPlayer.getHandScore();
             if (dealerStatus === "blackjack") {
                 if (playerStatus === "blackjack") {
+                    currPlayer.chips += 0;
+                    currPlayer.gameResult = "draw";
                 }
                 else {
+                    currPlayer.chips -= currPlayer.winAmount;
+                    currPlayer.gameResult = "lost";
                 }
             }
             else if (dealerStatus === "bust") {
                 if (playerStatus === "blackjack") {
+                    currPlayer.chips += currPlayer.winAmount * 1.5;
+                    currPlayer.gameResult = "win";
                 }
-                else if (playerStatus === "") {
+                else if (playerStatus === "double") {
+                    currPlayer.chips += currPlayer.winAmount;
+                    currPlayer.gameResult = "win";
                 }
                 else {
+                    currPlayer.chips += currPlayer.winAmount;
+                    currPlayer.gameResult = "win";
                 }
             }
-            else if (dealerScore > playerScore) {
-                if (playerStatus == "") {
-                }
-                else if (playerStatus == "stand") {
-                }
-            }
-            if (playerStatus == "bust" ||
-                playerStatus == "surrender")
-                statusLog.push("name: " +
-                    currPlayer.name +
-                    ", action" +
-                    currPlayer.gameStatus +
-                    ", bet : " +
-                    currPlayer.bet +
-                    ", won : " +
-                    currPlayer.winAmount);
             else {
+                if (playerStatus != "bust" && playerStatus != "surrender") {
+                    if (dealerScore > playerScore) {
+                        if (playerStatus == "double") {
+                            currPlayer.chips -= currPlayer.winAmount;
+                            currPlayer.gameResult = "lost";
+                        }
+                        else if (playerStatus == "stand") {
+                            currPlayer.chips -= currPlayer.winAmount;
+                            currPlayer.gameResult = "lost";
+                        }
+                    }
+                    else if (dealerScore < playerScore) {
+                        if (playerStatus === "blackjack") {
+                            currPlayer.chips += currPlayer.winAmount * 1.5;
+                            currPlayer.gameResult = "win";
+                        }
+                        else if (playerStatus === "double") {
+                            currPlayer.chips += currPlayer.winAmount;
+                            currPlayer.gameResult = "win";
+                        }
+                        else {
+                            currPlayer.chips += currPlayer.winAmount;
+                            currPlayer.gameResult = "win";
+                        }
+                    }
+                    else {
+                        currPlayer.chips += 0;
+                        currPlayer.gameResult = "draw";
+                    }
+                }
+                else {
+                    currPlayer.chips -= currPlayer.winAmount;
+                    currPlayer.gameResult = "lost";
+                }
             }
+            console.log(currPlayer.type + " : " + currPlayer.gameResult);
+            statusLog.push("name: " +
+                currPlayer.name +
+                " result : " +
+                +currPlayer.gameResult +
+                ", action" +
+                currPlayer.gameStatus +
+                ", bet : " +
+                currPlayer.bet +
+                ", won : " +
+                currPlayer.winAmount);
         }
         this.resultsLog.push(statusLog);
         return statusLog;
@@ -92,7 +132,7 @@ export class Table {
             gamedecision = player.promptPlayer(inputBet);
         }
         else {
-            if (player.type == "house") {
+            if (player.type === "house") {
                 let inputBet = "wait";
                 gamedecision = player.promptPlayer(inputBet);
             }
@@ -104,7 +144,7 @@ export class Table {
         console.log("handを評価 :", gamedecision);
         if (gamedecision.action == "bet") {
             console.log("ベット => 状態を更新");
-            player.chips -= gamedecision.amount;
+            player.bet = gamedecision.amount;
             player.winAmount = gamedecision.amount;
             player.gameStatus = "acting";
             console.log("Player after bet: ", player);
@@ -112,10 +152,10 @@ export class Table {
         }
         else if (gamedecision.action == "hit") {
             let score = player.getHandScore();
-            if (player.type == "ai" || player.type == "house") {
+            if (player.type == "ai") {
                 console.log("ai or houseは17未満だとhit");
                 while (score < 17) {
-                    console.log(player.name, "ヒット => カードを一枚引く");
+                    console.log(player.name, "17以下: ヒット => カードを一枚引く");
                     gamedecision = player.promptPlayer("hit");
                     player.hand.push(this.deck.drawOne());
                     score = player.getHandScore();
@@ -126,19 +166,20 @@ export class Table {
                 player.hand.push(this.deck.drawOne());
             }
             console.log("hitの終了 => bust, acting 判定〜〜〜");
-            player.gameStatus = score > 21 ? "bust" : "acting";
+            player.gameStatus =
+                score > 21 ? "bust" : score == 21 ? "blackjack" : "acting";
             console.log("Player after hit: ", player, score);
             console.log("----------------------------------------------------------------------------------------------------------------");
         }
         else if (gamedecision.action == "stand") {
             console.log("スタンド => standする");
             player.gameStatus = "stand";
-            console.log("Player after stand: ", player);
+            console.log(player.type + "after stand: ", player);
             console.log("----------------------------------------------------------------------------------------------------------------");
         }
         else if (gamedecision.action == "double") {
             player.hand.push(this.deck.drawOne());
-            player.chips -= gamedecision.amount;
+            player.bet += gamedecision.amount;
             player.winAmount = gamedecision.amount * 2;
             player.gameStatus = "stand";
         }
@@ -153,12 +194,13 @@ export class Table {
             console.log("----------------------------------------------------------------------------------------------------------------");
         }
         if (player.hand.length == 2 &&
+            player.getHandScore() == 21 &&
             player.hand.filter((card) => card.rank === "A").length > 0)
             player.gameStatus = "blackjack";
     }
     haveTurn() {
         let currPlayer = this.getTurnPlayer();
-        console.log("Player before " + this.gamePhase + " action :", currPlayer);
+        console.log(currPlayer.type + " before " + this.gamePhase + " action :", currPlayer);
         this.evaluateMove(currPlayer);
         if (this.gamePhase == "betting") {
             if (this.onLastPlayer()) {

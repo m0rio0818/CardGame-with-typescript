@@ -9,6 +9,7 @@ export class Player {
         this.bet = 0;
         this.winAmount = 0;
         this.gameStatus = "betting";
+        this.gameResult = "";
     }
     promptPlayer(userData) {
         let score = this.getHandScore();
@@ -24,8 +25,8 @@ export class Player {
             else
                 return new GameDecision("bet", userData);
         }
-        else if (this.gameStatus == "acting") {
-            if (this.type == "ai" || this.type == "house") {
+        else {
+            if (this.type == "ai") {
                 if (score < 17) {
                     return new GameDecision("hit");
                 }
@@ -36,10 +37,6 @@ export class Player {
             else {
                 return new GameDecision(userData);
             }
-        }
-        else {
-            console.log("lelse!!!!!", userData);
-            return new GameDecision(userData);
         }
     }
     getHandScore() {

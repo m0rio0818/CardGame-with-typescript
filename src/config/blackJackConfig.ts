@@ -7,17 +7,18 @@ export type BlackJackActionType =
     | "double"
     | "surrender"
     | "insurance"
-    | "wait";   // dealerのみ
+    | "wait"; // dealerのみ
 
 export type BlackjackStatusType =
     | ""
     | "betting"
-    | "waiting"   // dealerのみ
     | "acting"
     | "stand"
     | "bust"
+    | "double"
     | "blackjack"
-    | "surrender";
+    | "surrender"
+    | "waiting" // dealerのみ
 
 export type BlackJackGamePhaseType =
     | "betting"
@@ -25,3 +26,5 @@ export type BlackJackGamePhaseType =
     | "evaluateWinners"
     | "gameOver"
     | "roundOver";
+
+export type BlackJackGameStatus = "" | "win" | "lost" | "draw";

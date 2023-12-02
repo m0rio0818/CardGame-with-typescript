@@ -1,7 +1,10 @@
 import { Player } from "./Player.js";
 import { Deck } from "./Deck.js";
 import { GameDecision } from "./GameDecision.js";
-import { BlackJackActionType, BlackjackStatusType } from "../config/blackJackConfig.js";
+import {
+    BlackJackActionType,
+    BlackjackStatusType,
+} from "../config/blackJackConfig.js";
 import { Card } from "./Card.js";
 
 export class Table {
@@ -48,76 +51,109 @@ export class Table {
         console.log("ここから勝敗判定を行なっていきます。");
 
         for (let player of this.players) {
-            console.log(player.name, player.getHandScore());
+            console.log(
+                player.name,
+                player.getHandScore(),
+                player.gameStatus,
+                player.hand
+            );
         }
 
         // Dealer: BlackJack
-            // player: Blackjack => draw
-            // player : !Blackjack => Lose
+        // player: Blackjack => draw
+        // player : !Blackjack => Lose
         // Dealer : Bust
-            // Player : Blackjack => $bet x1.5 win
-            // Player : double => $bet x2 win
-            // player : stand => $bet win
-        //  Dealer > plaer
-            // player = double : -$bet x2
-            // player = stand :  -$bet
+        // Player : Blackjack => $bet x1.5 win
+        // Player : double => $bet x2 win
+        // player : stand => $bet win
+        //  else
+        //  Dealer > player
+        // player = double : -$bet x2
+        // player = stand :  -$bet
+        // plaer < Dealer
 
-        const dealer : Player = this.players[0];
-        const dealerScore : number = dealer.getHandScore();
-        const dealerStatus : BlackjackStatusType = dealer.gameStatus;
-
-        
+        const dealer: Player = this.players[0];
+        const dealerScore: number = dealer.getHandScore();
+        const dealerStatus: BlackjackStatusType = dealer.gameStatus;
+        console.log(dealerScore, dealerStatus, dealer.hand);
 
         let statusLog: string[] = [];
-        for (let i=1; i<this.players.length; i++) {
+        for (let i = 1; i < this.players.length; i++) {
             let currPlayer = this.players[i];
-            let playerStatus: BlackjackStatusType  = currPlayer.gameStatus;
-            let playerScore : number = currPlayer.getHandScore();
-            if (dealerStatus === "blackjack"){
+            let playerStatus: BlackjackStatusType = currPlayer.gameStatus;
+            let playerScore: number = currPlayer.getHandScore();
+            if (dealerStatus === "blackjack") {
                 if (playerStatus === "blackjack") {
                     // draw
-                }
-                else {
+                    currPlayer.chips += 0;
+                    currPlayer.gameResult = "draw";
+                } else {
                     // player lose
+                    currPlayer.chips -= currPlayer.winAmount;
+                    currPlayer.gameResult = "lost";
                 }
-            }
-            else if (dealerStatus === "bust"){
+            } else if (dealerStatus === "bust") {
                 if (playerStatus === "blackjack") {
                     // $bet x1.5 win
-                }
-                else if (playerStatus === ""){
+                    currPlayer.chips += currPlayer.winAmount * 1.5;
+                    currPlayer.gameResult = "win";
+                } else if (playerStatus === "double") {
                     // $bet x2 win
-                }
-                else {
+                    currPlayer.chips += currPlayer.winAmount;
+                    currPlayer.gameResult = "win";
+                } else {
                     // $bet x1 win
+                    currPlayer.chips += currPlayer.winAmount;
+                    currPlayer.gameResult = "win";
+                }
+            } else {
+                if (playerStatus != "bust" && playerStatus != "surrender") {
+                    if (dealerScore > playerScore) {
+                        if (playerStatus == "double") {
+                            currPlayer.chips -= currPlayer.winAmount;
+                            currPlayer.gameResult = "lost";
+                        } else if (playerStatus == "stand") {
+                            //  - $bet x1 win
+                            currPlayer.chips -= currPlayer.winAmount;
+                            currPlayer.gameResult = "lost";
+                        }
+                    } else if (dealerScore < playerScore) {
+                        if (playerStatus === "blackjack") {
+                            // $bet x1.5 win
+                            currPlayer.chips += currPlayer.winAmount * 1.5;
+                            currPlayer.gameResult = "win";
+                        } else if (playerStatus === "double") {
+                            // $bet x2 win
+                            currPlayer.chips += currPlayer.winAmount;
+                            currPlayer.gameResult = "win";
+                        } else {
+                            // $bet x1 win
+                            currPlayer.chips += currPlayer.winAmount;
+                            currPlayer.gameResult = "win";
+                        }
+                    } else {
+                        currPlayer.chips += 0;
+                        currPlayer.gameResult = "draw";
+                    }
+                } else {
+                    currPlayer.chips -= currPlayer.winAmount;
+                    currPlayer.gameResult = "lost";
                 }
             }
-            else if (dealerScore > playerScore) {
-                if (playerStatus == "") {
 
-                }
-                else if (playerStatus == "stand"){
-                    //  - $bet x1 win
-                }
-            }
-            
-            if (
-                playerStatus == "bust" ||
-                playerStatus == "surrender"
-            )
+            console.log(currPlayer.type + " : " + currPlayer.gameResult);
             statusLog.push(
-                    "name: " +
-                        currPlayer.name +
-                        ", action" +
-                        currPlayer.gameStatus +
-                        ", bet : " +
-                        currPlayer.bet +
-                        ", won : " +
-                        currPlayer.winAmount
-                );
-            else {
-                // 勝利、負け等をpushしたい。
-            }
+                "name: " +
+                    currPlayer.name +
+                    " result : " +
+                    +currPlayer.gameResult +
+                    ", action" +
+                    currPlayer.gameStatus +
+                    ", bet : " +
+                    currPlayer.bet +
+                    ", won : " +
+                    currPlayer.winAmount
+            );
         }
         this.resultsLog.push(statusLog);
         return statusLog;
@@ -164,13 +200,12 @@ export class Table {
     */
     evaluateMove(player: Player): void {
         let gamedecision: GameDecision;
-
         // 現在のhand　bet => player $20 bet のみ => hitはしない。 (stand);
         if (this.gamePhase == "betting" && player.type == "player") {
             let inputBet: number = 20;
             gamedecision = player.promptPlayer(inputBet);
         } else {
-            if (player.type == "house") {
+            if (player.type === "house") {
                 let inputBet: BlackJackActionType = "wait";
                 gamedecision = player.promptPlayer(inputBet);
             } else {
@@ -182,7 +217,8 @@ export class Table {
 
         if (gamedecision.action == "bet") {
             console.log("ベット => 状態を更新");
-            player.chips -= gamedecision.amount;
+            // player.chips -= gamedecision.amount;
+            player.bet = gamedecision.amount;
             player.winAmount = gamedecision.amount;
             player.gameStatus = "acting";
             console.log("Player after bet: ", player);
@@ -191,11 +227,14 @@ export class Table {
             );
         } else if (gamedecision.action == "hit") {
             let score = player.getHandScore();
-            if (player.type == "ai" || player.type == "house") {
+            if (player.type == "ai") {
                 console.log("ai or houseは17未満だとhit");
                 // 17未満の場合は場合は超えるまでhitを続ける。
                 while (score < 17) {
-                    console.log(player.name, "ヒット => カードを一枚引く");
+                    console.log(
+                        player.name,
+                        "17以下: ヒット => カードを一枚引く"
+                    );
                     gamedecision = player.promptPlayer("hit");
                     player.hand.push(this.deck.drawOne());
                     score = player.getHandScore();
@@ -207,7 +246,8 @@ export class Table {
 
             console.log("hitの終了 => bust, acting 判定〜〜〜");
 
-            player.gameStatus = score > 21 ? "bust" : "acting";
+            player.gameStatus =
+                score > 21 ? "bust" : score == 21 ? "blackjack" : "acting";
 
             console.log("Player after hit: ", player, score);
             console.log(
@@ -216,13 +256,13 @@ export class Table {
         } else if (gamedecision.action == "stand") {
             console.log("スタンド => standする");
             player.gameStatus = "stand";
-            console.log("Player after stand: ", player);
+            console.log(player.type + "after stand: ", player);
             console.log(
                 "----------------------------------------------------------------------------------------------------------------"
             );
         } else if (gamedecision.action == "double") {
             player.hand.push(this.deck.drawOne());
-            player.chips -= gamedecision.amount;
+            player.bet += gamedecision.amount;
             player.winAmount = gamedecision.amount * 2;
             player.gameStatus = "stand";
         } else if (gamedecision.action == "surrender") {
@@ -230,7 +270,7 @@ export class Table {
             player.winAmount = 0;
             player.gameStatus = "surrender";
         } else if (gamedecision.action == "wait") {
-            // ディーラーの待ち状態
+            // ディーラーに存在する、待ち状態
             player.gameStatus = "waiting";
             console.log("Dealer after wait: ", player);
             console.log(
@@ -241,6 +281,7 @@ export class Table {
         //　ブラックジャックの場合は、こちらで更新。
         if (
             player.hand.length == 2 &&
+            player.getHandScore() == 21 &&
             player.hand.filter((card) => card.rank === "A").length > 0
         )
             player.gameStatus = "blackjack";
@@ -254,7 +295,7 @@ export class Table {
     haveTurn(): void {
         let currPlayer: Player = this.getTurnPlayer();
         console.log(
-            "Player before " + this.gamePhase + " action :",
+            currPlayer.type + " before " + this.gamePhase + " action :",
             currPlayer
         );
 

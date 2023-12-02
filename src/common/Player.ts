@@ -2,6 +2,7 @@ import { Card } from "./Card.js";
 import { GameDecision } from "./GameDecision.js";
 import {
     BlackJackActionType,
+    BlackJackGameStatus,
     BlackJackPlayerType,
     BlackjackStatusType,
 } from "../config/blackJackConfig.js";
@@ -14,8 +15,10 @@ export class Player {
     public hand: Card[]; // プレイヤーの手札
     public bet: number; // 現在のラウンドでのベットしているチップ
     public winAmount: number; // 勝利金額。正の数にも負の数にもなります。
+    // public gamePhase : BlackjackStatusType;
     public gameStatus: BlackjackStatusType; // プレイヤーのゲームの状態やアクション. 最初の状態は「betting」です。
     //  "" | "betting" | "waiting" | "acting" | "stand" | "bust" | "blackjack" | "surrender";
+    public gameResult : BlackJackGameStatus;
 
     constructor(
         name: string,
@@ -30,7 +33,9 @@ export class Player {
         this.hand = [];
         this.bet = 0;
         this.winAmount = 0;
+        // this.gamePhase = "bet";
         this.gameStatus = "betting";
+        this.gameResult = "";
     }
 
     /*
@@ -50,8 +55,8 @@ export class Player {
                 this.bet = Math.floor(Math.random() * this.chips);
                 return new GameDecision("bet", this.bet);
             } else return new GameDecision("bet", userData as number);
-        } else if (this.gameStatus == "acting") {
-            if (this.type == "ai" || this.type == "house") {
+        } else  {
+            if (this.type == "ai" ) {
                 if (score < 17) {
                     return new GameDecision("hit");
                 } else {
@@ -60,9 +65,6 @@ export class Player {
             } else {
                 return new GameDecision(userData as BlackJackActionType);
             }
-        } else {
-            console.log("lelse!!!!!", userData);
-            return new GameDecision(userData as BlackJackActionType);
         }
     }
 
