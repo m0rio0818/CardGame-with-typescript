@@ -1,13 +1,52 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TypeScript(Recursion)</title>
-</head>
-<body>
-    aaa
-    <script type="module" src="dist/app.js" defer></script>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Black jack</title>
+        <!--bootstrap-->
+        <link
+            rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+            integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+            crossorigin="anonymous"
+        />
+        <link rel="stylesheet" href="./styls.css" />
+    </head>
+    <body>
+        <script type="module" src="dist/app.js" defer></script>
+        <div id="root">
+            <div
+                class="d-flex flex-column align-items-center justify-content-center vh-100 main-background"
+            >
+                <div class="container">
+                    <h3 class="color-white text-center">
+                        Welcome to Black jack & Poker game Center
+                    </h3>
+                    <h5 class="color-white text-center">
+                        Select Game and Input Your Name!
+                    </h5>
+                    <div class="input-group mb-3 d-flex justify-content-center">
+                        <input
+                            type="text"
+                            class="form-control col-sm-6 col-md-4 col-9"
+                            placeholder="Username"
+                            aria-label="Username"
+                            aria-describedby="basic-addon1"
+                        />
+                    </div>
+                    <div
+                        class="btn-group d-flex justify-content-center"
+                        role="group"
+                        aria-label="Basic example"
+                    >
+                        <button type="button" class="btn btn-success col-sm-4 col-md-3 col-7">
+                            Start Game
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>
