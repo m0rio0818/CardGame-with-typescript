@@ -5,7 +5,7 @@ import {
     BlackJackGameStatus,
     BlackJackPlayerType,
     BlackjackStatusType,
-} from "../config/blackJackConfig.js";
+} from "../../config/blackJackConfig.js";
 
 export class Player {
     public name: string; // name

@@ -4,7 +4,7 @@ import { GameDecision } from "./GameDecision.js";
 import {
     BlackJackActionType,
     BlackjackStatusType,
-} from "../config/blackJackConfig.js";
+} from "../../config/blackJackConfig.js";
 import { Card } from "./Card.js";
 
 export class Table {

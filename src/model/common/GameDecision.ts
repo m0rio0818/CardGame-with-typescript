@@ -1,4 +1,4 @@
-import { BlackJackActionType } from "../config/blackJackConfig";
+import { BlackJackActionType } from "../../config/blackJackConfig";
 
 export class GameDecision {
     public action: BlackJackActionType;
