@@ -1,5 +1,5 @@
-import Deck from './Deck'
-import Player from './Player'
+import Deck from './Deck.js'
+import Player from './Player.js'
 
 export default abstract class Table {
   gameType: string

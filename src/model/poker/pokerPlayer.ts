@@ -1,18 +1,15 @@
-import { Game, Tilemaps } from "phaser";
-import {
-    BlackjackActionType,
-    BlackjackStatusType,
-} from "../../config/blackjackConfig.js";
 import {
     PokerActionType,
     PokerPlayerType,
     PokerStatusType,
 } from "../../config/pokerConfig.js";
-import GameDecision from "../common/gameDecision.js";
-import Player from "../common/blackJackPlayer.js";
+import GameDecision from "../common/GameDecision.js";
+import Player from "../common/Player.js";
+import pokerGameDecision from "./pokerGameDecision.js";
 
 export default class pokerPlayer extends Player {
     gameStatus: PokerStatusType;
+    // roundBet: number; //　そのラウンドでのbetした金額
 
     constructor(
         name: string,
@@ -22,40 +19,47 @@ export default class pokerPlayer extends Player {
     ) {
         super(name, type, gameType, chips);
         this.gameStatus = "blind";
+        // this.roundBet = 0;
     }
 
-    promptPlayer(userData?: number | PokerActionType): GameDecision {
+    promptPlayer(userData?: number | PokerActionType | string): pokerGameDecision {
         let score = this.getHandScore();
 
         if (this.type === "player") {
             return this.gameStatus === "blind"
-                ? new GameDecision("blind", userData as number)
+                ? new pokerGameDecision("blind", userData as number)
                 : this.gameStatus === "bet"
-                ? new GameDecision("call", userData as number)
+                ? new pokerGameDecision("call", userData as number)
                 : this.gameStatus === "call"
-                ? new GameDecision("call", userData as number)
+                ? new pokerGameDecision("call", userData as number)
                 : this.gameStatus == "raise"
-                ? new GameDecision("raise", (userData as number) * 2)
-                : new GameDecision(userData as string);
+                ? new pokerGameDecision("raise", (userData as number) * 2)
+                : new pokerGameDecision("call", userData as number);
         } else {
             switch (this.gameStatus) {
                 case "blind":
-                    return new GameDecision("blind", userData as number);
+                    return new pokerGameDecision("blind", userData as number);
                 case "bet":
                     const rand = Math.random();
-                    // return rand > 0.5
-                    //     ? new GameDecision("call", userData as number)
-                    //     : new GameDecision("raise", (userData as number) * 2);
+                    // if (rand > 0.8)
+                    //     return new pokerGameDecision(
+                    //         "raise",
+                    //         (userData as number) * 2
+                    //     );
+                    // else if (rand > 0.6) return new pokerGameDecision("pass");
+                    //     //  new pokerGameDecision("pass", userData as number)
+                    //     // : new pokerGameDecision("raise", (userData as number) * 2);
+                    // else return new pokerGameDecision("call", userData as number);
                     return this.name == "ai_2"
-                    ? new GameDecision("raise", (userData as number) * 2)
-                        // ? new GameDecision("fold", (userData as number) * 2)
-                        : new GameDecision("call", userData as number);
+                        ? new pokerGameDecision("raise", (userData as number) * 2)
+                        : // new pokerGameDecision("fold", (userData as number) * 2)
+                          new pokerGameDecision("call", userData as number);
                 case "call":
-                    return new GameDecision("call", userData as number);
+                    return new pokerGameDecision("call", userData as number);
                 case "raise":
-                    return new GameDecision("raise", (userData as number) * 2);
+                    return new pokerGameDecision("raise", (userData as number) * 2);
                 default:
-                    return new GameDecision("fold");
+                    return new pokerGameDecision("fold");
             }
         }
     }

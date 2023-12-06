@@ -60,7 +60,7 @@ export default class Deck {
         }
     }
 
-    drawOne(): Card {
+    drawCard(): Card {
         return this.cards.pop()!;
     }
 }

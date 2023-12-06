@@ -1,5 +1,5 @@
-import { Card } from "./Card.js";
-import { GameDecision } from "./GameDecision.js";
+import Card from "../common/Card.js";
+import GameDecision from "../common/GameDecision.js";
 import {
     BlackJackActionType,
     BlackJackGameStatus,
@@ -7,7 +7,7 @@ import {
     BlackjackStatusType,
 } from "../../config/blackJackConfig.js";
 
-export class Player {
+export default class Player {
     public name: string; // name
     public type: BlackJackPlayerType; // type : "ai", "house", "use"
     public gameType: string; // {'blackjack'}から選択。プレイヤーの初期化方法を決定するために使用されます。
@@ -18,7 +18,7 @@ export class Player {
     // public gamePhase : BlackjackStatusType;
     public gameStatus: BlackjackStatusType; // プレイヤーのゲームの状態やアクション. 最初の状態は「betting」です。
     //  "" | "betting" | "waiting" | "acting" | "stand" | "bust" | "blackjack" | "surrender";
-    public gameResult : BlackJackGameStatus;
+    public gameResult: BlackJackGameStatus;
 
     constructor(
         name: string,
@@ -46,7 +46,14 @@ export class Player {
         // 意思決定を決めてもらう。
         let score: number = this.getHandScore();
 
-        console.log(this.type, " : ", this.gameStatus, this.hand, score,  userData);
+        console.log(
+            this.type,
+            " : ",
+            this.gameStatus,
+            this.hand,
+            score,
+            userData
+        );
 
         if (this.gameStatus == "betting") {
             if (this.type == "house") {
@@ -55,8 +62,8 @@ export class Player {
                 this.bet = Math.floor(Math.random() * this.chips);
                 return new GameDecision("bet", this.bet);
             } else return new GameDecision("bet", userData as number);
-        } else  {
-            if (this.type == "ai" ) {
+        } else {
+            if (this.type == "ai") {
                 if (score < 17) {
                     return new GameDecision("hit");
                 } else {

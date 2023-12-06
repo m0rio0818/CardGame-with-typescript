@@ -1,5 +1,5 @@
-import { Card } from "./Card.js";
-export class Deck {
+import Card from "./Card.js";
+export default class Deck {
     constructor(gameType) {
         this.gameType = gameType;
         this.cards = [];
@@ -48,7 +48,7 @@ export class Deck {
             this.cards[j] = temp;
         }
     }
-    drawOne() {
+    drawCard() {
         return this.cards.pop();
     }
 }

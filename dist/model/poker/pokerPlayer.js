@@ -1,5 +1,5 @@
-import GameDecision from "../common/gameDecision.js";
-import Player from "../common/player.js";
+import Player from "../common/Player.js";
+import pokerGameDecision from "./pokerGameDecision.js";
 export default class pokerPlayer extends Player {
     constructor(name, type, gameType, chips = 100) {
         super(name, type, gameType, chips);
@@ -9,30 +9,31 @@ export default class pokerPlayer extends Player {
         let score = this.getHandScore();
         if (this.type === "player") {
             return this.gameStatus === "blind"
-                ? new GameDecision("blind", userData)
+                ? new pokerGameDecision("blind", userData)
                 : this.gameStatus === "bet"
-                    ? new GameDecision("call", userData)
+                    ? new pokerGameDecision("call", userData)
                     : this.gameStatus === "call"
-                        ? new GameDecision("call", userData)
+                        ? new pokerGameDecision("call", userData)
                         : this.gameStatus == "raise"
-                            ? new GameDecision("raise", userData * 2)
-                            : new GameDecision(userData);
+                            ? new pokerGameDecision("raise", userData * 2)
+                            : new pokerGameDecision("call", userData);
         }
         else {
             switch (this.gameStatus) {
                 case "blind":
-                    return new GameDecision("blind", userData);
+                    return new pokerGameDecision("blind", userData);
                 case "bet":
                     const rand = Math.random();
                     return this.name == "ai_2"
-                        ? new GameDecision("raise", userData * 2)
-                        : new GameDecision("call", userData);
+                        ? new pokerGameDecision("raise", userData * 2)
+                        :
+                            new pokerGameDecision("call", userData);
                 case "call":
-                    return new GameDecision("call", userData);
+                    return new pokerGameDecision("call", userData);
                 case "raise":
-                    return new GameDecision("raise", userData * 2);
+                    return new pokerGameDecision("raise", userData * 2);
                 default:
-                    return new GameDecision("fold");
+                    return new pokerGameDecision("fold");
             }
         }
     }

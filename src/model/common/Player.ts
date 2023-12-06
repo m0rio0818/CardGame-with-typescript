@@ -1,7 +1,7 @@
 import {
     BlackJackActionType,
     BlackjackStatusType,
-} from "../../config/blackjackConfig";
+} from "../../config/blackJackConfig.js";
 import { PokerActionType, PokerStatusType } from "../../config/pokerConfig";
 import Card from "./Card";
 import GameDecision from "./GameDecision";
@@ -33,7 +33,7 @@ export default abstract class Player {
     プレイヤーのゲーム内での行動を返す
     */
     abstract promptPlayer(
-        userData?: number | BlackjackActionType | PokerActionType
+        userData?: number | BlackJackActionType | PokerActionType
     ): GameDecision;
 
     /*

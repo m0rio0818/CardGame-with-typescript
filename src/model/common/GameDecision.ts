@@ -1,8 +1,8 @@
 import { BlackJackActionType } from "../../config/blackJackConfig";
 import { PokerActionType } from "../../config/pokerConfig";
 
-export default class GameDecision {
-    public action: BlackJackActionType | PokerActionType;
+export default abstract class GameDecision {
+    public action: string;
     public amount: number;
     /*
         String action: プレイヤーのアクションの選択 ('bet', 'surrender', 'stand', 'hit', 'double')
@@ -10,7 +10,7 @@ export default class GameDecision {
         Player.promptPlayer() メソッドが常に GameDecision オブジェクトを返します
     */
 
-    constructor(action: BlackJackActionType, amount: number = 0) {
+    constructor(action: string, amount: number = 0) {
         this.action = action;
         this.amount = amount;
     }

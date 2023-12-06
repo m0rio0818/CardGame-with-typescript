@@ -1,11 +1,10 @@
-import { Player } from "./blackJackPlayer.js";
-import { Deck } from "./Deck.js";
-import { GameDecision } from "./GameDecision.js";
+import Player from "../blackjack/blackJackPlayer.js";
+import Deck from "../common/Deck.js";
+import GameDecision from "../common/GameDecision.js";
 import {
     BlackJackActionType,
     BlackjackStatusType,
 } from "../../config/blackJackConfig.js";
-import { Card } from "./Card.js";
 
 export class Table {
     /*
@@ -173,10 +172,10 @@ export class Table {
     blackjackAssignPlayerHands(): void {
         for (let player of this.players) {
             if (player.type == "house") {
-                player.hand.push(this.deck.drawOne());
+                player.hand.push(this.deck.drawCard());
             } else {
                 for (let i = 0; i < 2; i++) {
-                    player.hand.push(this.deck.drawOne());
+                    player.hand.push(this.deck.drawCard());
                 }
             }
         }
