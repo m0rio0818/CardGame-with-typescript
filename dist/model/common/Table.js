@@ -8,6 +8,7 @@ export default class Table {
         this.players = [];
         this.gameType = gameType;
         this.deck = new Deck(this.gameType);
+        console.log(this.deck);
     }
 }
-//# sourceMappingURL=table.js.map
+//# sourceMappingURL=Table.js.map

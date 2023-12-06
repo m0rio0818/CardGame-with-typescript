@@ -1,7 +1,6 @@
-import { BlackJackActionType } from "../../config/blackJackConfig.js";
 import GameDecision from "../common/GameDecision.js";
-
-export default class blackJackGameDecision extends GameDecision {
+import { BlackJackActionType } from "../../config/blackJackConfig.js";
+export default class pokerGameDecision extends GameDecision {
     public action: BlackJackActionType;
     public amount: number;
 

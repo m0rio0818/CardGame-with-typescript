@@ -7,6 +7,10 @@ export default class Deck {
             this.cards = this.generateDeck();
             this.shuffleDeck();
         }
+        else if (this.gameType == "poker") {
+            this.cards = this.generateDeck();
+            this.shuffleDeck();
+        }
     }
     generateDeck() {
         const suits = ["H", "D", "C", "S"];

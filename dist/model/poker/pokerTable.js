@@ -8,9 +8,9 @@ export default class pokerTable extends Table {
         this.gamePhase = "blinding";
         this.players = [
             new pokerPlayer("p1", "player", gameType),
-            new pokerPlayer("ai_1", "ai", gameType),
-            new pokerPlayer("ai_2", "ai", gameType),
-            new pokerPlayer("ai_3", "ai", gameType),
+            new pokerPlayer("p2", "player", gameType),
+            new pokerPlayer("p3", "player", gameType),
+            new pokerPlayer("p4", "player", gameType),
         ];
         this.dealerIndex = 0;
         this.turnCounter = this.dealerIndex + 1;
@@ -43,21 +43,30 @@ export default class pokerTable extends Table {
     }
     evaluateMove(player, userData) {
         if (player.type == "dealer") {
-            if (this.roundCounter == 1) {
+            if (this.roundCounter == 0) {
                 this.dealer.hand.push(this.deck.drawCard());
                 this.dealer.hand.push(this.deck.drawCard());
                 this.dealer.hand.push(this.deck.drawCard());
+            }
+            else if (this.roundCounter == 3) {
+                console.log("最終ラウンドまで来た。");
             }
             else {
                 this.dealer.hand.push(this.deck.drawCard());
             }
-            this.gamePhase = "betting";
-            this.clearPlayerBet();
             this.roundCounter++;
+            this.clearPlayerBet();
+            this.changePlayerStatusToBet();
+            this.turnCounter = this.dealerIndex + 1;
+            console.log("ディーラーのhand", this.dealer.hand);
+            console.log("次のラウンドの開始peron", this.getTurnPlayer().name);
+            this.gamePhase = "betting";
+            console.log(this.printPlayerStatus());
         }
         else {
             if (this.turnCounter == this.betIndex &&
-                player.gameStatus != "bet") {
+                player.gameStatus != "bet" &&
+                player.gameStatus != "blind") {
                 this.gamePhase = "dealer turn";
             }
             let gameDecision = player.promptPlayer(userData, this.betMoney);
@@ -74,6 +83,8 @@ export default class pokerTable extends Table {
                     console.log(player.name, "after blind", player);
                     if (this.turnCounter == this.dealerIndex + 2) {
                         this.changePlayerStatusToBet();
+                        console.log("プレイヤーの情報をBETに変更!!!");
+                        this.assignPlayerHands();
                     }
                     break;
                 case "call":
@@ -83,9 +94,9 @@ export default class pokerTable extends Table {
                     }
                     console.log(player.name, "before call", player);
                     let playercallMoney = gameDecision.amount;
-                    let currBet = player.bet;
-                    console.log("call前のbet", currBet);
-                    let playerHaveToCall = playercallMoney - currBet;
+                    let callBet = player.bet;
+                    console.log("call前のbet", player.bet);
+                    let playerHaveToCall = playercallMoney - callBet;
                     player.bet += playerHaveToCall;
                     console.log("call後のbet", player.bet);
                     player.chips -= playerHaveToCall;
@@ -97,8 +108,8 @@ export default class pokerTable extends Table {
                     console.log(player.name, "before raise", player);
                     let playerRaiseMoney = gameDecision.amount;
                     this.betMoney = gameDecision.amount;
-                    currBet = player.bet;
-                    let playerHaveToRaise = playerRaiseMoney - currBet;
+                    let raiseBet = player.bet;
+                    let playerHaveToRaise = playerRaiseMoney - raiseBet;
                     this.pot += playerHaveToRaise;
                     player.chips -= playerHaveToRaise;
                     this.betIndex = this.turnCounter;
@@ -131,7 +142,6 @@ export default class pokerTable extends Table {
                 this.evaluateMove(this.dealer);
         }
         if (this.gamePhase == "evaluating") {
-            ;
             this.evaluateAndGetRoundResults();
             this.clearPlayerHandsAndBets();
         }
@@ -159,9 +169,9 @@ export default class pokerTable extends Table {
                     :
                         this.evaluateMove(player);
             }
+            this.turnCounter++;
+            this.turnCounter %= this.players.length;
         }
-        this.turnCounter++;
-        this.turnCounter %= this.players.length;
     }
     playerActionResolved(player) {
         return (player.gameStatus == "call" ||

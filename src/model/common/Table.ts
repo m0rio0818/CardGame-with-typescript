@@ -14,6 +14,7 @@ export default abstract class Table {
     this.gameType = gameType
 
     this.deck = new Deck(this.gameType)
+    console.log(this.deck);
   }
 
   abstract assignPlayerHands(): void

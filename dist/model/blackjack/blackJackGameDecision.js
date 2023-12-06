@@ -1,5 +1,5 @@
 import GameDecision from "../common/GameDecision.js";
-export default class blackJackGameDecision extends GameDecision {
+export default class pokerGameDecision extends GameDecision {
     constructor(action, amount = 0) {
         super(action, amount);
         this.action = action;
