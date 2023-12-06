@@ -48,30 +48,36 @@ export default class pokerTable extends Table {
                 this.dealer.hand.push(this.deck.drawCard());
                 this.dealer.hand.push(this.deck.drawCard());
             }
-            else if (this.roundCounter == 3) {
-                console.log("最終ラウンドまで来た。");
-            }
             else {
                 this.dealer.hand.push(this.deck.drawCard());
             }
             this.roundCounter++;
+            if (this.roundCounter == 3) {
+                console.log("最終ラウンドまで来た。");
+                this.gamePhase = "evaluating";
+            }
             this.clearPlayerBet();
             this.changePlayerStatusToBet();
             this.turnCounter = this.dealerIndex + 1;
+            this.betMoney = this.minbet;
             console.log("ディーラーのhand", this.dealer.hand);
-            console.log("次のラウンドの開始peron", this.getTurnPlayer().name);
+            console.log("次のラウンドの開始person", this.getTurnPlayer().name);
             this.gamePhase = "betting";
-            console.log(this.printPlayerStatus());
+            this.printPlayerStatus();
         }
         else {
             if (this.turnCounter == this.betIndex &&
                 player.gameStatus != "bet" &&
                 player.gameStatus != "blind") {
+                console.log("一周してきました。ディーラーに移行");
                 this.gamePhase = "dealer turn";
             }
             let gameDecision = player.promptPlayer(userData, this.betMoney);
             console.log(gameDecision);
             switch (gameDecision.action) {
+                case "bet":
+                    console.log("ベットできてません。もう一度選択してください");
+                    break;
                 case "blind":
                     console.log(player.name, "before blind", player);
                     player.bet =
@@ -127,6 +133,7 @@ export default class pokerTable extends Table {
                     console.log(player.name, "after check", player);
                     break;
                 case "fold":
+                    console.log("おります。");
                     player.gameStatus = "fold";
                     break;
             }
@@ -135,35 +142,42 @@ export default class pokerTable extends Table {
     }
     haveTurn(userData) {
         if (this.gamePhase == "dealer turn") {
+            console.log("ディーラーターン");
             if (this.roundCounter == 3) {
+                console.log("最終ラウンドまで来た。1");
                 this.gamePhase = "evaluating";
             }
             else
                 this.evaluateMove(this.dealer);
         }
         if (this.gamePhase == "evaluating") {
+            console.log("TURN  OWARIIIIIIIIIIII!!!!");
             this.evaluateAndGetRoundResults();
             this.clearPlayerHandsAndBets();
         }
         let player = this.getTurnPlayer();
-        let playerBefore = this.getoneBeforePlayer();
         console.log("currPlayer: ", player.name);
+        let playerBefore = this.getoneBeforePlayer();
         if (this.allPlayerActionResolved()) {
             this.gamePhase = "dealer turn";
             this.evaluateMove(this.dealer);
         }
         else {
-            if (playerBefore.gameStatus == "check" && userData == "check") {
+            if ((playerBefore.gameStatus == "check" ||
+                playerBefore.gameStatus == "bet") &&
+                userData == "check") {
                 this.evaluateMove(player, "check");
             }
             else if (playerBefore.gameStatus !== "check" &&
                 userData == "check") {
+                console.log("前のプレイヤーがcheckしてなからcheckできません。");
                 this.evaluateMove(player, "call");
             }
             else if (player.chips <= this.minbet) {
                 this.evaluateMove(player, "allin");
             }
             else {
+                console.log("userAction: ", userData);
                 player.type == "player"
                     ? this.evaluateMove(player, userData)
                     :
@@ -189,7 +203,7 @@ export default class pokerTable extends Table {
     }
     printPlayerStatus() {
         for (let player of this.players) {
-            console.log(player.type, player.name, player.gameStatus);
+            console.log(player.type, player.name, player.gameStatus, player.chips);
         }
     }
     onLastPlayer() {

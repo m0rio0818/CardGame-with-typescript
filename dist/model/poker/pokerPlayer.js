@@ -7,20 +7,21 @@ export default class pokerPlayer extends Player {
     }
     promptPlayer(userData, betMoney) {
         if (this.type === "player") {
-            return this.gameStatus === "blind"
-                ? new pokerGameDecision("blind", betMoney)
-                : this.gameStatus === "bet"
-                    ? new pokerGameDecision("call", betMoney)
-                    : this.gameStatus === "call"
+            return userData == "blind"
+                ? new pokerGameDecision("blind")
+                : userData == "bet"
+                    ? new pokerGameDecision("bet")
+                    : userData == "call"
                         ? new pokerGameDecision("call", betMoney)
-                        : this.gameStatus == "raise"
+                        : userData == "raise"
                             ? new pokerGameDecision("raise", betMoney * 2)
-                            : this.gameStatus == "check"
-                                ? new pokerGameDecision("check")
-                                : this.gameStatus == "fold"
-                                    ? new pokerGameDecision("fold")
-                                    :
-                                        new pokerGameDecision("allin", this.chips);
+                            : userData == "allin"
+                                ? new pokerGameDecision("allin", betMoney)
+                                : userData == "check"
+                                    ? new pokerGameDecision("check")
+                                    : userData == "fold"
+                                        ? new pokerGameDecision("fold")
+                                        : new pokerGameDecision("blind");
         }
         else {
             switch (this.gameStatus) {
