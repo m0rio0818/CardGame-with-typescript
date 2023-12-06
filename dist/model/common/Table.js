@@ -10,4 +10,4 @@ export default class Table {
         this.deck = new Deck(this.gameType);
     }
 }
-//# sourceMappingURL=Table.js.map
+//# sourceMappingURL=table.js.map

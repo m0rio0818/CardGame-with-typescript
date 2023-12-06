@@ -242,12 +242,12 @@ export class Table {
                         "17以下: ヒット => カードを一枚引く"
                     );
                     gamedecision = player.promptPlayer("hit");
-                    player.hand.push(this.deck.drawOne());
+                    player.hand.push(this.deck.drawCard());
                     score = player.getHandScore();
                 }
             } else {
                 console.log(player.name, "ヒット => カードを一枚引く");
-                player.hand.push(this.deck.drawOne());
+                player.hand.push(this.deck.drawCard());
             }
 
             console.log("hitの終了 => bust, acting 判定〜〜〜", score);
@@ -266,7 +266,7 @@ export class Table {
                 "----------------------------------------------------------------------------------------------------------------"
             );
         } else if (gamedecision.action == "double") {
-            player.hand.push(this.deck.drawOne());
+            player.hand.push(this.deck.drawCard());
             player.bet += gamedecision.amount;
             player.winAmount = player.bet * 2;
             let score: number = player.getHandScore();
@@ -347,7 +347,7 @@ export class Table {
             let dealerScore = dealer.getHandScore();
             console.log(dealerScore);
             while (dealerScore < 17) {
-                dealer.hand.push(this.deck.drawOne());
+                dealer.hand.push(this.deck.drawCard());
                 dealerScore = dealer.getHandScore();
             }
 

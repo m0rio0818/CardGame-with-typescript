@@ -7,10 +7,16 @@ import pokerTable from "./model/poker/pokerTable.js";
 
 let table = new pokerTable("poker");
 // console.log(table);
-while (table.gamePhase != "round over") {
-    table.haveTurn();
-}
+// while (table.gamePhase != "round over") {
+//     table.haveTurn();
+// }
 
+table.haveTurn(); // ai1
+table.haveTurn(); // ai2
+table.haveTurn(); // ai3
+table.haveTurn(); // ai4
+table.haveTurn("call"); // p1
+table.haveTurn(); // ai1
+table.haveTurn(); // ai2
 
 // 初期状態では、ハウスと2人以上のA.Iプレーヤーが戦います。
-console.log(table.resultsLog);

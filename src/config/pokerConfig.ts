@@ -3,7 +3,6 @@ export type PokerActionType =
     | "call"
     | "check"
     | "fold"
-    | "drop"
     | "raise"
     | "allin"
     | "blind"
@@ -14,13 +13,11 @@ export type PokerPlayerType = "" | "ai" | "player" | "dealer";
 export type PokerStatusType =
     | ""
     | "blind"
-    | "pass"
+    | "bet"  //
+    | "check" //　passすること // 前のプレイヤーがcheckならできる。
     | "fold" // 降りること
-    | "bet"
-    | "call"
-    | "raise"
-    | "check"
-    | "folded"
+    | "call" //  前の人と同じ金額を賭ける。
+    | "raise" // 二倍
     | "allin"
     | "";
 

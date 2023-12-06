@@ -1,21 +1,21 @@
+import { setTransitionHooks } from "vue";
 import {
     PokerGamePhaseType,
     PokerDenominationType,
     PokerActionType,
 } from "../../config/pokerConfig.js";
-import GameDecision from "../common/GameDecision.js";
-import Player from "../common/Player.js";
-import Table from "../common/table.js";
+import Table from "../common/Table.js";
+import pokerGameDecision from "./pokerGameDecision.js";
 import pokerPlayer from "./pokerPlayer.js";
 
 export default class pokerTable extends Table {
     betDenominations: PokerDenominationType[] = [5, 10, 20, 50, 100];
     dealer: pokerPlayer;
     gamePhase: PokerGamePhaseType; // 型の変更
-    turnCounter: number;
+    turnCounter: number; //　現在のターンカウンター
     dealerIndex: number; // 追加
     minbet: number; //　最小bet
-    betMoney: number; //レイズ等をした時のbet額 管理
+    betMoney: number; // テーブルの現在のbet金額(raise等によって変動していく。)
     betIndex: number; // betStartIndex;
     pot: number;
     players: pokerPlayer[];
@@ -33,10 +33,10 @@ export default class pokerTable extends Table {
         //     Math.random() * (this.players.length - 1)
         // );
         this.dealerIndex = 0;
-        this.turnCounter = this.dealerIndex + 1;
+        this.turnCounter = this.dealerIndex + 1; // 現在ターンのプレイヤーを返す。
         this.betIndex = (this.dealerIndex + 2) % this.players.length;
         this.minbet = 5; // 最小ベット金額
-        this.betMoney = 5; //　ベットしないといけない金額
+        this.betMoney = this.minbet; //　ベットしないといけない金額
         this.pot = 0; // potに溜まった金額
     }
 
@@ -53,8 +53,13 @@ export default class pokerTable extends Table {
             player.bet = 0;
         }
         this.dealer.hand = [];
-        this.dealer.bet = 0;
         this.pot = 0;
+    }
+
+    clearPlayerBet(): void {
+        for (let player of this.players) {
+            player.bet = 0;
+        }
     }
 
     // ラウンド結果を評価し、結果を文字列として返すメソッド.
@@ -63,149 +68,182 @@ export default class pokerTable extends Table {
     }
 
     // プレイヤーのアクションを評価し、ゲームの進行状態を変更するメソッド。
-    evaluateMove(
-        player: pokerPlayer,
-        userData?: number | PokerActionType
-    ): void {
-        let decision: GameDecision = player.promptPlayer(this.betMoney);
-        console.log(
-            "PlayerIndex: ",
-            this.turnCounter,
-            "betIndex: ",
-            this.betIndex
-        );
-        console.log(player.name, "before", player.gameStatus, player);
-        console.log(player.name, "Decistion: ", decision);
-        switch (decision.action) {
-            case "blind":
-                player.bet = this.turnCounter == 1 ? 2 : 5;
-                player.chips -= player.bet;
-                this.pot += player.bet;
-                break;
-            case "call":
-                console.log("~~~~betの処理〜〜〜");
-                console.log(
-                    "bet",
-                    player.bet,
-                    "have to bet : ",
-                    decision.amount!
-                );
-                // 現在betする金額
-                let playerNeedBet =
-                    decision.amount! <= player.bet
-                        ? decision.amount
-                        : decision.amount! - player.bet;
-
-                player.bet += playerNeedBet!;
-                player.chips -= playerNeedBet!;
-                this.pot += playerNeedBet!;
-                player.gameStatus = "call";
-                console.log("bet ===>>", player.bet);
-                break;
-            case "raise":
-                console.log("betIndex更新前: ", this.betIndex);
-                this.betIndex = this.turnCounter;
-                console.log("betIndex更新後: ", this.betIndex);
-                console.log("before raise: ", this.betMoney);
-                this.betMoney *= 2;
-                console.log("after raise: ", this.betMoney);
-                let playerRaiseBet =
-                    decision.amount! <= player.bet
-                        ? decision.amount
-                        : decision.amount! - player.bet;
-
-                this.pot += playerRaiseBet!;
-                player.bet += playerRaiseBet!;
-                player.chips -= player.bet;
-                player.gameStatus = "raise";
-                break;
-            case "fold":
-                player.gameStatus = "fold";
-                break;
-            case "pass":
-                player.gameStatus = "pass";
-                break;
-            // case "":
-            //     break;
-            // default:
-            //     break;
-        }
-        console.log(player.name, "after", player.gameStatus, player);
-        console.log("POT に溜まっているお金", this.pot);
-    }
-
-    // プレイヤーのターンを処理するメソッド.
-    haveTurn(userData?: string | number | undefined): void {
-        let player = this.getTurnPlayer();
-        if (this.gamePhase == "blinding") {
-            // ブラインドベット
-            // そのターンのbetをstartした人のindexを取得 (そこで終了か判定するため)
-            this.evaluateMove(player);
-            this.turnCounter++;
-            this.turnCounter %= this.players.length;
-            if (this.turnCounter == this.betIndex + 1) {
-                this.assignPlayerHands();
-                this.chagePlayerStatusToBet(); // 全プレイヤーをbet状態にする。
-                this.gamePhase = "betting";
+    evaluateMove(player: pokerPlayer, userData?: PokerActionType): void {
+        if (player.type == "dealer") {
+            if (this.roundCounter == 1) {
+                this.dealer.hand.push(this.deck.drawCard());
+                this.dealer.hand.push(this.deck.drawCard());
+                this.dealer.hand.push(this.deck.drawCard());
+            } else {
+                this.dealer.hand.push(this.deck.drawCard());
             }
-        } else if (this.gamePhase == "betting") {
-            if (player.gameStatus == "blind") player.gameStatus = "bet";
-            // // 一周したら、終了。途中で,raiseしたら、またそのindexがbetIndexになり、一周カウント。
-            this.evaluateMove(player);
-            this.turnCounter++;
-            this.turnCounter %= this.players.length;
-            player = this.getTurnPlayer();
-            if (player.gameStatus == "raise" || player.gameStatus == "pass") {
+            this.gamePhase = "betting";
+            this.clearPlayerBet();
+            this.roundCounter++;
+        } else {
+            // turnCounter == betIndex : 1周してきた時
+            if (
+                this.turnCounter == this.betIndex &&
+                player.gameStatus != "bet"
+            ) {
                 this.gamePhase = "dealer turn";
             }
 
-            if (
-                this.turnCounter == this.betIndex &&
-                this.gamePhase != "dealer turn"
-            ) {
-                console.log(player.gameStatus);
-                if (player.gameStatus == "raise") {
-                    this.gamePhase = "betting";
-                } else if (player.gameStatus == "pass") {
-                    this.gamePhase = "dealer turn";
-                }
+            let gameDecision: pokerGameDecision = player.promptPlayer(
+                userData!,
+                this.betMoney
+            );
+
+            console.log(gameDecision);
+
+            switch (gameDecision.action) {
+                case "blind":
+                    //　ブラインドベットをする。
+                    console.log(player.name, "before blind", player);
+                    player.bet =
+                        this.turnCounter == this.dealerIndex + 1 ? 2 : 5;
+                    console.log("player Blind bet money", player.bet);
+                    player.chips -= player.bet;
+                    this.pot += player.bet;
+                    player.gameStatus = "bet";
+                    console.log(player.name, "after blind", player);
+                    // ブラインド終了後に、、全プレイヤーをbet状態にする。
+                    if (this.turnCounter == this.dealerIndex + 2) {
+                        this.changePlayerStatusToBet();
+                    }
+                    break;
+                case "call":
+                    // 一個前のプレイヤーのステータス check => betIndexの変更
+                    if (this.getoneBeforePlayer().gameStatus == "check") {
+                        this.betIndex = this.turnCounter;
+                        this.changePlayerStatusToBet();
+                    }
+
+                    console.log(player.name, "before call", player);
+
+                    let playercallMoney = gameDecision.amount;
+                    let currBet = player.bet;
+                    console.log("call前のbet", currBet);
+                    let playerHaveToCall = playercallMoney - currBet;
+                    player.bet += playerHaveToCall;
+                    console.log("call後のbet", player.bet);
+                    player.chips -= playerHaveToCall;
+                    this.pot += playerHaveToCall;
+                    player.gameStatus = "call";
+                    console.log(player.name, "after call", player);
+                    break;
+                case "raise":
+                    console.log(player.name, "before raise", player);
+                    // レイズ時indexの変更
+                    let playerRaiseMoney = gameDecision.amount;
+                    this.betMoney = gameDecision.amount;
+                    currBet = player.bet;
+                    let playerHaveToRaise = playerRaiseMoney - currBet;
+                    this.pot += playerHaveToRaise;
+                    player.chips -= playerHaveToRaise;
+                    this.betIndex = this.turnCounter;
+                    // 全プレイヤーをbet状態に戻す。
+                    this.changePlayerStatusToBet();
+                    // 自身はraiseにかえ、一周してきた時に、betではないので次は
+                    player.gameStatus = "raise";
+                    console.log(player.name, "after raise", player);
+                    break;
+                case "allin":
+                    this.pot += gameDecision.amount;
+                    player.gameStatus = "allin";
+                    break;
+                case "check":
+                    console.log(player.name, "after check", player);
+                    player.gameStatus = "check";
+                    console.log(player.name, "after check", player);
+                    break;
+                case "fold":
+                    player.gameStatus = "fold";
+                    break;
             }
-        } else if (this.gamePhase == "dealer turn") {
-            console.log("ROUND!!!!", this.roundCounter);
-            console.log("ディーラーのターンです。");
-            console.log(this.turnCounter, this.dealerIndex);
-            console.log("roundCounter", this.roundCounter);
-            if (this.roundCounter == 0) {
-                console.log("roundCounter 3 != ", this.roundCounter);
-                console.log("ディーラーが初回の3枚カードを引きます。");
-                this.dealer.hand.push(this.deck.drawCard());
-                this.dealer.hand.push(this.deck.drawCard());
-                this.dealer.hand.push(this.deck.drawCard());
-                this.gamePhase = "betting";
-                console.log("gamePhase", this.gamePhase);
-            } else if (this.roundCounter == 3) {
-                console.log(
-                    "ラウンドが終了しました。ここから勝敗判定に入ります。"
-                );
-                this.clearPlayerHandsAndBets();
-                this.pot = 0;
-                this.dealerIndex++;
-                this.dealerIndex %= this.players.length;
-                this.gamePhase = "round over";
-            } else {
-                console.log("roundCounter 3 != ", this.roundCounter);
-                console.log("ディーラーがカードを引きます。");
-                this.dealer.hand.push(this.deck.drawCard());
-                this.gamePhase = "betting";
-            }
-            this.roundCounter++;
-            this.chagePlayerStatusToBet();
-            this.turnCounter = this.dealerIndex + 1;
-            this.betMoney = this.minbet; //　また開始ベットに戻す。
-            // player.bet = this.minbet; //
-            console.log("gamePhase", this.gamePhase);
-            console.log("ポットMONEY!!!!!!", this.pot);
+            console.log("Pot Money", this.pot);
         }
+    }
+
+    // プレイヤーのターンを処理するメソッド.
+    haveTurn(userData?: PokerActionType): void {
+        if (this.gamePhase == "dealer turn") {
+            if (this.roundCounter == 3) {
+                this.gamePhase = "evaluating";
+            }
+            // 0, 1, 2回目は再びbettingに戻る。
+            else this.evaluateMove(this.dealer);
+        }
+
+        if (this.gamePhase == "evaluating") {
+;            this.evaluateAndGetRoundResults();
+            this.clearPlayerHandsAndBets();
+        }
+
+        let player = this.getTurnPlayer();
+        // 前のまえのプレイヤーがpassしてたらpass可能
+        // else bet, raise, dropのみ選択可能。
+
+        let playerBefore = this.getoneBeforePlayer();
+        console.log("currPlayer: ", player.name);
+        if (this.allPlayerActionResolved()) {
+            this.gamePhase = "dealer turn";
+            this.evaluateMove(this.dealer);
+        } else {
+            if (playerBefore.gameStatus == "check" && userData == "check") {
+                // checkできる。
+                this.evaluateMove(player, "check");
+            }
+            // passはできないように実装。
+            else if (
+                playerBefore.gameStatus !== "check" &&
+                userData == "check"
+            ) {
+                this.evaluateMove(player, "call");
+            }
+
+            // playerが最小ベットより小さかったら。
+            // allin
+            else if (player.chips <= this.minbet) {
+                this.evaluateMove(player, "allin");
+            } else {
+                player.type == "player"
+                    ? this.evaluateMove(player, userData as PokerActionType)
+                    : // ai
+                      this.evaluateMove(player);
+            }
+        }
+
+        // プレイヤーにカードを配る。
+
+        this.turnCounter++;
+        this.turnCounter %= this.players.length;
+    }
+
+    /*
+    playerActionResolved(player: Player): boolean
+    {'call', "check", "fold", "raise", "allin"}
+    ラウンド中のプレイヤーの行動が全て完了しているかどうかを返す
+    */
+    playerActionResolved(player: pokerPlayer): boolean {
+        return (
+            player.gameStatus == "call" ||
+            player.gameStatus == "check" ||
+            player.gameStatus == "fold" ||
+            player.gameStatus == "raise" ||
+            player.gameStatus == "allin"
+        );
+    }
+
+    /*
+    allPlayerActionsResolved(): boolean
+    ラウンド中の全プレイヤーの行動が完了しているかどうかを返す
+    */
+    allPlayerActionResolved(): boolean {
+        for (let player of this.players) {
+            if (!this.playerActionResolved(player)) return false;
+        }
+        return true;
     }
 
     printPlayerStatus(): void {
@@ -214,12 +252,17 @@ export default class pokerTable extends Table {
         }
     }
 
+    // 最後のプレイヤーを返す。
+    onLastPlayer(): boolean {
+        return this.turnCounter == this.betIndex;
+    }
+
     moveToNextPlayer(): void {
         this.turnCounter++;
         this.turnCounter %= this.players.length;
     }
 
-    chagePlayerStatusToBet(): void {
+    changePlayerStatusToBet(): void {
         for (let player of this.players) {
             if (player.gameStatus != "fold") player.gameStatus = "bet";
         }
@@ -228,5 +271,11 @@ export default class pokerTable extends Table {
     // ターン中のプレイヤーを取得するメソッド.
     getTurnPlayer(): pokerPlayer {
         return this.players[this.turnCounter % this.players.length];
+    }
+
+    getoneBeforePlayer(): pokerPlayer {
+        return this.players[
+            (this.turnCounter + this.players.length - 1) % this.players.length
+        ];
     }
 }

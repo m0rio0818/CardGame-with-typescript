@@ -1,5 +1,5 @@
 import Card from "../common/Card.js";
-import GameDecision from "../common/GameDecision.js";
+import blackJackGameDecision from "../blackjack/blackJackGameDecision.js";
 import {
     BlackJackActionType,
     BlackJackGameStatus,
@@ -42,7 +42,7 @@ export default class Player {
         ?Number userData: モデル外から渡されるパラメータ。nullになることもあります。
         return GameDecision: 状態を考慮した上で、プレイヤーが行った意思決定。
     */
-    promptPlayer(userData: number | BlackJackActionType): GameDecision {
+    promptPlayer(userData: number | BlackJackActionType): blackJackGameDecision {
         // 意思決定を決めてもらう。
         let score: number = this.getHandScore();
 
@@ -57,20 +57,20 @@ export default class Player {
 
         if (this.gameStatus == "betting") {
             if (this.type == "house") {
-                return new GameDecision("wait");
+                return new blackJackGameDecision("wait");
             } else if (this.type == "ai") {
                 this.bet = Math.floor(Math.random() * this.chips);
-                return new GameDecision("bet", this.bet);
-            } else return new GameDecision("bet", userData as number);
+                return new blackJackGameDecision("bet", this.bet);
+            } else return new blackJackGameDecision("bet", userData as number);
         } else {
             if (this.type == "ai") {
                 if (score < 17) {
-                    return new GameDecision("hit");
+                    return new blackJackGameDecision("hit");
                 } else {
-                    return new GameDecision("stand");
+                    return new blackJackGameDecision("stand");
                 }
             } else {
-                return new GameDecision(userData as BlackJackActionType);
+                return new blackJackGameDecision(userData as BlackJackActionType);
             }
         }
     }

@@ -1,4 +1,4 @@
-import GameDecision from "../common/GameDecision.js";
+import blackJackGameDecision from "../blackjack/blackJackGameDecision.js";
 export default class Player {
     constructor(name, type, gameType, chips = 400) {
         this.name = name;
@@ -16,26 +16,26 @@ export default class Player {
         console.log(this.type, " : ", this.gameStatus, this.hand, score, userData);
         if (this.gameStatus == "betting") {
             if (this.type == "house") {
-                return new GameDecision("wait");
+                return new blackJackGameDecision("wait");
             }
             else if (this.type == "ai") {
                 this.bet = Math.floor(Math.random() * this.chips);
-                return new GameDecision("bet", this.bet);
+                return new blackJackGameDecision("bet", this.bet);
             }
             else
-                return new GameDecision("bet", userData);
+                return new blackJackGameDecision("bet", userData);
         }
         else {
             if (this.type == "ai") {
                 if (score < 17) {
-                    return new GameDecision("hit");
+                    return new blackJackGameDecision("hit");
                 }
                 else {
-                    return new GameDecision("stand");
+                    return new blackJackGameDecision("stand");
                 }
             }
             else {
-                return new GameDecision(userData);
+                return new blackJackGameDecision(userData);
             }
         }
     }
