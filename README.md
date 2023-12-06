@@ -1,2 +1,2 @@
 # blackjack-typescript-
-typescriptを用いたblackjackの実装。
+typescriptを用いたblackjack, pokerの実装。
