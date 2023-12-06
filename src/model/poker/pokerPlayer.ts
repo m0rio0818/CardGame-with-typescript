@@ -9,7 +9,7 @@ import {
     PokerStatusType,
 } from "../../config/pokerConfig.js";
 import GameDecision from "../common/gameDecision.js";
-import Player from "../common/player.js";
+import Player from "../common/blackJackPlayer.js";
 
 export default class pokerPlayer extends Player {
     gameStatus: PokerStatusType;

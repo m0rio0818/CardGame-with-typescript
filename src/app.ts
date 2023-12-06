@@ -1,4 +1,4 @@
-import { Table } from "./model/common/Table.js";
+import { Table } from "./model/common/blackJackTable.js";
 /*
     Blackjackの実装
     前回作成したコードを使ってください。

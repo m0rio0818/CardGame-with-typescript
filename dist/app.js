@@ -1,4 +1,4 @@
-import { Table } from "./common/Table.js";
+import { Table } from "./model/common/Table.js";
 let table = new Table("blackjack");
 while (table.gamePhase != 'roundOver') {
     table.haveTurn();

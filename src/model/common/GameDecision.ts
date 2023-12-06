@@ -1,7 +1,8 @@
 import { BlackJackActionType } from "../../config/blackJackConfig";
+import { PokerActionType } from "../../config/pokerConfig";
 
-export class GameDecision {
-    public action: BlackJackActionType;
+export default class GameDecision {
+    public action: BlackJackActionType | PokerActionType;
     public amount: number;
     /*
         String action: プレイヤーのアクションの選択 ('bet', 'surrender', 'stand', 'hit', 'double')
