@@ -12,7 +12,7 @@ table.haveTurn("call");
 table.haveTurn("call");
 console.log("roundCounter = 1");
 table.haveTurn("check");
-table.haveTurn("check");
+table.haveTurn("fold");
 table.haveTurn("check");
 table.haveTurn("call");
 table.haveTurn("check");

@@ -24,7 +24,7 @@ table.haveTurn("call"); // p2
 console.log("roundCounter = 1");
 // roundCounter = 1;
 table.haveTurn("check"); // p2
-table.haveTurn("check"); // p3
+table.haveTurn("fold"); // p3
 table.haveTurn("check"); // p4
 table.haveTurn("call"); // p1
 table.haveTurn("check"); // p2

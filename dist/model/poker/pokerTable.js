@@ -16,6 +16,8 @@ export default class pokerTable extends Table {
         this.turnCounter = this.dealerIndex + 1;
         this.betIndex = (this.dealerIndex + 2) % this.players.length;
         this.minbet = 5;
+        this.smallBlind = Math.floor(this.minbet / 2);
+        this.bigBlind = Math.floor(this.minbet);
         this.betMoney = this.minbet;
         this.pot = 0;
     }
@@ -81,7 +83,9 @@ export default class pokerTable extends Table {
                 case "blind":
                     console.log(player.name, "before blind", player);
                     player.bet =
-                        this.turnCounter == this.dealerIndex + 1 ? 2 : 5;
+                        this.turnCounter == this.dealerIndex + 1
+                            ? this.smallBlind
+                            : this.bigBlind;
                     console.log("player Blind bet money", player.bet);
                     player.chips -= player.bet;
                     this.pot += player.bet;
@@ -111,6 +115,7 @@ export default class pokerTable extends Table {
                     console.log(player.name, "after call", player);
                     break;
                 case "raise":
+                    console.log(player.chips);
                     console.log(player.name, "before raise", player);
                     let playerRaiseMoney = gameDecision.amount;
                     this.betMoney = gameDecision.amount;
@@ -121,19 +126,23 @@ export default class pokerTable extends Table {
                     this.betIndex = this.turnCounter;
                     this.changePlayerStatusToBet();
                     player.gameStatus = "raise";
+                    this.printPlayerStatus();
                     console.log(player.name, "after raise", player);
+                    console.log(player.chips);
                     break;
                 case "allin":
+                    if (player.gameStatus == "allin")
+                        break;
                     this.pot += gameDecision.amount;
                     player.gameStatus = "allin";
                     break;
                 case "check":
-                    console.log(player.name, "after check", player);
+                    console.log(player.name, "before check", player);
                     player.gameStatus = "check";
                     console.log(player.name, "after check", player);
                     break;
                 case "fold":
-                    console.log("おります。");
+                    console.log(player.name, "降ります。");
                     player.gameStatus = "fold";
                     break;
             }
@@ -168,13 +177,27 @@ export default class pokerTable extends Table {
                 userData == "check") {
                 this.evaluateMove(player, "check");
             }
+            else if (player.gameStatus == "fold" ||
+                player.gameStatus == "allin") {
+                console.log(player.name + "はこのゲームでは何もできません。");
+                this.evaluateMove(player, player.gameStatus);
+            }
             else if (playerBefore.gameStatus !== "check" &&
+                playerBefore.gameStatus !== "fold" &&
                 userData == "check") {
                 console.log("前のプレイヤーがcheckしてなからcheckできません。");
                 this.evaluateMove(player, "call");
             }
-            else if (player.chips <= this.minbet) {
+            else if (player.chips < this.betMoney && player.chips > 0) {
+                console.log(player.name, "の所持金が最小ベット額より少ないです！！", this.betMoney, player.chips);
                 this.evaluateMove(player, "allin");
+            }
+            else if (player.chips < this.betMoney * 2 &&
+                player.chips > 0 &&
+                userData == "raise") {
+                console.log("所持金足りないからRAISEできませんよ!!!!!");
+                console.log("強制call");
+                this.evaluateMove(player, "call");
             }
             else {
                 console.log("userAction: ", userData);
@@ -215,7 +238,7 @@ export default class pokerTable extends Table {
     }
     changePlayerStatusToBet() {
         for (let player of this.players) {
-            if (player.gameStatus != "fold")
+            if (player.gameStatus != "fold" && player.gameStatus != "allin")
                 player.gameStatus = "bet";
         }
     }

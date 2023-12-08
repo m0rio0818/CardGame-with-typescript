@@ -13,7 +13,7 @@ export default class pokerPlayer extends Player {
         name: string,
         type: PokerPlayerType,
         gameType: string,
-        chips: number = 100
+        chips: number = 20
     ) {
         super(name, type, gameType, chips);
         this.gameStatus = "blind";
@@ -24,20 +24,6 @@ export default class pokerPlayer extends Player {
         betMoney?: number
     ): pokerGameDecision {
         if (this.type === "player") {
-            // return this.gameStatus === "blind"
-            //     ? new pokerGameDecision("blind", betMoney as number)
-            //     : this.gameStatus === "bet"
-            //     ? new pokerGameDecision("call", betMoney as number)
-            //     : this.gameStatus === "call"
-            //     ? new pokerGameDecision("call", betMoney as number)
-            //     : this.gameStatus == "raise"
-            //     ? new pokerGameDecision("raise", (betMoney as number) * 2)
-            //     : this.gameStatus == "check"
-            //     ? new pokerGameDecision("check")
-            //     : this.gameStatus == "fold"
-            //     ? new pokerGameDecision("fold")
-            //     : allin;
-
             return userData == "blind"
                 ? new pokerGameDecision("blind")
                 : userData == "bet"
@@ -47,13 +33,14 @@ export default class pokerPlayer extends Player {
                 : userData == "raise"
                 ? new pokerGameDecision("raise", (betMoney as number) * 2)
                 : userData == "allin"
-                ? new pokerGameDecision("allin", betMoney as number)
+                ? new pokerGameDecision("allin", this.chips)
                 : userData == "check"
                 ? new pokerGameDecision("check")
                 : userData == "fold"
                 ? new pokerGameDecision("fold")
                 : new pokerGameDecision("blind");
         } else {
+            // aiの実装
             switch (this.gameStatus) {
                 case "blind":
                     return new pokerGameDecision("blind", betMoney as number);

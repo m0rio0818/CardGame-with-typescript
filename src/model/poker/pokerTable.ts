@@ -16,6 +16,8 @@ export default class pokerTable extends Table {
     minbet: number; //　最小bet
     betMoney: number; // テーブルの現在のbet金額(raise等によって変動していく。)
     betIndex: number; // betStartIndex;
+    smallBlind: number;
+    bigBlind: number;
     pot: number;
     players: pokerPlayer[];
     constructor(gameType: string) {
@@ -35,6 +37,8 @@ export default class pokerTable extends Table {
         this.turnCounter = this.dealerIndex + 1; // 現在ターンのプレイヤーを返す。
         this.betIndex = (this.dealerIndex + 2) % this.players.length;
         this.minbet = 5; // 最小ベット金額
+        this.smallBlind = Math.floor(this.minbet / 2);
+        this.bigBlind = Math.floor(this.minbet);
         this.betMoney = this.minbet; //　ベットしないといけない金額
         this.pot = 0; // potに溜まった金額
     }
@@ -117,7 +121,9 @@ export default class pokerTable extends Table {
                     //　ブラインドベットをする。
                     console.log(player.name, "before blind", player);
                     player.bet =
-                        this.turnCounter == this.dealerIndex + 1 ? 2 : 5;
+                        this.turnCounter == this.dealerIndex + 1
+                            ? this.smallBlind
+                            : this.bigBlind;
                     console.log("player Blind bet money", player.bet);
                     player.chips -= player.bet;
                     this.pot += player.bet;
@@ -151,6 +157,7 @@ export default class pokerTable extends Table {
                     console.log(player.name, "after call", player);
                     break;
                 case "raise":
+                    console.log(player.chips);
                     console.log(player.name, "before raise", player);
                     // レイズ時indexの変更
                     let playerRaiseMoney = gameDecision.amount;
@@ -164,19 +171,22 @@ export default class pokerTable extends Table {
                     this.changePlayerStatusToBet();
                     // 自身はraiseにかえ、一周してきた時に、betではないので次は
                     player.gameStatus = "raise";
+                    this.printPlayerStatus();
                     console.log(player.name, "after raise", player);
+                    console.log(player.chips);
                     break;
                 case "allin":
+                    if (player.gameStatus == "allin") break;
                     this.pot += gameDecision.amount;
                     player.gameStatus = "allin";
                     break;
                 case "check":
-                    console.log(player.name, "after check", player);
+                    console.log(player.name, "before check", player);
                     player.gameStatus = "check";
                     console.log(player.name, "after check", player);
                     break;
                 case "fold":
-                    console.log("おります。");
+                    console.log(player.name, "降ります。");
                     player.gameStatus = "fold";
                     break;
             }
@@ -219,20 +229,42 @@ export default class pokerTable extends Table {
             ) {
                 // checkできる。
                 this.evaluateMove(player, "check");
+            } else if (
+                player.gameStatus == "fold" ||
+                player.gameStatus == "allin"
+            ) {
+                console.log(player.name + "はこのゲームでは何もできません。");
+                this.evaluateMove(player, player.gameStatus);
             }
             // 前のプレイヤーがpassしてなかったら、passはできないように実装。
             else if (
                 playerBefore.gameStatus !== "check" &&
+                playerBefore.gameStatus !== "fold" &&
                 userData == "check"
             ) {
                 console.log("前のプレイヤーがcheckしてなからcheckできません。");
+                // call　or raise or fold => 選択
                 this.evaluateMove(player, "call");
             }
 
-            // playerが最小ベットより小さかったら。
-            // allin
-            else if (player.chips <= this.minbet) {
+            // playerの所持金が現在のベット金額より小さかったら allin
+            // callの場合
+            else if (player.chips < this.betMoney && player.chips > 0) {
+                console.log(
+                    player.name,
+                    "の所持金が最小ベット額より少ないです！！",
+                    this.betMoney,
+                    player.chips
+                );
                 this.evaluateMove(player, "allin");
+            } else if (
+                player.chips < this.betMoney * 2 &&
+                player.chips > 0 &&
+                userData == "raise"
+            ) {
+                console.log("所持金足りないからRAISEできませんよ!!!!!");
+                console.log("強制call");
+                this.evaluateMove(player, "call");
             } else {
                 console.log("userAction: ", userData);
                 player.type == "player"
@@ -240,8 +272,8 @@ export default class pokerTable extends Table {
                     : // ai
                       this.evaluateMove(player);
             }
-            // プレイヤーにカードを配る。
 
+            // プレイヤーにカードを配る。
             this.turnCounter++;
             this.turnCounter %= this.players.length;
         }
@@ -296,7 +328,8 @@ export default class pokerTable extends Table {
 
     changePlayerStatusToBet(): void {
         for (let player of this.players) {
-            if (player.gameStatus != "fold") player.gameStatus = "bet";
+            if (player.gameStatus != "fold" && player.gameStatus != "allin")
+                player.gameStatus = "bet";
         }
     }
 

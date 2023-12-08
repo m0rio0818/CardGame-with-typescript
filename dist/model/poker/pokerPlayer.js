@@ -1,7 +1,7 @@
 import Player from "../common/Player.js";
 import pokerGameDecision from "./pokerGameDecision.js";
 export default class pokerPlayer extends Player {
-    constructor(name, type, gameType, chips = 100) {
+    constructor(name, type, gameType, chips = 20) {
         super(name, type, gameType, chips);
         this.gameStatus = "blind";
     }
@@ -16,7 +16,7 @@ export default class pokerPlayer extends Player {
                         : userData == "raise"
                             ? new pokerGameDecision("raise", betMoney * 2)
                             : userData == "allin"
-                                ? new pokerGameDecision("allin", betMoney)
+                                ? new pokerGameDecision("allin", this.chips)
                                 : userData == "check"
                                     ? new pokerGameDecision("check")
                                     : userData == "fold"
