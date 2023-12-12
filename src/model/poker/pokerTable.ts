@@ -118,6 +118,7 @@ export default class pokerTable extends Table {
                     console.log("ベットできてません。もう一度選択してください");
                     break;
                 case "blind":
+                    if (this.turnCounter == this.dealerIndex + 1) this.assignPlayerHands();
                     //　ブラインドベットをする。
                     console.log(player.name, "before blind", player);
                     player.bet =
@@ -133,7 +134,6 @@ export default class pokerTable extends Table {
                     if (this.turnCounter == this.dealerIndex + 2) {
                         this.changePlayerStatusToBet();
                         console.log("プレイヤーの情報をBETに変更!!!");
-                        this.assignPlayerHands();
                     }
                     break;
                 case "call":
@@ -190,6 +190,7 @@ export default class pokerTable extends Table {
                     player.gameStatus = "fold";
                     break;
             }
+            player.getHandScore(this.dealer);
             console.log("Pot Money", this.pot);
         }
     }

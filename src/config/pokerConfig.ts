@@ -13,7 +13,7 @@ export type PokerPlayerType = "" | "ai" | "player" | "dealer";
 export type PokerStatusType =
     | ""
     | "blind"
-    | "bet"  //
+    | "bet" //
     | "check" //　passすること // 前のプレイヤーがcheckならできる。
     | "fold" // 降りること
     | "call" //  前の人と同じ金額を賭ける。
@@ -22,6 +22,19 @@ export type PokerStatusType =
     | "";
 
 export type PokerChangeBetIndexType = "" | "raise";
+
+export type PokerHandType =
+    | ""
+    | "royal flush"
+    | "straight flush"
+    | "four card"
+    | "full house"
+    | "flush"
+    | "straight"
+    | "three card"
+    | "two pair"
+    | "one pair"
+    | "no pair";
 
 export type PokerGamePhaseType =
     | "blinding"
