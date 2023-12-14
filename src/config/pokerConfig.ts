@@ -34,7 +34,8 @@ export type PokerHandType =
     | "three card"
     | "two pair"
     | "one pair"
-    | "no pair";
+    | "no pair"
+    | "fold";
 
 export type PokerGamePhaseType =
     | "blinding"
@@ -44,5 +45,6 @@ export type PokerGamePhaseType =
     | "evaluating"
     | "round over"
     | "game over";
+
 
 export type PokerDenominationType = 5 | 10 | 20 | 50 | 100;

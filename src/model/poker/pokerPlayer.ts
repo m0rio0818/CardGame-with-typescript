@@ -14,10 +14,12 @@ export default class pokerPlayer extends Player {
     gameStatus: PokerStatusType;
     indexOfNum: string[];
     Cards: Card[];
-    CardsMap: Record<string, number>;
-    pairsOfTwo: number;
-    pairsOfThree: number;
     maxValue: number;
+    playerHandStatus: PokerHandType;
+    pairsOfTwoList: string[];
+    pairsOfThreeList: string[];
+    pairsOfFourList: string[];
+    parisOfCardList: string[];
 
     constructor(
         name: string,
@@ -43,10 +45,12 @@ export default class pokerPlayer extends Player {
             "A",
         ];
         this.Cards = this.hand;
-        this.CardsMap = {};
-        this.pairsOfTwo = 0;
-        this.pairsOfThree = 0;
         this.maxValue = 0;
+        this.playerHandStatus = "no pair";
+        this.pairsOfTwoList = [];
+        this.pairsOfThreeList = [];
+        this.pairsOfFourList = [];
+        this.parisOfCardList = [];
     }
 
     promptPlayer(
@@ -73,30 +77,18 @@ export default class pokerPlayer extends Player {
             // aiの実装
             switch (this.gameStatus) {
                 case "blind":
-                    return new pokerGameDecision("blind", betMoney as number);
-                case "bet":
+                    return new pokerGameDecision("blind", betMoney);
+                case "check":
+                    return new pokerGameDecision("check");
+                default:
                     const rand = Math.random();
-                    if (rand > 0.9)
+                    if (rand > 0.9) return new pokerGameDecision("fold");
+                    else if (rand > 0.8)
                         return new pokerGameDecision(
                             "raise",
                             (betMoney as number) * 2
                         );
-                    // else if (rand > 0.6) return new pokerGameDecision("check");
-                    else
-                        return new pokerGameDecision(
-                            "call",
-                            betMoney as number
-                        );
-
-                case "call":
-                    return new pokerGameDecision("call", betMoney as number);
-                case "raise":
-                    return new pokerGameDecision(
-                        "raise",
-                        (betMoney as number) * 2
-                    );
-                default:
-                    return new pokerGameDecision("fold");
+                    else return new pokerGameDecision("call", betMoney);
             }
         }
     }
@@ -104,6 +96,7 @@ export default class pokerPlayer extends Player {
     getHandScore(dealer: Player): PokerHandType {
         console.log("before Concat", this.Cards);
         this.Cards = this.hand.concat(dealer.hand);
+        const CardsMap: Record<string, number> = {};
         this.Cards.sort((a, b) => {
             return (
                 this.indexOfNum.indexOf(a.rank) -
@@ -113,55 +106,136 @@ export default class pokerPlayer extends Player {
         console.log("after Concat", this.Cards);
 
         for (let card of this.Cards) {
-            this.CardsMap[card.rank] == undefined
-                ? (this.CardsMap[card.rank] = 1)
-                : (this.CardsMap[card.rank] += 1);
+            if (CardsMap[card.rank] == undefined) {
+                CardsMap[card.rank] = 1;
+            } else {
+                CardsMap[card.rank] += 1;
+            }
         }
 
-        this.maxValue = Math.max(...Object.values(this.CardsMap));
+        console.log(this.name, "CARDS TOTTALLLLLLLLL !!!", this.Cards);
 
-        Object.keys(this.CardsMap).forEach((data) => {
-            if (this.CardsMap[data] == 2) this.pairsOfTwo++;
-            if (this.CardsMap[data] == 3) this.pairsOfThree++;
+        this.maxValue = Math.max(...Object.values(CardsMap));
+        let pairsOfTwo = 0;
+        let pairsOfThree = 0;
+        let pairsOfFour = 0;
+        const pairsOfTwoList: string[] = [];
+        const pairsOfThreeList: string[] = [];
+        const parisOfFourList: string[] = [];
+        const parisOfCardList: string[] = [];
+
+        console.log("CardMap", CardsMap);
+        Object.keys(CardsMap).forEach((data) => {
+            console.log("D: ", data, CardsMap[data]);
+            if (CardsMap[data] == 2) {
+                pairsOfTwo++;
+                pairsOfTwoList.push(data);
+            }
+            if (CardsMap[data] == 3) {
+                pairsOfThree++;
+                pairsOfThreeList.push(data);
+            }
+            if (CardsMap[data] == 4) {
+                pairsOfFour++;
+                parisOfFourList.push(data);
+            }
         });
 
+        let allRankList = Object.keys(CardsMap).sort((a, b) => {
+            return this.indexOfNum.indexOf(a) - this.indexOfNum.indexOf(b);
+        });
+
+        let count =
+            pairsOfTwoList.length * 2 +
+            pairsOfThreeList.length * 3 +
+            this.pairsOfFourList.length * 4;
+        console.log("今から必要な個数", count, 5 - count);
+
+        for (let i = allRankList.length - 1; i >= 0; i--) {
+            if (5 - count == 0) break;
+            if (
+                pairsOfTwoList.indexOf(allRankList[i]) == -1 &&
+                pairsOfThreeList.indexOf(allRankList[i]) == -1 &&
+                this.pairsOfFourList.indexOf(allRankList[i]) == -1
+            ) {
+                parisOfCardList.push(allRankList[i]);
+                count++;
+            }
+        }
+
+        console.log("beforeSort: ", pairsOfTwoList);
+        this.sortList(pairsOfTwoList);
+        console.log("afterSort: ", pairsOfTwoList);
+        this.sortList(pairsOfThreeList);
+        this.sortList(parisOfFourList)
+        this.sortList(parisOfCardList)
+
+        console.log("MaxVaue", CardsMap, pairsOfThree, pairsOfTwo);
+        this.parisOfCardList = parisOfCardList;
+
         if (this.isRoyalFlush()) {
+            this.playerHandStatus = "royal flush";
             return "royal flush";
         } else if (this.isStraightFlush()) {
+            this.playerHandStatus = "straight flush";
             return "straight flush";
-        } else if (this.isFourCard()) {
+        } else if (this.isFourCard(pairsOfFour)) {
+            this.pairsOfFourList = parisOfFourList;
+            this.playerHandStatus = "four card";
             return "four card";
-        } else if (this.isFullHouse()) {
+        } else if (this.isFullHouse(pairsOfTwo, pairsOfThree)) {
+            this.pairsOfThreeList = pairsOfThreeList;
+            this.pairsOfTwoList = pairsOfTwoList;
+            this.playerHandStatus = "full house";
             return "full house";
         } else if (this.isFlush()) {
+            this.playerHandStatus = "flush";
             return "flush";
         } else if (this.isStraight()) {
+            this.playerHandStatus = "straight";
             return "straight";
-        } else if (this.isThreeCard()) {
+        } else if (this.isThreeCard(pairsOfThree)) {
+            this.pairsOfThreeList = pairsOfThreeList;
+            this.playerHandStatus = "three card";
             return "three card";
-        } else if (this.isTwoPair()) {
+        } else if (this.isTwoPair(pairsOfTwo)) {
+            this.pairsOfTwoList = pairsOfTwoList;
+            this.playerHandStatus = "two pair";
             return "two pair";
+        } else if (this.isOnePair(pairsOfTwo)) {
+            this.pairsOfTwoList = pairsOfTwoList;
+            this.playerHandStatus = "one pair";
+            return "one pair";
         } else {
+            this.playerHandStatus = "no pair";
             return "no pair";
         }
     }
 
+    sortList(list: string[]): string[] {
+        return list.sort((a, b) => {
+            return this.indexOfNum.indexOf(a) - this.indexOfNum.indexOf(b);
+        });
+    }
+
     isRoyalFlush(): boolean {
+        console.log("this.card", this.Cards);
         return (
             this.isStraightFlush() &&
-            this.Cards[this.Cards.length - 1].rank == "A"
+            this.Cards[this.Cards.length - 1].rank === "A"
         );
     }
+
     isStraightFlush(): boolean {
         return this.isStraight() && this.isFlush();
     }
 
-    isFourCard(): boolean {
+    isFourCard(pairsOfFour: number): boolean {
         return this.maxValue == 4;
     }
 
-    isFullHouse(): boolean {
-        return this.pairsOfThree == 1 && this.pairsOfTwo == 1;
+    isFullHouse(pairsOfTwo: number, pairsOfThree: number): boolean {
+        return pairsOfThree == 1 && pairsOfTwo == 1;
     }
 
     isFlush(): boolean {
@@ -180,58 +254,17 @@ export default class pokerPlayer extends Player {
         return true;
     }
 
-    isThreeCard(): boolean {
-        return this.maxValue == 3 && this.pairsOfThree == 1;
+    isThreeCard(pairsOfThree: number): boolean {
+        return this.maxValue === 3 && pairsOfThree === 1;
     }
 
-    isTwoPair(): boolean {
-        return this.maxValue == 2 && this.pairsOfTwo == 2;
+    isTwoPair(pairsOfTwo: number): boolean {
+        return pairsOfTwo === 2;
     }
 
-    isOnePair(): boolean {
-        return this.pairsOfTwo == 2;
+    isOnePair(pairsOfTwo: number): boolean {
+        return pairsOfTwo === 1;
     }
-
-    // checkCardsPair(dealer: Player): PokerHandType {
-    //     // ロイヤルストレートフラッシュ確認
-    //     const isRoyalFlush = () =>
-    //         isStraightFlush() && this.Cards[this.Cards.length - 1].rank == "A";
-
-    //     // ストレートフラッシュ確認
-    //     const isStraightFlush = () => isStraight() && isFlush();
-
-    //     // フォーカード
-    //     const isFourCard = () => maxValue == 4;
-
-    //     // フルハウス
-    //     const isFullHouse = () => pairsOfThree == 1 && pairsOfTwo == 1;
-
-    //     // フラッシュ
-    //     const isFlush = () =>
-    //         Cards.every((hand) => Cards[0].suit === hand.suit);
-
-    //     // ストレート
-    //     const isStraight = () => {
-    //         for (let i = 0; i < Cards.length - 1; i++) {
-    //             if (
-    //                 this.indexOfNum.indexOf(Cards[i + 1].rank) -
-    //                     this.indexOfNum.indexOf(Cards[i].rank) !=
-    //                 1
-    //             )
-    //                 return false;
-    //         }
-    //         return true;
-    //     };
-
-    //     // スリーカード
-    //     const isThreeCard = () => maxValue == 3 && pairsOfThree == 1;
-
-    //     // ツーペア
-    //     const isTwoPair = () => maxValue == 2 && pairsOfTwo == 2;
-
-    //     // ワンペア
-    //     const isOnePair = () => maxValue == 2 && pairsOfTwo == 1;
-    // }
 
     printHandScore(Cards: Card[]): void {
         for (let i = 0; i < Cards.length; i++) {

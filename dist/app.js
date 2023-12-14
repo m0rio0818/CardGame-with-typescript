@@ -31,5 +31,6 @@ table.haveTurn("call");
 table.haveTurn("call");
 table.haveTurn("call");
 table.haveTurn("call");
-table.haveTurn("call");
+console.log("roundCounter = 4");
+table.haveTurn();
 //# sourceMappingURL=app.js.map
