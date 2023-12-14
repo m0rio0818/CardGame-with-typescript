@@ -1,11 +1,11 @@
+import { PokerController } from "./controller/PokerController.js";
 import pokerPlayer from "./model/poker/pokerPlayer.js";
 import pokerTable from "./model/poker/pokerTable.js";
-/*
-    pokerのの実装
-    前回作成したコードを使ってください。
-*/
 
-let table = new pokerTable("poker");
+
+
+let table = new pokerTable("poker", 5);
+// PokerController.renderGameScene(table);
 // console.log(table);
 // while (table.gamePhase != "round over") {
 //     table.haveTurn();
@@ -48,8 +48,18 @@ table.haveTurn("call"); // p1
 
 console.log("roundCounter = 4"); // judge!!
 table.haveTurn(); // p2
-// table.haveTurn("call"); // p2
+// // table.haveTurn("call"); // p2
 // table.haveTurn("call"); // p3
 // // roundCounter = 3;
 
 // 初期状態では、ハウスと2人以上のA.Iプレーヤーが戦います。
+
+
+// p1 ["3"], [], ["Q", "K", "A"]
+// p2 ["K"], [], ["7", "9", "Q"]
+// p3 ["K"], [], ["9", "J", "Q"]
+
+
+// p1 ["7","K"], [], ["Q", "K", "A"]
+// p2 ["8","K"], [], ["7", "9", "Q"]
+// p3 ["J","Q"], [], ["9", "J", "Q"]

@@ -3,6 +3,7 @@ import {
     PokerHandType,
     PokerPlayerType,
     PokerStatusType,
+    pokerIndexOfNum,
 } from "../../config/pokerConfig.js";
 import Card from "../common/Card.js";
 import GameDecision from "../common/GameDecision.js";
@@ -12,7 +13,6 @@ import pokerTable from "./pokerTable.js";
 
 export default class pokerPlayer extends Player {
     gameStatus: PokerStatusType;
-    indexOfNum: string[];
     Cards: Card[];
     maxValue: number;
     playerHandStatus: PokerHandType;
@@ -29,21 +29,6 @@ export default class pokerPlayer extends Player {
     ) {
         super(name, type, gameType, chips);
         this.gameStatus = "blind";
-        this.indexOfNum = [
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "J",
-            "Q",
-            "K",
-            "A",
-        ];
         this.Cards = this.hand;
         this.maxValue = 0;
         this.playerHandStatus = "no pair";
@@ -80,10 +65,15 @@ export default class pokerPlayer extends Player {
                     return new pokerGameDecision("blind", betMoney);
                 case "check":
                     return new pokerGameDecision("check");
+                case "fold":
+                    return new pokerGameDecision("fold");
+                case "allin":
+                    return new pokerGameDecision("allin", this.chips);
                 default:
                     const rand = Math.random();
-                    if (rand > 0.9) return new pokerGameDecision("fold");
-                    else if (rand > 0.8)
+                    // if (rand > 0.9) return new pokerGameDecision("fold");
+                    //else
+                    if (rand > 0.8)
                         return new pokerGameDecision(
                             "raise",
                             (betMoney as number) * 2
@@ -99,8 +89,8 @@ export default class pokerPlayer extends Player {
         const CardsMap: Record<string, number> = {};
         this.Cards.sort((a, b) => {
             return (
-                this.indexOfNum.indexOf(a.rank) -
-                this.indexOfNum.indexOf(b.rank)
+                pokerIndexOfNum.indexOf(a.rank) -
+                pokerIndexOfNum.indexOf(b.rank)
             );
         });
         console.log("after Concat", this.Cards);
@@ -142,7 +132,7 @@ export default class pokerPlayer extends Player {
         });
 
         let allRankList = Object.keys(CardsMap).sort((a, b) => {
-            return this.indexOfNum.indexOf(a) - this.indexOfNum.indexOf(b);
+            return pokerIndexOfNum.indexOf(a) - pokerIndexOfNum.indexOf(b);
         });
 
         let count =
@@ -167,8 +157,8 @@ export default class pokerPlayer extends Player {
         this.sortList(pairsOfTwoList);
         console.log("afterSort: ", pairsOfTwoList);
         this.sortList(pairsOfThreeList);
-        this.sortList(parisOfFourList)
-        this.sortList(parisOfCardList)
+        this.sortList(parisOfFourList);
+        this.sortList(parisOfCardList);
 
         console.log("MaxVaue", CardsMap, pairsOfThree, pairsOfTwo);
         this.parisOfCardList = parisOfCardList;
@@ -214,7 +204,7 @@ export default class pokerPlayer extends Player {
 
     sortList(list: string[]): string[] {
         return list.sort((a, b) => {
-            return this.indexOfNum.indexOf(a) - this.indexOfNum.indexOf(b);
+            return pokerIndexOfNum.indexOf(a) - pokerIndexOfNum.indexOf(b);
         });
     }
 
@@ -243,10 +233,11 @@ export default class pokerPlayer extends Player {
     }
 
     isStraight(): boolean {
+        if (this.Cards.length != 5) return false;
         for (let i = 0; i < this.Cards.length - 1; i++) {
             if (
-                this.indexOfNum.indexOf(this.Cards[i + 1].rank) -
-                    this.indexOfNum.indexOf(this.Cards[i].rank) !=
+                pokerIndexOfNum.indexOf(this.Cards[i + 1].rank) -
+                    pokerIndexOfNum.indexOf(this.Cards[i].rank) !=
                 1
             )
                 return false;

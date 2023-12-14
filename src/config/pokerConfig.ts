@@ -46,5 +46,20 @@ export type PokerGamePhaseType =
     | "round over"
     | "game over";
 
+export const pokerIndexOfNum: string[] = [
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "J",
+    "Q",
+    "K",
+    "A",
+];
 
 export type PokerDenominationType = 5 | 10 | 20 | 50 | 100;

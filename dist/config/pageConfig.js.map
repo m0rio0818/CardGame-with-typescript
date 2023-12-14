@@ -1,0 +1,1 @@
+{"version":3,"file":"pageConfig.js","sourceRoot":"","sources":["../../src/config/pageConfig.ts"],"names":[],"mappings":"AAAA,MAAM,OAAO,MAAM;IACjB,MAAM,CAAC,WAAW;QAChB,MAAM,IAAI,GAAG,QAAQ,CAAC,cAAc,CAAC,KAAK,CAAC,CAAA;QAC3C,IAAK,CAAC,SAAS,GAAG,EAAE,CAAA;IACtB,CAAC;CACF"}

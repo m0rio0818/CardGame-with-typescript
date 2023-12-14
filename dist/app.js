@@ -1,5 +1,5 @@
 import pokerTable from "./model/poker/pokerTable.js";
-let table = new pokerTable("poker");
+let table = new pokerTable("poker", 5);
 console.log("roundCounter = 0");
 table.haveTurn();
 table.haveTurn();
