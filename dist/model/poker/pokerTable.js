@@ -8,9 +8,9 @@ export default class pokerTable extends Table {
         this.gamePhase = "blinding";
         this.players = [
             new pokerPlayer("p1", "player", gameType),
-            new pokerPlayer("p2", "player", gameType),
-            new pokerPlayer("p3", "player", gameType),
-            new pokerPlayer("p4", "player", gameType),
+            new pokerPlayer("p2", "ai", gameType),
+            new pokerPlayer("p3", "ai", gameType),
+            new pokerPlayer("p4", "ai", gameType),
         ];
         this.dealerIndex = 0;
         this.playerIndexCounter = this.dealerIndex + 1;
@@ -28,6 +28,12 @@ export default class pokerTable extends Table {
             player.hand.push(this.deck.drawCard());
         }
     }
+    sortPlayerScore() {
+        let sortedPlayers = this.players.sort((a, b) => {
+            return a.chips - b.chips;
+        });
+        return sortedPlayers;
+    }
     clearPlayerHandsAndBets() {
         for (let player of this.players) {
             player.hand = [];
@@ -40,6 +46,7 @@ export default class pokerTable extends Table {
         }
         this.dealer.hand = [];
         this.pot = 0;
+        this.turnCounter = 0;
     }
     clearPlayerBet() {
         for (let player of this.players) {
@@ -48,7 +55,7 @@ export default class pokerTable extends Table {
     }
     evaluateAndGetRoundResults() {
         let winners = [];
-        let roundLog = [];
+        let roundLog = "";
         const hashMap = new Map();
         hashMap.set("royal flush", 0);
         hashMap.set("straight flush", 0);
@@ -62,7 +69,11 @@ export default class pokerTable extends Table {
         hashMap.set("no pair", 0);
         hashMap.set("fold", 0);
         console.log("ログ、勝敗判定します");
-        this.players.map((player) => hashMap.set(player.playerHandStatus, hashMap.get(player.playerHandStatus) + 1));
+        this.players.map((player) => {
+            if (player.gameStatus != "fold") {
+                hashMap.set(player.playerHandStatus, hashMap.get(player.playerHandStatus) + 1);
+            }
+        });
         let heighRole = "";
         for (const [key, value] of hashMap) {
             if (value > 0) {
@@ -122,7 +133,12 @@ export default class pokerTable extends Table {
                 if (winnerPlayer.length == 1) {
                     console.log("Winner", winnerPlayer[0].name);
                     winners.push(winnerPlayer[0]);
-                    roundLog.push(this.players);
+                    for (let i = 0; i < this.players.length; i++) {
+                        roundLog +=
+                            this.players[i].chips +
+                                (i != this.players.length - 1 ? "," : "");
+                    }
+                    return roundLog;
                 }
                 else {
                     flag = false;
@@ -202,7 +218,12 @@ export default class pokerTable extends Table {
             winnerPlayer[0].chips += this.pot;
             this.pot = 0;
         }
-        return "";
+        for (let i = 0; i < this.players.length; i++) {
+            roundLog +=
+                this.players[i].chips +
+                    (i != this.players.length - 1 ? "," : "");
+        }
+        return roundLog;
     }
     compairPairsOfTwo(playerList) {
         let currHand;
@@ -372,7 +393,7 @@ export default class pokerTable extends Table {
                 console.log("前のプレイヤーがcheckしてなからcheckできません。");
                 this.evaluateMove(player, "call");
             }
-            else if (player.chips < this.betMoney && player.chips > 0) {
+            else if (player.chips < this.betMoney) {
                 console.log(player.name, "の所持金が最小ベット額より少ないです！！", this.betMoney, player.chips);
                 this.evaluateMove(player, "allin");
             }
@@ -394,7 +415,7 @@ export default class pokerTable extends Table {
         }
         if (this.gamePhase == "evaluating") {
             console.log("TURN  OWARI!!!!");
-            this.evaluateAndGetRoundResults();
+            this.resultsLog.push(this.evaluateAndGetRoundResults());
             this.clearPlayerHandsAndBets();
             this.gamePhase = "blinding";
             this.roundCounter++;

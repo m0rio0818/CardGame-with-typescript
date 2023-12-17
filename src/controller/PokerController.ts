@@ -12,36 +12,10 @@ export class PokerController {
         this.renderPlayers(table);
 
         if (table.roundCounter === table.maxTurn) {
+            console.log("ゲーム終了, 結果表示ページに遷移したい。");
+            Config.displayNone();
             this.renderFinalResultsModal(table);
             return;
-        }
-
-        // if (table.gamePhase === "evaluating") {
-        //     Config.displayNone();
-        //     this.renderRoundOverModal(table);
-        //     this.onClickNextRoundButton(table);
-        //     return;
-        // }
-
-        // if (table.gamePhase === "dealer turn") {
-        //     table.dealer.gameStatus =
-        //         table.dealer.gameStatus === "waiting"
-        //             ? "acting"
-        //             : table.dealer.gameStatus;
-        //     setTimeout(() => {
-        //         Config.displayNone();
-        //         if (table.dealer.gameStatus === "acting") {
-        //             table.haveTurn();
-        //             this.renderGameScene(table);
-        //         }
-        //         table.gamePhase = "evaluating";
-        //         this.renderGameScene(table);
-        //         return;
-        //     }, 3000);
-        // }
-
-        if (table.roundCounter == table.maxTurn - 1) {
-            console.log("ゲーム終了, 結果表示ページに遷移したい。");
         }
 
         if (table.gamePhase === "dealer turn") {
@@ -50,7 +24,7 @@ export class PokerController {
                 table.haveTurn();
                 this.renderGameScene(table);
                 return;
-            }, 3000);
+            }, 1000);
         }
 
         // allInとなる条件
@@ -72,7 +46,8 @@ export class PokerController {
                         Config.displayNone();
                         table.haveTurn();
                         this.renderGameScene(table);
-                    }, 1000);
+                    }, 500);
+                    return;
                 }
                 //　ひとり前のプレイヤーがcheck or 自分がそのターンのはじめ
                 if (
@@ -107,7 +82,7 @@ export class PokerController {
                 Config.displayNone();
                 table.haveTurn();
                 this.renderGameScene(table);
-            }, 2000);
+            }, 100);
         }
     }
 

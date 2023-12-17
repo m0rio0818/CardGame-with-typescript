@@ -106,5 +106,30 @@ export class PokerView {
         container.append(allInButton, foldButton, checkButton);
         root === null || root === void 0 ? void 0 : root.append(container);
     }
+    static createFinalResultsModal(table) {
+        const root = document.createElement("app");
+        const container = document.createElement("div");
+        const tableDiv = document.createElement("table");
+        const tableFrame = document.createElement("tr");
+        const nametr = document.createElement("th");
+        nametr.innerText = "name";
+        tableFrame.append(nametr);
+        for (let i = 0; i < table.maxTurn; i++) {
+            const cell = document.createElement("th");
+            const cellText = document.createTextNode(`Round ${i + 1}`);
+            cell.appendChild(cellText);
+            tableFrame.append(cell);
+        }
+        let logs = table.resultsLog;
+        let players = table.players;
+        for (let i = 0; i < logs.length; i++) {
+            console.log(logs[i].split(","));
+        }
+        container.append(tableDiv);
+        console.log(tableFrame);
+        root === null || root === void 0 ? void 0 : root.append(container);
+    }
+    static backToMenuButton() {
+    }
 }
 //# sourceMappingURL=PokerView.js.map

@@ -5,11 +5,10 @@ export class PokerController {
     static renderGameScene(table) {
         this.renderPlayers(table);
         if (table.roundCounter === table.maxTurn) {
+            console.log("ゲーム終了, 結果表示ページに遷移したい。");
+            Config.displayNone();
             this.renderFinalResultsModal(table);
             return;
-        }
-        if (table.roundCounter == table.maxTurn - 1) {
-            console.log("ゲーム終了, 結果表示ページに遷移したい。");
         }
         if (table.gamePhase === "dealer turn") {
             setTimeout(() => {
@@ -17,7 +16,7 @@ export class PokerController {
                 table.haveTurn();
                 this.renderGameScene(table);
                 return;
-            }, 3000);
+            }, 1000);
         }
         const turnPlayer = table.getTurnPlayer();
         const beforePlayer = table.getoneBeforePlayer();
@@ -31,7 +30,8 @@ export class PokerController {
                         Config.displayNone();
                         table.haveTurn();
                         this.renderGameScene(table);
-                    }, 1000);
+                    }, 500);
+                    return;
                 }
                 if (beforePlayer.gameStatus == "check" ||
                     table.playerIndexCounter == table.dealerIndex + 1) {
@@ -63,7 +63,7 @@ export class PokerController {
                 Config.displayNone();
                 table.haveTurn();
                 this.renderGameScene(table);
-            }, 2000);
+            }, 100);
         }
     }
     static renderPlayers(table) {

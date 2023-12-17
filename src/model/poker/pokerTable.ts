@@ -29,9 +29,9 @@ export default class pokerTable extends Table {
         this.gamePhase = "blinding";
         this.players = [
             new pokerPlayer("p1", "player", gameType),
-            new pokerPlayer("p2", "player", gameType),
-            new pokerPlayer("p3", "player", gameType),
-            new pokerPlayer("p4", "player", gameType),
+            new pokerPlayer("p2", "ai", gameType),
+            new pokerPlayer("p3", "ai", gameType),
+            new pokerPlayer("p4", "ai", gameType),
         ];
         // this.dealerIndex = Math.floor(
         //     Math.random() * (this.players.length - 1)
@@ -54,6 +54,13 @@ export default class pokerTable extends Table {
         }
     }
 
+    sortPlayerScore(): pokerPlayer[] {
+        let sortedPlayers: pokerPlayer[] = this.players.sort((a, b) => {
+            return a.chips - b.chips;
+        });
+        return sortedPlayers;
+    }
+
     clearPlayerHandsAndBets(): void {
         for (let player of this.players) {
             player.hand = [];
@@ -66,6 +73,7 @@ export default class pokerTable extends Table {
         }
         this.dealer.hand = [];
         this.pot = 0;
+        this.turnCounter = 0;
     }
 
     clearPlayerBet(): void {
@@ -76,8 +84,8 @@ export default class pokerTable extends Table {
 
     // ラウンド結果を評価し、結果を文字列として返すメソッド.
     evaluateAndGetRoundResults(): string {
-        let winners : pokerPlayer[] = [];
-        let roundLog : pokerPlayer[] = [];
+        let winners: pokerPlayer[] = [];
+        let roundLog = "";
         const hashMap: Map<PokerHandType, number> = new Map<
             PokerHandType,
             number
@@ -96,12 +104,14 @@ export default class pokerTable extends Table {
 
         console.log("ログ、勝敗判定します");
 
-        this.players.map((player) =>
-            hashMap.set(
-                player.playerHandStatus,
-                hashMap.get(player.playerHandStatus)! + 1
-            )
-        );
+        this.players.map((player) => {
+            if (player.gameStatus != "fold") {
+                hashMap.set(
+                    player.playerHandStatus,
+                    hashMap.get(player.playerHandStatus)! + 1
+                );
+            }
+        });
         let heighRole: PokerHandType = "";
         // 今回のポーカーの役で一番強いものを決める => もしダブってたら、手札の強い順？
         for (const [key, value] of hashMap) {
@@ -131,6 +141,7 @@ export default class pokerTable extends Table {
                 "複数人います。",
                 winnerPlayer.map((player) => player.playerHandStatus)
             );
+
             // フォーカード　比較
             if (winnerPlayer[0].playerHandStatus == "four card") {
             }
@@ -216,8 +227,13 @@ export default class pokerTable extends Table {
                 if (winnerPlayer.length == 1) {
                     console.log("Winner", winnerPlayer[0].name);
                     winners.push(winnerPlayer[0]);
-                    roundLog.push(this.players);
-                    // return 
+                    for (let i = 0; i < this.players.length; i++) {
+                        roundLog +=
+                            this.players[i].chips +
+                            (i != this.players.length - 1 ? "," : "");
+                    }
+
+                    return roundLog;
                 } else {
                     flag = false;
                     if (!flag) {
@@ -272,7 +288,6 @@ export default class pokerTable extends Table {
                     winnerPlayer[currIndex].chips += this.pot;
                 }
 
-
                 console.log(currIndex, winnerPlayer[currIndex].name, flag);
             }
             // no pair
@@ -313,6 +328,7 @@ export default class pokerTable extends Table {
                     }
                     if (flag) break;
                 }
+
                 if (!flag) {
                     // 引き分け
                     for (let player of winnerPlayer) {
@@ -347,9 +363,12 @@ export default class pokerTable extends Table {
             this.pot = 0;
         }
 
-
-
-        return "";
+        for (let i = 0; i < this.players.length; i++) {
+            roundLog +=
+                this.players[i].chips +
+                (i != this.players.length - 1 ? "," : "");
+        }
+        return roundLog;
     }
 
     compairPairsOfTwo(playerList: pokerPlayer[]): boolean {
@@ -564,7 +583,7 @@ export default class pokerTable extends Table {
 
             // playerの所持金が現在のベット金額より小さかったら allin
             // callの場合
-            else if (player.chips < this.betMoney && player.chips > 0) {
+            else if (player.chips < this.betMoney) {
                 console.log(
                     player.name,
                     "の所持金が最小ベット額より少ないです！！",
@@ -594,7 +613,7 @@ export default class pokerTable extends Table {
 
         if (this.gamePhase == "evaluating") {
             console.log("TURN  OWARI!!!!");
-            this.evaluateAndGetRoundResults();
+            this.resultsLog.push(this.evaluateAndGetRoundResults());
             this.clearPlayerHandsAndBets();
             this.gamePhase = "blinding";
             this.roundCounter++;
