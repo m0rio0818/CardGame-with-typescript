@@ -10,10 +10,6 @@ import Table from "../common/Table.js";
 import pokerGameDecision from "./pokerGameDecision.js";
 import pokerPlayer from "./pokerPlayer.js";
 
-type pokerHand = {
-    [key in PokerHandType]: number;
-};
-
 export default class pokerTable extends Table {
     dealer: pokerPlayer;
     gamePhase: PokerGamePhaseType; // 型の変更
@@ -80,6 +76,8 @@ export default class pokerTable extends Table {
 
     // ラウンド結果を評価し、結果を文字列として返すメソッド.
     evaluateAndGetRoundResults(): string {
+        let winners : pokerPlayer[] = [];
+        let roundLog : pokerPlayer[] = [];
         const hashMap: Map<PokerHandType, number> = new Map<
             PokerHandType,
             number
@@ -120,7 +118,19 @@ export default class pokerTable extends Table {
             let winnerPlayer: pokerPlayer[] = this.players.filter(
                 (player) => player.playerHandStatus == heighRole
             );
-            console.log("複数人います。", winnerPlayer.map(player => player.playerHandStatus));
+            // ツーカード　or ワンペア
+            winnerPlayer.map((player) => {
+                console.log(
+                    player.name,
+                    player.pairsOfTwoList,
+                    player.pairsOfThreeList,
+                    player.parisOfCardList
+                );
+            });
+            console.log(
+                "複数人います。",
+                winnerPlayer.map((player) => player.playerHandStatus)
+            );
             // フォーカード　比較
             if (winnerPlayer[0].playerHandStatus == "four card") {
             }
@@ -163,10 +173,16 @@ export default class pokerTable extends Table {
                     j--
                 ) {
                     currHand = startPlayer.pairsOfTwoList[j];
+
                     // 現在のhandで一番高いランクを判定
                     for (let i = 0; i < winnerPlayer.length; i++) {
                         let currPlayerHand = winnerPlayer[i].pairsOfTwoList[j];
-                        console.log("currHand",currHand, "playerHand",currPlayerHand);
+                        console.log(
+                            "currHand",
+                            currHand,
+                            "playerHand",
+                            currPlayerHand
+                        );
                         if (currHand != currPlayerHand) {
                             flag = true;
                             if (
@@ -184,51 +200,65 @@ export default class pokerTable extends Table {
                                     "flag",
                                     flag
                                 );
-                            } 
+                            }
                         }
                     }
                     // いらないwinnerPlayerを削除
-
-                    if (flag) break;
-                }
-
-                // this.compairPairsOfTwo(winnerPlayer);
-
-                let flagSecond = false;
-                if (!flag) {
-                    for (
-                        let j = winnerPlayer[0].parisOfCardList.length - 1;
-                        j >= 0;
-                        j--
-                    ) {
-                        currHand = winnerPlayer[0].parisOfCardList[j];
-                        for (let i = 0; i < winnerPlayer.length; i++) {
-                            let currPlayerHand =
-                                winnerPlayer[i].parisOfCardList[j];
-                            console.log(currIndex, currHand, currPlayerHand);
-                            if (currHand != currPlayerHand) {
-                                flagSecond = true;
-                                if (
-                                    pokerIndexOfNum.indexOf(currHand) <
-                                    pokerIndexOfNum.indexOf(currPlayerHand)
-                                ) {
-                                    currHand = currPlayerHand;
-                                    currIndex = i;
-                                    console.log(
-                                        "currHand",
-                                        currHand,
-                                        "currIndex",
-                                        currIndex,
-                                        flagSecond
-                                    );
-                                }
-                            }
-                        }
-                        if (flagSecond) break;
+                    console.log("currhand:", currHand);
+                    if (flag) {
+                        winnerPlayer = winnerPlayer.filter(
+                            (player) => player.pairsOfTwoList[j] == currHand
+                        );
                     }
                 }
 
-                if (!flagSecond) {
+                // winnersPlayerがこの時点で決まってたら終了
+                if (winnerPlayer.length == 1) {
+                    console.log("Winner", winnerPlayer[0].name);
+                    winners.push(winnerPlayer[0]);
+                    roundLog.push(this.players);
+                    // return 
+                } else {
+                    flag = false;
+                    if (!flag) {
+                        for (
+                            let j = winnerPlayer[0].parisOfCardList.length - 1;
+                            j >= 0;
+                            j--
+                        ) {
+                            currHand = winnerPlayer[0].parisOfCardList[j];
+                            for (let i = 0; i < winnerPlayer.length; i++) {
+                                let currPlayerHand =
+                                    winnerPlayer[i].parisOfCardList[j];
+                                console.log(
+                                    currIndex,
+                                    currHand,
+                                    currPlayerHand
+                                );
+                                if (currHand != currPlayerHand) {
+                                    flag = true;
+                                    if (
+                                        pokerIndexOfNum.indexOf(currHand) <
+                                        pokerIndexOfNum.indexOf(currPlayerHand)
+                                    ) {
+                                        currHand = currPlayerHand;
+                                        currIndex = i;
+                                        console.log(
+                                            "currHand",
+                                            currHand,
+                                            "currIndex",
+                                            currIndex,
+                                            flag
+                                        );
+                                    }
+                                }
+                            }
+                            if (flag) break;
+                        }
+                    }
+                }
+
+                if (!flag) {
                     // 引き分け
                     console.log("引き分け");
                     for (let player of winnerPlayer) {
@@ -241,12 +271,9 @@ export default class pokerTable extends Table {
                     // 勝利プレイヤーに分配
                     winnerPlayer[currIndex].chips += this.pot;
                 }
-                console.log(
-                    currIndex,
-                    winnerPlayer[currIndex].name,
-                    flag,
-                    flagSecond
-                );
+
+
+                console.log(currIndex, winnerPlayer[currIndex].name, flag);
             }
             // no pair
             else {
@@ -319,6 +346,8 @@ export default class pokerTable extends Table {
             winnerPlayer[0].chips += this.pot;
             this.pot = 0;
         }
+
+
 
         return "";
     }
@@ -424,7 +453,7 @@ export default class pokerTable extends Table {
                     this.pot += player.bet;
                     player.gameStatus = "bet";
                     console.log(player.name, "after blind", player);
-                    // ブラインド終了後に、、全プレイヤーをbet状態にする。
+                    // ブラインド終了後に、全プレイヤーをbet状態にする。
                     if (this.playerIndexCounter == this.dealerIndex + 2) {
                         this.gamePhase = "betting";
                         this.changePlayerStatusToBet();

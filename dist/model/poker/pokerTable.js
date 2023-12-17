@@ -47,6 +47,8 @@ export default class pokerTable extends Table {
         }
     }
     evaluateAndGetRoundResults() {
+        let winners = [];
+        let roundLog = [];
         const hashMap = new Map();
         hashMap.set("royal flush", 0);
         hashMap.set("straight flush", 0);
@@ -71,7 +73,10 @@ export default class pokerTable extends Table {
         console.log(heighRole, hashMap.get(heighRole));
         if (hashMap.get(heighRole) > 1) {
             let winnerPlayer = this.players.filter((player) => player.playerHandStatus == heighRole);
-            console.log("複数人います。", winnerPlayer.map(player => player.playerHandStatus));
+            winnerPlayer.map((player) => {
+                console.log(player.name, player.pairsOfTwoList, player.pairsOfThreeList, player.parisOfCardList);
+            });
+            console.log("複数人います。", winnerPlayer.map((player) => player.playerHandStatus));
             if (winnerPlayer[0].playerHandStatus == "four card") {
             }
             else if (winnerPlayer[0].playerHandStatus == "full house" ||
@@ -109,31 +114,40 @@ export default class pokerTable extends Table {
                             }
                         }
                     }
-                    if (flag)
-                        break;
-                }
-                let flagSecond = false;
-                if (!flag) {
-                    for (let j = winnerPlayer[0].parisOfCardList.length - 1; j >= 0; j--) {
-                        currHand = winnerPlayer[0].parisOfCardList[j];
-                        for (let i = 0; i < winnerPlayer.length; i++) {
-                            let currPlayerHand = winnerPlayer[i].parisOfCardList[j];
-                            console.log(currIndex, currHand, currPlayerHand);
-                            if (currHand != currPlayerHand) {
-                                flagSecond = true;
-                                if (pokerIndexOfNum.indexOf(currHand) <
-                                    pokerIndexOfNum.indexOf(currPlayerHand)) {
-                                    currHand = currPlayerHand;
-                                    currIndex = i;
-                                    console.log("currHand", currHand, "currIndex", currIndex, flagSecond);
-                                }
-                            }
-                        }
-                        if (flagSecond)
-                            break;
+                    console.log("currhand:", currHand);
+                    if (flag) {
+                        winnerPlayer = winnerPlayer.filter((player) => player.pairsOfTwoList[j] == currHand);
                     }
                 }
-                if (!flagSecond) {
+                if (winnerPlayer.length == 1) {
+                    console.log("Winner", winnerPlayer[0].name);
+                    winners.push(winnerPlayer[0]);
+                    roundLog.push(this.players);
+                }
+                else {
+                    flag = false;
+                    if (!flag) {
+                        for (let j = winnerPlayer[0].parisOfCardList.length - 1; j >= 0; j--) {
+                            currHand = winnerPlayer[0].parisOfCardList[j];
+                            for (let i = 0; i < winnerPlayer.length; i++) {
+                                let currPlayerHand = winnerPlayer[i].parisOfCardList[j];
+                                console.log(currIndex, currHand, currPlayerHand);
+                                if (currHand != currPlayerHand) {
+                                    flag = true;
+                                    if (pokerIndexOfNum.indexOf(currHand) <
+                                        pokerIndexOfNum.indexOf(currPlayerHand)) {
+                                        currHand = currPlayerHand;
+                                        currIndex = i;
+                                        console.log("currHand", currHand, "currIndex", currIndex, flag);
+                                    }
+                                }
+                            }
+                            if (flag)
+                                break;
+                        }
+                    }
+                }
+                if (!flag) {
                     console.log("引き分け");
                     for (let player of winnerPlayer) {
                         console.log(player, player.name);
@@ -143,7 +157,7 @@ export default class pokerTable extends Table {
                 else {
                     winnerPlayer[currIndex].chips += this.pot;
                 }
-                console.log(currIndex, winnerPlayer[currIndex].name, flag, flagSecond);
+                console.log(currIndex, winnerPlayer[currIndex].name, flag);
             }
             else {
                 let currHand = winnerPlayer[0].pairsOfTwoList[winnerPlayer[0].pairsOfTwoList.length - 1];

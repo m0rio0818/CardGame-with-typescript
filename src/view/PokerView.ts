@@ -28,7 +28,7 @@ export class PokerView {
             const roundCounter = document.createElement("h4");
             roundCounter.innerText = "Round: " + (table.roundCounter + 1);
             const turnCounter = document.createElement("h4");
-            turnCounter.innerHTML = "turn: " + (table.turnCounter); 
+            turnCounter.innerHTML = "turn: " + table.turnCounter;
             const gamePhase = document.createElement("h4");
             gamePhase.innerText = "GamePhase: " + table.gamePhase;
             const currPlayer = document.createElement("h4");
@@ -103,6 +103,45 @@ export class PokerView {
             "fold-button"
         );
 
+        container.append(callButton, raiseButton, foldButton);
+        root?.append(container);
+    }
+
+    static createActionswithCheckModal() {
+        const root = document.getElementById("app");
+
+        const container = document.createElement("div");
+
+        const callButton = document.createElement("button");
+        callButton.innerText = "call";
+        callButton.classList.add(
+            "btn",
+            "btn-primary",
+            "p-1",
+            "mx-1",
+            "call-button"
+        );
+
+        const raiseButton = document.createElement("button");
+        raiseButton.innerText = "Raise";
+        raiseButton.classList.add(
+            "btn",
+            "btn-primary",
+            "p-1",
+            "mx-1",
+            "raise-button"
+        );
+
+        const foldButton = document.createElement("button");
+        foldButton.innerText = "fold";
+        foldButton.classList.add(
+            "btn",
+            "btn-primary",
+            "p-1",
+            "mx-1",
+            "fold-button"
+        );
+
         const checkButton = document.createElement("button");
         checkButton.innerText = "check";
         checkButton.classList.add(
@@ -114,6 +153,74 @@ export class PokerView {
         );
 
         container.append(callButton, raiseButton, foldButton, checkButton);
+        root?.append(container);
+    }
+
+    static createallInModal() {
+        const root = document.getElementById("app");
+
+        const container = document.createElement("div");
+        const allInButton = document.createElement("button");
+        allInButton.innerText = "allIn";
+        allInButton.classList.add(
+            "btn",
+            "btn-primary",
+            "p-1",
+            "mx-1",
+            "allIn-button"
+        );
+
+        const foldButton = document.createElement("button");
+        foldButton.innerText = "fold";
+        foldButton.classList.add(
+            "btn",
+            "btn-primary",
+            "p-1",
+            "mx-1",
+            "fold-button"
+        );
+
+        container.append(allInButton, foldButton);
+        root?.append(container);
+    }
+
+    // チェックできるのは、自分がそのターンの開始プレイヤーor一人前のプレイヤーがcheckしていた場合。
+    // allInの場合も同様
+    static createallInwithCheckModal() {
+        const root = document.getElementById("app");
+
+        const container = document.createElement("div");
+        const allInButton = document.createElement("button");
+        allInButton.innerText = "allIn";
+        allInButton.classList.add(
+            "btn",
+            "btn-primary",
+            "p-1",
+            "mx-1",
+            "allIn-button"
+        );
+
+        const foldButton = document.createElement("button");
+        foldButton.innerText = "fold";
+        foldButton.classList.add(
+            "btn",
+            "btn-primary",
+            "p-1",
+            "mx-1",
+            "fold-button"
+        );
+
+        const checkButton = document.createElement("button");
+        checkButton.innerText = "check";
+        checkButton.classList.add(
+            "btn",
+            "btn-primary",
+            "p-1",
+            "mx-1",
+            "check-button"
+        );
+
+        container.append(allInButton, foldButton, checkButton);
         root?.append(container);
     }
 }

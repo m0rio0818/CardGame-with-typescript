@@ -4,6 +4,10 @@ import { PokerView } from "../view/PokerView.js";
 export class PokerController {
     static renderGameScene(table) {
         this.renderPlayers(table);
+        if (table.roundCounter === table.maxTurn) {
+            this.renderFinalResultsModal(table);
+            return;
+        }
         if (table.roundCounter == table.maxTurn - 1) {
             console.log("ゲーム終了, 結果表示ページに遷移したい。");
         }
@@ -16,21 +20,41 @@ export class PokerController {
             }, 3000);
         }
         const turnPlayer = table.getTurnPlayer();
+        const beforePlayer = table.getoneBeforePlayer();
         console.log(turnPlayer.type);
         if (turnPlayer.type == "player") {
             if (table.gamePhase != "blinding") {
                 if (turnPlayer.gameStatus == "fold" ||
                     turnPlayer.gameStatus == "allin") {
-                    console.log("もう何もアクションはできません。");
+                    console.log("allin or fold なので、もう今は何もアクションはできません。");
                     setTimeout(() => {
                         Config.displayNone();
                         table.haveTurn();
                         this.renderGameScene(table);
                     }, 1000);
                 }
+                if (beforePlayer.gameStatus == "check" ||
+                    table.playerIndexCounter == table.dealerIndex + 1) {
+                    if (turnPlayer.chips < table.betMoney &&
+                        turnPlayer.chips > 0) {
+                        PokerView.createActionswithCheckModal();
+                        this.onActionButtonsClick(table);
+                    }
+                    else {
+                        PokerView.createActionswithCheckModal();
+                        this.onActionButtonsClick(table);
+                    }
+                }
                 else {
-                    PokerView.createActionsModal();
-                    this.onActionButtonsClick(table);
+                    if (turnPlayer.chips < table.betMoney &&
+                        turnPlayer.chips > 0) {
+                        PokerView.createallInModal();
+                        this.onActionButtonsClick(table);
+                    }
+                    else {
+                        PokerView.createActionsModal();
+                        this.onActionButtonsClick(table);
+                    }
                 }
             }
         }
@@ -53,6 +77,7 @@ export class PokerController {
         const raiseButton = document.querySelector(".raise-button");
         const foldButton = document.querySelector(".fold-button");
         const checkButton = document.querySelector(".check-button");
+        const allInButton = document.querySelector(".allIn-button");
         callButton === null || callButton === void 0 ? void 0 : callButton.addEventListener("click", () => {
             Config.displayNone();
             table.haveTurn("call");
@@ -69,11 +94,21 @@ export class PokerController {
             console.log("clicked FOLD!!");
             this.renderGameScene(table);
         });
+        allInButton === null || allInButton === void 0 ? void 0 : allInButton.addEventListener("click", () => {
+            Config.displayNone();
+            table.haveTurn("allin");
+            console.log("ALL IN ");
+            this.renderGameScene(table);
+        });
         checkButton === null || checkButton === void 0 ? void 0 : checkButton.addEventListener("check", () => {
             Config.displayNone();
             table.haveTurn("check");
             this.renderGameScene(table);
         });
+    }
+    static renderFinalResultsModal(table) {
+        PokerView.createFinalResultsModal(table);
+        this.onClickFinalResultsButons(table);
     }
     static onClickNextRoundButton(table) {
         const nextRoundButton = document.querySelector(".next-round-button");

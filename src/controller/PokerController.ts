@@ -11,15 +11,10 @@ export class PokerController {
         // lotate table's dealer and player
         this.renderPlayers(table);
 
-        // if (table.gamePhase === "betting") {
-        //     this.renderGameOverModal(table);
-        //     return;
-        // }
-
-        // if (table.roundCount === table.maxRounds) {
-        //     this.renderFinalResultsModal(table);
-        //     return;
-        // }
+        if (table.roundCounter === table.maxTurn) {
+            this.renderFinalResultsModal(table);
+            return;
+        }
 
         // if (table.gamePhase === "evaluating") {
         //     Config.displayNone();
@@ -58,7 +53,11 @@ export class PokerController {
             }, 3000);
         }
 
+        // allInとなる条件
+        // 所持金がtableのbet額以下
+        // Skipになる条件　fold, allIn
         const turnPlayer = table.getTurnPlayer();
+        const beforePlayer = table.getoneBeforePlayer();
         console.log(turnPlayer.type);
         if (turnPlayer.type == "player") {
             if (table.gamePhase != "blinding") {
@@ -66,15 +65,41 @@ export class PokerController {
                     turnPlayer.gameStatus == "fold" ||
                     turnPlayer.gameStatus == "allin"
                 ) {
-                    console.log("もう何もアクションはできません。");
+                    console.log(
+                        "allin or fold なので、もう今は何もアクションはできません。"
+                    );
                     setTimeout(() => {
                         Config.displayNone();
                         table.haveTurn();
                         this.renderGameScene(table);
                     }, 1000);
+                }
+                //　ひとり前のプレイヤーがcheck or 自分がそのターンのはじめ
+                if (
+                    beforePlayer.gameStatus == "check" ||
+                    table.playerIndexCounter == table.dealerIndex + 1
+                ) {
+                    if (
+                        turnPlayer.chips < table.betMoney &&
+                        turnPlayer.chips > 0
+                    ) {
+                        PokerView.createActionswithCheckModal();
+                        this.onActionButtonsClick(table);
+                    } else {
+                        PokerView.createActionswithCheckModal();
+                        this.onActionButtonsClick(table);
+                    }
                 } else {
-                    PokerView.createActionsModal();
-                    this.onActionButtonsClick(table);
+                    if (
+                        turnPlayer.chips < table.betMoney &&
+                        turnPlayer.chips > 0
+                    ) {
+                        PokerView.createallInModal();
+                        this.onActionButtonsClick(table);
+                    } else {
+                        PokerView.createActionsModal();
+                        this.onActionButtonsClick(table);
+                    }
                 }
             }
         } else {
@@ -84,77 +109,12 @@ export class PokerController {
                 this.renderGameScene(table);
             }, 2000);
         }
-
-        // if (turnPlayer.type === "human") {
-        //     if (table.gamePhase === "betting") {
-        //         BlackjackView.createBetModal(table);
-
-        //         const betButton = document.querySelector(".bet-button");
-        //         if (!betButton?.ariaDisabled) {
-        //             betButton!.addEventListener("click", () => {
-        //                 Config.displayNone();
-
-        //                 const betCount = parseInt(
-        //                     betButton!.innerHTML.split(" ")[1]
-        //                 );
-        //                 table.haveTurn(betCount);
-        //                 this.renderGameScene(table);
-        //                 betButton!.ariaDisabled = "true";
-        //             });
-        //         }
-        //     } else if (table.gamePhase === "acting") {
-        //         // プレイヤーのgameStatusがstand, bust, surrender, blackjackの場合は次のターンへ
-        //         if (table.playerActionResolved(turnPlayer)) {
-        //             Config.displayNone();
-
-        //             table.haveTurn();
-        //             this.renderGameScene(table);
-        //         } else {
-        //             BlackjackView.createActionsModal();
-
-        //             // on action buttons click
-        //             this.onActionButtonsClick(table);
-        //         }
-        //     }
-        // } else {
-        //     setTimeout(() => {
-        //         Config.displayNone();
-        //         table.haveTurn();
-        //         this.renderGameScene(table);
-        //     }, 3000);
-        // }
     }
 
     /*
-  renderRoundOverModal(table: BlackjackTable): void
-  ラウンド終了時のモーダルを描画する
-  */
-    //     static renderRoundOverModal(table: BlackjackTable) {
-    //         BlackjackView.createRoundOverModal(table);
-    //     }
-
-    //     /*
-    //   renderGameOverModal(table: BlackjackTable): void
-    //   操作プレイヤーのチップが全てなくなった時のモーダルを描画する
-    //   */
-    //     static renderGameOverModal(table: BlackjackTable) {
-    //         BlackjackView.createGameOverModal();
-    //         this.onClickGameOverButtons(table);
-    //     }
-
-    //     /*
-    //   renderFinalResultsModal(table: BlackjackTable): void
-    //   全ラウンド終了後の最終結果のモーダルを描画する
-    //   */
-    //     static renderFinalResultsModal(table: pokerTable) {
-    //         PokerView.createFinalResultsModal(table);
-    //         this.onClickFinalResultsButons(table);
-    //     }
-
-    /*
-  renderPlayers(table: PokerTable): void
-  プレイヤーの情報を描画する
-  */
+    renderPlayers(table: PokerTable): void
+    プレイヤーの情報を描画する
+    */
     static renderPlayers(table: pokerTable) {
         PokerView.createPlayerView(table.dealer, table);
 
@@ -164,14 +124,15 @@ export class PokerController {
     }
 
     /*
-  onActionButtonsClick(table: BlackjackTable): void
-  アクションボタンがクリックされた時の処理を記述する
-  */
+    onActionButtonsClick(table: BlackjackTable): void
+    アクションボタンがクリックされた時の処理を記述する
+    */
     static onActionButtonsClick(table: pokerTable) {
         const callButton = document.querySelector(".call-button");
         const raiseButton = document.querySelector(".raise-button");
         const foldButton = document.querySelector(".fold-button");
         const checkButton = document.querySelector(".check-button");
+        const allInButton = document.querySelector(".allIn-button");
 
         callButton?.addEventListener("click", () => {
             Config.displayNone();
@@ -192,6 +153,13 @@ export class PokerController {
             this.renderGameScene(table);
         });
 
+        allInButton?.addEventListener("click", () => {
+            Config.displayNone();
+            table.haveTurn("allin");
+            console.log("ALL IN ");
+            this.renderGameScene(table);
+        });
+
         checkButton?.addEventListener("check", () => {
             Config.displayNone();
             table.haveTurn("check");
@@ -200,10 +168,19 @@ export class PokerController {
     }
 
     /*
-  onClickNextRoundButton(table: BlackjackTable): void
-  round overモーダルのnext roundボタンがクリックされた時の処理を記述する
-  */
-    static onClickNextRoundButton(table: pokerTable) {
+    renderFinalResultsModal(table: PokerTable): void
+    全ラウンド終了後の最終結果のモーダルを描画する
+    */
+    static renderFinalResultsModal(table: pokerTable): void {
+        PokerView.createFinalResultsModal(table);
+        this.onClickFinalResultsButons(table);
+    }
+
+    /*
+    onClickNextRoundButton(table: BlackjackTable): void
+    round overモーダルのnext roundボタンがクリックされた時の処理を記述する
+    */
+    static onClickNextRoundButton(table: pokerTable): void {
         const nextRoundButton = document.querySelector(".next-round-button");
         nextRoundButton?.addEventListener("click", () => {
             if (table.gamePhase === "game over") {
@@ -218,10 +195,10 @@ export class PokerController {
     }
 
     /*
-  onClickGameOverButtons(table: BlackjackTable): void
-  game overモーダルのrestart, backボタンがクリックされた時の処理を記述する
-  */
-    static onClickGameOverButtons(table: pokerTable) {
+    onClickGameOverButtons(table: BlackjackTable): void
+    game overモーダルのrestart, backボタンがクリックされた時の処理を記述する
+    */
+    static onClickGameOverButtons(table: pokerTable): void {
         const restartButton = document.querySelector(".restart-button");
         const backButton = document.querySelector(".back-button");
         restartButton?.addEventListener("click", () => {
@@ -241,8 +218,8 @@ export class PokerController {
     }
 
     /*
-  onClickFinalResultsButons(table: BlackjackTable): void
-  final resultsモーダルのrestart, backボタンがクリックされた時の処理を記述する
-  */
+    onClickFinalResultsButons(table: BlackjackTable): void
+    final resultsモーダルのrestart, backボタンがクリックされた時の処理を記述する
+    */
     static onClickFinalResultsButons(table: BlackjackTable) {}
 }
