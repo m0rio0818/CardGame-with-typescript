@@ -274,4 +274,4 @@ export class Table {
         return false;
     }
 }
-//# sourceMappingURL=blackJackTable.js.map
+//# sourceMappingURL=blackjackTable.js.map

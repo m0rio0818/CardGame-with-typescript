@@ -4,8 +4,8 @@ import pokerTable from "./model/poker/pokerTable.js";
 
 
 
-let table = new pokerTable("poker", 1);
-PokerController.renderGameScene(table);
+let table = new pokerTable("poker", 4);
+PokerController.startGame(table);
 // console.log(table);
 // while (table.gamePhase != "round over") {
 //     table.haveTurn();
