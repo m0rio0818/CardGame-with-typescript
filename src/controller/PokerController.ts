@@ -1,6 +1,6 @@
 import { Config } from "../config/pageConfig.js";
 import pokerTable from "../model/poker/pokerTable.js";
-import { PokerView } from "../view/PokerView.js";
+import { PokerView } from "../games/pokerScene.js";
 import { PreloadScene } from "../games/common/preloadScene.js";
 
 export class PokerController {
