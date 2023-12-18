@@ -11,20 +11,22 @@ export class Button extends Phaser.GameObjects.Container {
             },
         });
         this.image = new Image(scene, 0, 0, key);
-        this.setInteractive();
-        this.image.on("pointeron", () => {
-            console.log("down");
+        this.image.setInteractive();
+        this.image.on("pointerdown", () => {
+            this.image.y += 4;
+            this.text.y += 4;
             callback();
         });
-        this.image.on("pointerdown", () => {
-            console.log("down");
+        this.image.on("pointerup", () => {
+            this.image.y -= 4;
+            this.text.y -= 4;
             callback();
         });
         this.image.on("pointerover", () => {
-            console.log("aaa");
+            this.image.setTint(0xcccccc);
         });
         this.image.on("pointerout", () => {
-            console.log("aaa");
+            this.image.clearTint();
         });
         const { width, height } = this.text;
         this.image.displayWidth = width + 100;
