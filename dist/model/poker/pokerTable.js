@@ -249,7 +249,6 @@ export default class pokerTable extends Table {
         }
         return flag;
     }
-    compairPairsOfCard(playerList) { }
     evaluateMove(player, userData) {
         if (player.type == "dealer") {
             if (this.turnCounter == 0) {

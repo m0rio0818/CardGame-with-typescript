@@ -1,8 +1,27 @@
 import { Config } from "../config/pageConfig.js";
 import pokerTable from "../model/poker/pokerTable.js";
-import { PokerView } from "../view/PokerView.js";
+import { PokerView } from "../games/pokerScene.js";
+import { PreloadScene } from "../games/common/preloadScene.js";
 
 export class PokerController {
+    static startGame(table: pokerTable) {
+        const game = new Phaser.Game({
+            type: Phaser.AUTO,
+            width: 1080,
+            height: 720,
+            scene: [],
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
+            },
+        });
+
+        game.scene.add("preload", PreloadScene, false);
+        game.scene.add("poker", PokerView, false);
+
+        game.scene.start("preload", { table: table });
+    }
+
     /*
   renderGameScene(table: BlackjackTable): void
   ゲームのシーンを描画する

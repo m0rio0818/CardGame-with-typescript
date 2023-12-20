@@ -1,5 +1,6 @@
 import pokerTable from "../model/poker/pokerTable.js";
 import pokerPlayer from "../model/poker/pokerPlayer.js";
+import Phaser from "phaser";
 
 export class PokerView {
     /*
