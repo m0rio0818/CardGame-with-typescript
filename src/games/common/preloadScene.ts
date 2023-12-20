@@ -8,8 +8,6 @@ export class PreloadScene extends Phaser.Scene {
 
     preload() {
         const { width, height } = this.cameras.main;
-        console.log(width, height);
-
         // 新しいグラフィックスオブジェクトの作成
 
         // プログレス背景
@@ -48,7 +46,6 @@ export class PreloadScene extends Phaser.Scene {
             }
         });
 
-
         this.load.on("complete", function () {
             console.log("complete");
         });
@@ -66,9 +63,11 @@ export class PreloadScene extends Phaser.Scene {
             });
         });
 
-        this.load.image("background", "public/assets/ui/background.jpeg")
-        this.load.image("gray-button", "public/assets/ui/gray-button.png")
-        this.load.image("blue-button", "public/assets/ui/blue-button.png")
+        this.load.image("back", "public/assets/cards/backB.png");
+
+        this.load.image("background", "public/assets/ui/background.jpeg");
+        this.load.image("gray-button", "public/assets/ui/gray-button.png");
+        this.load.image("blue-button", "public/assets/ui/blue-button.png");
     }
 
     create(data: any) {
@@ -88,8 +87,8 @@ export class PreloadScene extends Phaser.Scene {
         this.progressBar?.destroy();
         this.loadText?.destroy();
         this.percentage?.destroy();
-        if (data.table.gameType == "poker"){
-            this.scene.start('poker', { table: data.table })
+        if (data.table.gameType == "poker") {
+            this.scene.start("poker", { table: data.table });
         }
     }
 }

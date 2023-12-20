@@ -403,7 +403,6 @@ export default class pokerTable extends Table {
         return flag;
     }
 
-    compairPairsOfCard(playerList: pokerPlayer): boolean {}
 
     // プレイヤーのアクションを評価し、ゲームの進行状態を変更するメソッド。
     evaluateMove(player: pokerPlayer, userData?: PokerActionType): void {

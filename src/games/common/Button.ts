@@ -38,17 +38,17 @@ export class Button extends Phaser.GameObjects.Container {
         });
 
         this.image.on("pointerover", () => {
-            this.image.setTint(0xcccccc)
+            this.image.setTint(0xcccccc);
         });
 
         this.image.on("pointerout", () => {
-            this.image.clearTint()
+            this.image.clearTint();
         });
 
         // adjust image size
         const { width, height } = this.text;
-        this.image.displayWidth = width + 100;
-        this.image.displayHeight = height + 23;
+        this.image.displayWidth = width + 68;
+        this.image.displayHeight = height + 18;
 
         // adjust text position
         this.text.x = -width / 2;

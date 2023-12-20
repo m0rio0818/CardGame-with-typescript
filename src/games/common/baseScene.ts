@@ -5,7 +5,6 @@ export class BaseScene extends Phaser.Scene {
         const table = data.table;
         this.add.image(0, 0, "background").setOrigin(0);
         this.createGameZone();
-        this.createNameText(table.players[0].name);
     }
 
     createGameZone() {

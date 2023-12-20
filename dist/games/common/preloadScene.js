@@ -9,7 +9,6 @@ export class PreloadScene extends Phaser.Scene {
     }
     preload() {
         const { width, height } = this.cameras.main;
-        console.log(width, height);
         this.progressBox = this.add.graphics();
         this.progressBox.fillStyle(0x222222, 0.7);
         this.progressBox.fillRect(width / 2 - 160, height / 2 - 25, 320, 50);
@@ -43,6 +42,7 @@ export class PreloadScene extends Phaser.Scene {
                 this.load.image(`${rank}${suit}`, `public/assets/cards/${rank}${suit}.png`);
             });
         });
+        this.load.image("back", "public/assets/cards/backB.png");
         this.load.image("background", "public/assets/ui/background.jpeg");
         this.load.image("gray-button", "public/assets/ui/gray-button.png");
         this.load.image("blue-button", "public/assets/ui/blue-button.png");
@@ -65,7 +65,7 @@ export class PreloadScene extends Phaser.Scene {
         (_c = this.loadText) === null || _c === void 0 ? void 0 : _c.destroy();
         (_d = this.percentage) === null || _d === void 0 ? void 0 : _d.destroy();
         if (data.table.gameType == "poker") {
-            this.scene.start('poker', { table: data.table });
+            this.scene.start("poker", { table: data.table });
         }
     }
 }

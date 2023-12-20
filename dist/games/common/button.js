@@ -29,8 +29,8 @@ export class Button extends Phaser.GameObjects.Container {
             this.image.clearTint();
         });
         const { width, height } = this.text;
-        this.image.displayWidth = width + 100;
-        this.image.displayHeight = height + 23;
+        this.image.displayWidth = width + 68;
+        this.image.displayHeight = height + 18;
         this.text.x = -width / 2;
         this.text.y = -height / 2;
         this.add(this.image);
