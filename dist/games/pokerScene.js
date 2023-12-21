@@ -32,18 +32,24 @@ export class PokerView extends BaseScene {
         this.renderScene();
     }
     renderScene() {
-        var _a, _b, _c, _d, _e, _f, _g;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
         this.PotInfo();
         this.playerInfo();
         const turnPlayer = this.table.getTurnPlayer();
         const beforePlayer = (_a = this.table) === null || _a === void 0 ? void 0 : _a.getoneBeforePlayer();
-        if (((_b = this.table) === null || _b === void 0 ? void 0 : _b.gamePhase) == "betting" &&
+        console.log("THIS.TABLE.PHASE", (_b = this.table) === null || _b === void 0 ? void 0 : _b.gamePhase);
+        if (((_c = this.table) === null || _c === void 0 ? void 0 : _c.gamePhase) == "betting" &&
             this.playerhandsImages[0] === undefined) {
             this.dealInitialHands();
+            this.filpCard(0);
+        }
+        if (((_d = this.table) === null || _d === void 0 ? void 0 : _d.gamePhase) == "dealer turn") {
+            console.log("ディーラーのターンです。");
+            console.log(this.table.dealer.hand);
         }
         switch (turnPlayer.type) {
             case "player":
-                if (((_c = this.table) === null || _c === void 0 ? void 0 : _c.gamePhase) != "blinding") {
+                if (((_e = this.table) === null || _e === void 0 ? void 0 : _e.gamePhase) != "blinding") {
                     if (turnPlayer.gameStatus == "fold" ||
                         turnPlayer.gameStatus == "allin") {
                         console.log("player は allIn or Fold");
@@ -55,9 +61,9 @@ export class PokerView extends BaseScene {
                         break;
                     }
                     if ((beforePlayer === null || beforePlayer === void 0 ? void 0 : beforePlayer.gameStatus) == "check" ||
-                        ((_d = this.table) === null || _d === void 0 ? void 0 : _d.playerIndexCounter) ==
-                            ((_e = this.table) === null || _e === void 0 ? void 0 : _e.dealerIndex) + 1) {
-                        if (turnPlayer.chips < ((_f = this.table) === null || _f === void 0 ? void 0 : _f.betMoney)) {
+                        ((_f = this.table) === null || _f === void 0 ? void 0 : _f.playerIndexCounter) ==
+                            ((_g = this.table) === null || _g === void 0 ? void 0 : _g.dealerIndex) + 1) {
+                        if (turnPlayer.chips < ((_h = this.table) === null || _h === void 0 ? void 0 : _h.betMoney)) {
                             this.createAllInButton(0, 0);
                             this.createCheckButton(0, 0);
                             this.createFoldButton(0, 0);
@@ -70,7 +76,7 @@ export class PokerView extends BaseScene {
                         }
                     }
                     else {
-                        if (turnPlayer.chips < ((_g = this.table) === null || _g === void 0 ? void 0 : _g.betMoney)) {
+                        if (turnPlayer.chips < ((_j = this.table) === null || _j === void 0 ? void 0 : _j.betMoney)) {
                             this.createAllInButton(0, 0);
                             this.createFoldButton(0, 0);
                         }
@@ -99,38 +105,79 @@ export class PokerView extends BaseScene {
     dealInitialHands() {
         var _a;
         for (let i = 0; i < 2; i++) {
+            let targetX = 0;
+            let targetY = 0;
             for (let j = 0; j < ((_a = this.table) === null || _a === void 0 ? void 0 : _a.players.length); j++) {
                 const player = this.table.players[j];
                 const playerHand = player.hand;
                 console.log(player.name, playerHand);
                 const card = playerHand[i];
-                const targetX = i == 0 ? this.width / 2 - 50 : this.width / 2 + 70;
-                const targetY = this.height - 100;
+                if (j == 0) {
+                    targetX =
+                        i == 0 ? this.width / 2 - 50 : this.width / 2 + 50;
+                    targetY = this.height - 80;
+                }
+                else if (j == 1) {
+                    targetX = 80;
+                    targetY =
+                        i == 0 ? this.height / 2 - 40 : this.height / 2 + 40;
+                }
+                else if (j == 2) {
+                    targetY = 80;
+                    targetX =
+                        i == 0 ? this.width / 2 - 30 : this.width / 2 + 50;
+                }
+                else {
+                    targetX = this.width - 80;
+                    targetY =
+                        i == 0 ? this.height / 2 - 40 : this.height / 2 + 40;
+                }
                 const cardDeck = this.add.sprite(this.width / 2, this.height / 2, "back");
-                cardDeck.setScale(1.5);
+                cardDeck.setOrigin(0.5, 0.5);
+                if (j == 1 || j == 3)
+                    cardDeck.setRotation(1.5708);
+                j == 0 ? cardDeck.setScale(1.5) : cardDeck.setScale(1.1);
                 this.add.tween({
                     targets: cardDeck,
                     x: targetX,
                     y: targetY,
                     duration: 1000,
-                    onComplete: () => {
-                        cardDeck.setTexture(`${card.rank}${card.suit}`);
+                });
+                if (j == 0) {
+                    setTimeout(() => {
+                        cardDeck.setScale(1.5);
                         this.add.tween({
                             targets: cardDeck,
-                            duration: 3000,
-                            ease: "Power2",
+                            scaleY: 0,
+                            duration: 500,
+                            ease: "linear",
+                            onComplete: () => {
+                                cardDeck.setScale(1.5);
+                                cardDeck.setTexture(`${card.rank}${card.suit}`);
+                                this.add.tween({
+                                    targets: cardDeck,
+                                    scaleY: 1,
+                                    duration: 500,
+                                    ease: "linear",
+                                });
+                            },
                         });
-                    },
-                });
-                console.log("before ", this.playerhandsImages, j, this.playerhandsImages[j]);
+                    }, 1000);
+                }
                 if (this.playerhandsImages[j] == undefined) {
                     this.playerhandsImages.push([cardDeck]);
                 }
                 else {
                     this.playerhandsImages[j].push(cardDeck);
                 }
-                console.log("after ", this.playerhandsImages, j, this.playerhandsImages[j]);
             }
+        }
+    }
+    filpCard(i) {
+        let playerHand = this.playerhandsImages[i];
+        for (let i = 0; i < playerHand.length; i++) {
+            const cardImage = playerHand[i];
+            console.log("cardDetail :", playerHand[i]);
         }
     }
     setXPosition(i) {
@@ -165,12 +212,12 @@ export class PokerView extends BaseScene {
         for (let i = 0; i < ((_a = this.table) === null || _a === void 0 ? void 0 : _a.players.length); i++) {
             const currPlayer = (_b = this.table) === null || _b === void 0 ? void 0 : _b.players[i];
             const playerInfo = this.add.text(this.setXPosition(i), i == 0
-                ? this.height - 200
+                ? this.height - 150
                 : i == 1
-                    ? this.height / 2 - 100
+                    ? this.height / 2 - 140
                     : i == 2
                         ? 40
-                        : this.height / 2 + 50, "Name: " + (currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.name), {
+                        : this.height / 2 + 100, "Name: " + (currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.name), {
                 style: {
                     fontSize: "100px",
                     color: "#ffffff",
@@ -187,18 +234,18 @@ export class PokerView extends BaseScene {
             for (let i = 0; i < ((_b = this.table) === null || _b === void 0 ? void 0 : _b.players.length); i++) {
                 const currPlyer = (_c = this.table) === null || _c === void 0 ? void 0 : _c.players[i];
                 const playerInfo = this.add.text(this.setXPosition(i), i == 0
-                    ? this.height - 160
+                    ? this.height - 40
                     : i == 1
-                        ? this.height / 2 - 50
+                        ? this.height / 2 - 120
                         : i == 2
                             ? 80
-                            : this.height / 2 + 90, "Hand: " + (currPlyer === null || currPlyer === void 0 ? void 0 : currPlyer.playerHandStatus));
+                            : this.height / 2 + 150, "Hand: " + (currPlyer === null || currPlyer === void 0 ? void 0 : currPlyer.playerHandStatus));
                 this.playerHandInfo.push(playerInfo);
             }
         }
         else if (((_d = this.table) === null || _d === void 0 ? void 0 : _d.gamePhase) == "betting") {
             const currPlayer = (_e = this.table) === null || _e === void 0 ? void 0 : _e.players[0];
-            const playerInfo = this.add.text(this.setXPosition(0), this.height - 160, "Hand: " + (currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.playerHandStatus));
+            const playerInfo = this.add.text(this.setXPosition(0), this.height - 110, "Hand: " + (currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.playerHandStatus));
             this.playerBetInfo.push(playerInfo);
         }
     }
@@ -211,12 +258,12 @@ export class PokerView extends BaseScene {
         for (let i = 0; i < ((_a = this.table) === null || _a === void 0 ? void 0 : _a.players.length); i++) {
             const currPlayer = (_b = this.table) === null || _b === void 0 ? void 0 : _b.players[i];
             const playerInfo = this.add.text(this.setXPosition(i), i == 0
-                ? this.height - 180
+                ? this.height - 130
                 : i == 1
-                    ? this.height / 2 - 70
+                    ? this.height / 2 - 110
                     : i == 2
                         ? 60
-                        : this.height / 2 + 70, "CHIP: " + String(currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.chips), {
+                        : this.height / 2 + 120, "CHIP: " + String(currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.chips), {
                 style: {
                     fontSize: "50px",
                     color: "#ffffff",
