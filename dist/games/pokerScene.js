@@ -15,14 +15,23 @@ export class PokerView extends BaseScene {
         this.nameInfo = null;
         this.handInfo = null;
         this.potInfo = null;
+        this.turnData = null;
         this.actionButtons = [];
         this.playerhandsImages = [];
         this.playerNameInfo = [];
         this.playerChipsInfo = [];
         this.playerHandInfo = [];
         this.playerBetInfo = [];
+        this.dealerHandInfo = [];
     }
     create(data) {
+        this.actionButtons = [];
+        this.playerhandsImages = [];
+        this.playerNameInfo = [];
+        this.playerChipsInfo = [];
+        this.playerHandInfo = [];
+        this.playerBetInfo = [];
+        this.playerHandInfo = [];
         const { width, height } = this.cameras.main;
         this.width = width;
         this.height = height;
@@ -32,7 +41,8 @@ export class PokerView extends BaseScene {
         this.renderScene();
     }
     renderScene() {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        this.turnInfo();
         this.PotInfo();
         this.playerInfo();
         const turnPlayer = this.table.getTurnPlayer();
@@ -43,13 +53,18 @@ export class PokerView extends BaseScene {
             this.dealInitialHands();
             this.filpCard(0);
         }
-        if (((_d = this.table) === null || _d === void 0 ? void 0 : _d.gamePhase) == "dealer turn") {
-            console.log("ディーラーのターンです。");
-            console.log(this.table.dealer.hand);
+        if (((_d = this.table) === null || _d === void 0 ? void 0 : _d.gamePhase) == "evaluating") {
+            console.log("評価中だよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜評価中だ！");
+            this.claerDealerCard();
+        }
+        if (((_e = this.table) === null || _e === void 0 ? void 0 : _e.gamePhase) == "dealer turn") {
+            console.log("ディーラーのターンですよおおお。");
+            this.setDealerCard();
+            console.log(turnPlayer.name, this.table.dealer.hand);
         }
         switch (turnPlayer.type) {
             case "player":
-                if (((_e = this.table) === null || _e === void 0 ? void 0 : _e.gamePhase) != "blinding") {
+                if (((_f = this.table) === null || _f === void 0 ? void 0 : _f.gamePhase) != "blinding") {
                     if (turnPlayer.gameStatus == "fold" ||
                         turnPlayer.gameStatus == "allin") {
                         console.log("player は allIn or Fold");
@@ -61,9 +76,9 @@ export class PokerView extends BaseScene {
                         break;
                     }
                     if ((beforePlayer === null || beforePlayer === void 0 ? void 0 : beforePlayer.gameStatus) == "check" ||
-                        ((_f = this.table) === null || _f === void 0 ? void 0 : _f.playerIndexCounter) ==
-                            ((_g = this.table) === null || _g === void 0 ? void 0 : _g.dealerIndex) + 1) {
-                        if (turnPlayer.chips < ((_h = this.table) === null || _h === void 0 ? void 0 : _h.betMoney)) {
+                        ((_g = this.table) === null || _g === void 0 ? void 0 : _g.playerIndexCounter) ==
+                            ((_h = this.table) === null || _h === void 0 ? void 0 : _h.dealerIndex) + 1) {
+                        if (turnPlayer.chips < ((_j = this.table) === null || _j === void 0 ? void 0 : _j.betMoney)) {
                             this.createAllInButton(0, 0);
                             this.createCheckButton(0, 0);
                             this.createFoldButton(0, 0);
@@ -76,7 +91,7 @@ export class PokerView extends BaseScene {
                         }
                     }
                     else {
-                        if (turnPlayer.chips < ((_j = this.table) === null || _j === void 0 ? void 0 : _j.betMoney)) {
+                        if (turnPlayer.chips < ((_k = this.table) === null || _k === void 0 ? void 0 : _k.betMoney)) {
                             this.createAllInButton(0, 0);
                             this.createFoldButton(0, 0);
                         }
@@ -102,8 +117,42 @@ export class PokerView extends BaseScene {
         }
         console.log(turnPlayer);
     }
+    claerDealerCard() {
+        this.dealerHandInfo.forEach((hand) => hand.destroy());
+    }
+    setDealerCard() {
+        var _a, _b, _c, _d, _e;
+        if (((_a = this.table) === null || _a === void 0 ? void 0 : _a.turnCounter) == 1) {
+            for (let i = 0; i < ((_b = this.table) === null || _b === void 0 ? void 0 : _b.dealer.hand.length); i++) {
+                const delaerCard = (_c = this.table) === null || _c === void 0 ? void 0 : _c.dealer.hand[i];
+                const dealerHand = this.add.sprite(this.width, 0, `${delaerCard === null || delaerCard === void 0 ? void 0 : delaerCard.rank}${delaerCard === null || delaerCard === void 0 ? void 0 : delaerCard.suit}`);
+                dealerHand.setScale(1.5);
+                this.add.tween({
+                    targets: dealerHand,
+                    x: 320 + i * 100,
+                    y: this.height / 2,
+                    duration: 1000,
+                });
+                this.dealerHandInfo.push(dealerHand);
+            }
+        }
+        else {
+            let i = ((_d = this.table) === null || _d === void 0 ? void 0 : _d.dealer.hand.length) - 1;
+            const delaerCard = (_e = this.table) === null || _e === void 0 ? void 0 : _e.dealer.hand[i];
+            const dealerHand = this.add.sprite(this.width, 0, `${delaerCard === null || delaerCard === void 0 ? void 0 : delaerCard.rank}${delaerCard === null || delaerCard === void 0 ? void 0 : delaerCard.suit}`);
+            dealerHand.setScale(1.5);
+            this.add.tween({
+                targets: dealerHand,
+                x: 320 + i * 100,
+                y: this.height / 2,
+                duration: 1000,
+            });
+            this.dealerHandInfo.push(dealerHand);
+        }
+    }
     dealInitialHands() {
         var _a;
+        console.log("今からプレイヤーにカード配るおおおおお");
         for (let i = 0; i < 2; i++) {
             let targetX = 0;
             let targetY = 0;
@@ -189,6 +238,18 @@ export class PokerView extends BaseScene {
                     ? this.width / 2 + 100
                     : this.width - 150;
     }
+    turnInfo() {
+        var _a, _b;
+        (_a = this.turnData) === null || _a === void 0 ? void 0 : _a.destroy();
+        const turnInfo = this.add.text(990, 40, "turn: " + String((_b = this.table) === null || _b === void 0 ? void 0 : _b.roundCounter), {
+            style: {
+                fontSize: "60px",
+                color: "#ffffff",
+                fontFamily: "pixel",
+            },
+        });
+        this.turnData = turnInfo;
+    }
     PotInfo() {
         var _a, _b;
         (_a = this.potInfo) === null || _a === void 0 ? void 0 : _a.destroy();
@@ -228,13 +289,14 @@ export class PokerView extends BaseScene {
         }
     }
     playerHandText() {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e, _f;
+        console.log("HANDNDDDDD  ", this.playerHandInfo);
         this.playerHandInfo.forEach((hand) => hand.destroy());
         if (((_a = this.table) === null || _a === void 0 ? void 0 : _a.gamePhase) == "evaluating") {
             for (let i = 0; i < ((_b = this.table) === null || _b === void 0 ? void 0 : _b.players.length); i++) {
                 const currPlyer = (_c = this.table) === null || _c === void 0 ? void 0 : _c.players[i];
                 const playerInfo = this.add.text(this.setXPosition(i), i == 0
-                    ? this.height - 40
+                    ? this.height - 110
                     : i == 1
                         ? this.height / 2 - 120
                         : i == 2
@@ -243,10 +305,11 @@ export class PokerView extends BaseScene {
                 this.playerHandInfo.push(playerInfo);
             }
         }
-        else if (((_d = this.table) === null || _d === void 0 ? void 0 : _d.gamePhase) == "betting") {
-            const currPlayer = (_e = this.table) === null || _e === void 0 ? void 0 : _e.players[0];
+        if (((_d = this.table) === null || _d === void 0 ? void 0 : _d.gamePhase) == "betting" ||
+            ((_e = this.table) === null || _e === void 0 ? void 0 : _e.gamePhase) == "dealer turn") {
+            const currPlayer = (_f = this.table) === null || _f === void 0 ? void 0 : _f.players[0];
             const playerInfo = this.add.text(this.setXPosition(0), this.height - 110, "Hand: " + (currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.playerHandStatus));
-            this.playerBetInfo.push(playerInfo);
+            this.playerHandInfo.push(playerInfo);
         }
     }
     playerBetText() {
@@ -290,6 +353,7 @@ export class PokerView extends BaseScene {
             (_a = this.table) === null || _a === void 0 ? void 0 : _a.haveTurn("call");
             this.renderScene();
             this.actionButtons.forEach((button) => button.destroy());
+            this.playerInfo();
         });
         this.actionButtons.push(callButton);
     }
@@ -300,6 +364,7 @@ export class PokerView extends BaseScene {
             (_a = this.table) === null || _a === void 0 ? void 0 : _a.haveTurn("allin");
             this.renderScene();
             this.actionButtons.forEach((button) => button.destroy());
+            this.playerInfo();
         });
         this.actionButtons.push(allInButton);
     }
@@ -310,6 +375,7 @@ export class PokerView extends BaseScene {
             (_a = this.table) === null || _a === void 0 ? void 0 : _a.haveTurn("check");
             this.renderScene();
             this.actionButtons.forEach((button) => button.destroy());
+            this.playerInfo();
         });
         this.actionButtons.push(checkButton);
     }
@@ -320,13 +386,18 @@ export class PokerView extends BaseScene {
             (_a = this.table) === null || _a === void 0 ? void 0 : _a.haveTurn("fold");
             this.renderScene();
             this.actionButtons.forEach((button) => button.destroy());
+            this.playerInfo();
         });
         this.actionButtons.push(foldButton);
     }
     createRaiseButton(x, y) {
         this.raiseButton = new Button(this, 750, 610, "raise", "gray-button", () => {
+            var _a;
             console.log("raise");
+            (_a = this.table) === null || _a === void 0 ? void 0 : _a.haveTurn("raise");
+            this.renderScene();
             this.actionButtons.forEach((button) => button.destroy());
+            this.playerInfo();
         });
         this.actionButtons.push(this.raiseButton);
     }

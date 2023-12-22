@@ -20,7 +20,7 @@ export default abstract class Player {
         name: string,
         type: string,
         gameType: string,
-        chips: number = 100
+        chips: number = 10
     ) {
         this.name = name;
         this.type = type;

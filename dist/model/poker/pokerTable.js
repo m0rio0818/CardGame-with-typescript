@@ -259,8 +259,8 @@ export default class pokerTable extends Table {
             else if (this.turnCounter < 3) {
                 this.dealer.hand.push(this.deck.drawCard());
             }
-            this.turnCounter++;
             console.log("turnCounter !!: ", this.turnCounter);
+            this.turnCounter++;
             if (this.turnCounter == 4) {
                 console.log("最終ラウンドまで来た。");
                 this.gamePhase = "evaluating";
@@ -271,18 +271,18 @@ export default class pokerTable extends Table {
             this.betMoney = this.minbet;
             console.log("ディーラーのhand", this.dealer.hand);
             console.log("次のラウンドの開始person", this.getTurnPlayer().name);
-            this.gamePhase == "evaluating"
-                ? (this.gamePhase = "evaluating")
-                : (this.gamePhase = "betting");
             this.printPlayerStatus();
         }
         else {
+            console.log("PLAYERINDEXCOUNTER ", this.playerIndexCounter, "BETINDEX", this.betIndex, player.gameStatus);
             if (this.onLastPlayer() &&
                 player.gameStatus != "bet" &&
                 player.gameStatus != "blind") {
                 console.log("一周してきました。ディーラーに移行");
                 this.gamePhase = "dealer turn";
+                return;
             }
+            console.log(userData);
             let gameDecision = player.promptPlayer(userData, this.betMoney);
             console.log(gameDecision);
             if (this.gamePhase != "blinding") {
@@ -293,6 +293,7 @@ export default class pokerTable extends Table {
                     console.log("ベットできてません。もう一度選択してください");
                     break;
                 case "blind":
+                    console.log(this.playerIndexCounter, this.dealerIndex);
                     if (this.playerIndexCounter == this.dealerIndex + 1)
                         this.assignPlayerHands();
                     console.log(player.name, "before blind", player);
@@ -363,21 +364,18 @@ export default class pokerTable extends Table {
         }
     }
     haveTurn(userData) {
-        console.log("ゲームフェーズ");
-        if (this.gamePhase == "dealer turn") {
-            console.log("ディーラーターン");
-            this.evaluateMove(this.dealer);
-        }
         let player = this.getTurnPlayer();
         let playerBefore = this.getoneBeforePlayer();
         console.log("currPlayer: ", player.name);
         if (this.allPlayerActionResolved()) {
             this.gamePhase = "dealer turn";
             this.evaluateMove(this.dealer);
+            console.log("this.gamePhase: ", "ディーラーのターンです。", this.gamePhase);
         }
         else {
             if ((playerBefore.gameStatus == "check" ||
-                playerBefore.gameStatus == "bet") &&
+                (this.playerIndexCounter == this.dealerIndex + 1 &&
+                    this.gamePhase != "blinding")) &&
                 (userData == "check" || player.type == "ai")) {
                 this.evaluateMove(player, "check");
             }
@@ -404,11 +402,13 @@ export default class pokerTable extends Table {
                 this.evaluateMove(player, "call");
             }
             else {
-                console.log("userAction: ", userData);
+                console.log("userAction: ", player.type, userData);
                 player.type == "player"
                     ? this.evaluateMove(player, userData)
                     :
-                        this.evaluateMove(player);
+                        this.gamePhase == "betting"
+                            ? this.evaluateMove(player, "bet")
+                            : this.evaluateMove(player);
             }
             this.moveToNextPlayer();
         }
