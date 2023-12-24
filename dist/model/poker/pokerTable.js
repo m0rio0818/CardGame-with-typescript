@@ -371,7 +371,8 @@ export default class pokerTable extends Table {
             this.resultsLog.push(this.evaluateAndGetRoundResults());
             this.clearPlayerHandsAndBets();
             this.roundCounter++;
-            this.gamePhase = "betting";
+            this.gamePhase = "blinding";
+            console.log("ラウンド終了次はblinding", this.gamePhase);
             return;
         }
         let player = this.getTurnPlayer();
