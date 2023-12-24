@@ -23,7 +23,7 @@ export class PokerView extends BaseScene {
     private nameInfo: Text | null = null;
     private handInfo: Text | null = null;
     private potInfo: Text | null = null;
-    private turnData: Text | nulls = null;
+    private turnData: Text | null = null;
 
     // destroyするためのlist
     private actionButtons: Button[] = [];
@@ -66,14 +66,22 @@ export class PokerView extends BaseScene {
             this.playerhandsImages[0] === undefined
         ) {
             this.dealInitialHands();
-            this.filpCard(0);
         }
         if (this.table?.gamePhase == "evaluating") {
-            console.log("評価中だよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜評価中だ！");
-            this.claerDealerCard();
+            setTimeout(() => {
+                this.filpCard();
+                setTimeout(() => {
+                    this.clearAllHand();
+                    this.claerDealerCard();
+                    setTimeout(() => {
+                        this.table?.haveTurn();
+                        this.renderScene();
+                    }, 1000);
+                }, 2000);
+            }, 1000);
+            return;
         }
         if (this.table?.gamePhase == "dealer turn") {
-            console.log("ディーラーのターンですよおおお。");
             this.setDealerCard();
             console.log(turnPlayer.name, this.table.dealer.hand);
         }
@@ -177,7 +185,6 @@ export class PokerView extends BaseScene {
     }
 
     dealInitialHands() {
-        console.log("今からプレイヤーにカード配るおおおおお");
         for (let i = 0; i < 2; i++) {
             let targetX: number = 0;
             let targetY: number = 0;
@@ -187,6 +194,7 @@ export class PokerView extends BaseScene {
 
                 console.log(player.name, playerHand);
                 const card = playerHand[i];
+                console.log("CAAARRRDDDDD", card);
 
                 if (j == 0) {
                     targetX =
@@ -253,12 +261,38 @@ export class PokerView extends BaseScene {
         }
     }
 
-    filpCard(i: number) {
-        let playerHand = this.playerhandsImages[i];
-        for (let i = 0; i < playerHand.length; i++) {
-            const cardImage = playerHand[i];
-            console.log("cardDetail :", playerHand[i]);
+    async filpCard() {
+        for (let i = 1; i < this.table?.players.length!; i++) {
+            let currHand = this.table?.players[i].hand;
+            let currImages = this.playerhandsImages[i];
+            for (let j = 0; j < 2; j++) {
+                let currImage = currImages[j];
+                this.add.tween({
+                    targets: currImages[j],
+                    scaleY: 0,
+                    duration: 500,
+                    ease: "linear",
+                    onComplete: () => {
+                        currImage.setTexture(
+                            `${currHand![j].rank}${currHand![j].suit}`
+                        );
+                        this.add.tween({
+                            targets: currImage,
+                            scaleY: 1,
+                            duration: 500,
+                            ease: "linear",
+                        });
+                    },
+                });
+            }
         }
+    }
+
+    async clearAllHand() {
+        this.playerhandsImages.forEach((player) =>
+            player.forEach((hand) => hand.destroy())
+        );
+        this.playerhandsImages = [];
     }
 
     setXPosition(i: number): number {
@@ -340,7 +374,6 @@ export class PokerView extends BaseScene {
     }
 
     playerHandText() {
-        console.log("HANDNDDDDD  ", this.playerHandInfo);
         this.playerHandInfo.forEach((hand) => hand.destroy());
         if (this.table?.gamePhase == "evaluating") {
             for (let i = 0; i < this.table?.players.length; i++) {

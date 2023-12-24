@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { BaseScene } from "./common/baseScene.js";
 import { Button } from "./common/button.js";
 export class PokerView extends BaseScene {
@@ -51,14 +60,23 @@ export class PokerView extends BaseScene {
         if (((_c = this.table) === null || _c === void 0 ? void 0 : _c.gamePhase) == "betting" &&
             this.playerhandsImages[0] === undefined) {
             this.dealInitialHands();
-            this.filpCard(0);
         }
         if (((_d = this.table) === null || _d === void 0 ? void 0 : _d.gamePhase) == "evaluating") {
-            console.log("評価中だよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜評価中だ！");
-            this.claerDealerCard();
+            setTimeout(() => {
+                this.filpCard();
+                setTimeout(() => {
+                    this.clearAllHand();
+                    this.claerDealerCard();
+                    setTimeout(() => {
+                        var _a;
+                        (_a = this.table) === null || _a === void 0 ? void 0 : _a.haveTurn();
+                        this.renderScene();
+                    }, 1000);
+                }, 2000);
+            }, 1000);
+            return;
         }
         if (((_e = this.table) === null || _e === void 0 ? void 0 : _e.gamePhase) == "dealer turn") {
-            console.log("ディーラーのターンですよおおお。");
             this.setDealerCard();
             console.log(turnPlayer.name, this.table.dealer.hand);
         }
@@ -152,7 +170,6 @@ export class PokerView extends BaseScene {
     }
     dealInitialHands() {
         var _a;
-        console.log("今からプレイヤーにカード配るおおおおお");
         for (let i = 0; i < 2; i++) {
             let targetX = 0;
             let targetY = 0;
@@ -161,6 +178,7 @@ export class PokerView extends BaseScene {
                 const playerHand = player.hand;
                 console.log(player.name, playerHand);
                 const card = playerHand[i];
+                console.log("CAAARRRDDDDD", card);
                 if (j == 0) {
                     targetX =
                         i == 0 ? this.width / 2 - 50 : this.width / 2 + 50;
@@ -222,12 +240,38 @@ export class PokerView extends BaseScene {
             }
         }
     }
-    filpCard(i) {
-        let playerHand = this.playerhandsImages[i];
-        for (let i = 0; i < playerHand.length; i++) {
-            const cardImage = playerHand[i];
-            console.log("cardDetail :", playerHand[i]);
-        }
+    filpCard() {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            for (let i = 1; i < ((_a = this.table) === null || _a === void 0 ? void 0 : _a.players.length); i++) {
+                let currHand = (_b = this.table) === null || _b === void 0 ? void 0 : _b.players[i].hand;
+                let currImages = this.playerhandsImages[i];
+                for (let j = 0; j < 2; j++) {
+                    let currImage = currImages[j];
+                    this.add.tween({
+                        targets: currImages[j],
+                        scaleY: 0,
+                        duration: 500,
+                        ease: "linear",
+                        onComplete: () => {
+                            currImage.setTexture(`${currHand[j].rank}${currHand[j].suit}`);
+                            this.add.tween({
+                                targets: currImage,
+                                scaleY: 1,
+                                duration: 500,
+                                ease: "linear",
+                            });
+                        },
+                    });
+                }
+            }
+        });
+    }
+    clearAllHand() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.playerhandsImages.forEach((player) => player.forEach((hand) => hand.destroy()));
+            this.playerhandsImages = [];
+        });
     }
     setXPosition(i) {
         return i == 0
@@ -290,7 +334,6 @@ export class PokerView extends BaseScene {
     }
     playerHandText() {
         var _a, _b, _c, _d, _e, _f;
-        console.log("HANDNDDDDD  ", this.playerHandInfo);
         this.playerHandInfo.forEach((hand) => hand.destroy());
         if (((_a = this.table) === null || _a === void 0 ? void 0 : _a.gamePhase) == "evaluating") {
             for (let i = 0; i < ((_b = this.table) === null || _b === void 0 ? void 0 : _b.players.length); i++) {

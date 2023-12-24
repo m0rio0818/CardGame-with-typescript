@@ -426,6 +426,7 @@ export default class pokerTable extends Table {
             this.betMoney = this.minbet;
             console.log("ディーラーのhand", this.dealer.hand);
             console.log("次のラウンドの開始person", this.getTurnPlayer().name);
+
             this.printPlayerStatus();
         } else {
             // playerIndexCounter == betIndex : 1周してきた時
@@ -541,6 +542,16 @@ export default class pokerTable extends Table {
 
     // プレイヤーのターンを処理するメソッド.
     haveTurn(userData?: PokerActionType): void {
+        if (this.gamePhase == "dealer turn") this.gamePhase = "betting";
+        else if (this.gamePhase == "evaluating") {
+            console.log("ROUND  OWARI!!!!");
+            this.resultsLog.push(this.evaluateAndGetRoundResults());
+            this.clearPlayerHandsAndBets();
+            this.roundCounter++;
+            this.gamePhase = "betting";
+            return;
+        }
+
         let player = this.getTurnPlayer();
         let playerBefore = this.getoneBeforePlayer();
         // 前のまえのプレイヤーがpassしてたらpass可能
@@ -613,14 +624,6 @@ export default class pokerTable extends Table {
 
             // プレイヤーにカードを配る。
             this.moveToNextPlayer();
-        }
-
-        if (this.gamePhase == "evaluating") {
-            console.log("TURN  OWARI!!!!");
-            this.resultsLog.push(this.evaluateAndGetRoundResults());
-            this.clearPlayerHandsAndBets();
-            this.gamePhase = "blinding";
-            this.roundCounter++;
         }
     }
 

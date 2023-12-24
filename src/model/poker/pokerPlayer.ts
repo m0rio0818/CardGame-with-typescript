@@ -68,8 +68,6 @@ export default class pokerPlayer extends Player {
                     return new pokerGameDecision("allin", this.chips);
                 case "bet":
                     const rand = Math.random();
-                    // if (rand > 0.9) return new pokerGameDecision("fold");
-                    //else
                     if (rand > 0.8)
                         return new pokerGameDecision(
                             "raise",

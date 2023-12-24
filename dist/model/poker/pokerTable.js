@@ -364,6 +364,16 @@ export default class pokerTable extends Table {
         }
     }
     haveTurn(userData) {
+        if (this.gamePhase == "dealer turn")
+            this.gamePhase = "betting";
+        else if (this.gamePhase == "evaluating") {
+            console.log("ROUND  OWARI!!!!");
+            this.resultsLog.push(this.evaluateAndGetRoundResults());
+            this.clearPlayerHandsAndBets();
+            this.roundCounter++;
+            this.gamePhase = "betting";
+            return;
+        }
         let player = this.getTurnPlayer();
         let playerBefore = this.getoneBeforePlayer();
         console.log("currPlayer: ", player.name);
@@ -411,13 +421,6 @@ export default class pokerTable extends Table {
                             : this.evaluateMove(player);
             }
             this.moveToNextPlayer();
-        }
-        if (this.gamePhase == "evaluating") {
-            console.log("TURN  OWARI!!!!");
-            this.resultsLog.push(this.evaluateAndGetRoundResults());
-            this.clearPlayerHandsAndBets();
-            this.gamePhase = "blinding";
-            this.roundCounter++;
         }
     }
     playerActionResolved(player) {
