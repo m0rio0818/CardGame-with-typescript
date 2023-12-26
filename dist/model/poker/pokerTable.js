@@ -348,6 +348,7 @@ export default class pokerTable extends Table {
                     if (player.gameStatus == "allin")
                         break;
                     this.pot += gameDecision.amount;
+                    player.chips -= gameDecision.amount;
                     player.gameStatus = "allin";
                     break;
                 case "check":
@@ -388,6 +389,7 @@ export default class pokerTable extends Table {
                 (this.playerIndexCounter == this.betIndex &&
                     player.gameStatus == "bet") ||
                 userData == "check") {
+                console.log("checkできる!");
                 this.evaluateMove(player, "check");
             }
             else if (player.gameStatus == "fold" ||
@@ -395,11 +397,8 @@ export default class pokerTable extends Table {
                 console.log(player.name + "はこのゲームでは何もできません。");
                 this.evaluateMove(player, player.gameStatus);
             }
-            else if (playerBefore.gameStatus !== "check" &&
-                playerBefore.gameStatus !== "fold" &&
-                userData == "check") {
-                console.log("前のプレイヤーがcheckしてなからcheckできません。");
-                this.evaluateMove(player, "call");
+            else if (player.chips == 0) {
+                this.evaluateMove(player, "fold");
             }
             else if (player.chips < this.betMoney) {
                 console.log(player.name, "の所持金が最小ベット額より少ないです！！", this.betMoney, player.chips);

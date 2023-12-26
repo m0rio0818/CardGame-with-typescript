@@ -82,9 +82,11 @@ export class PokerView extends BaseScene {
         }
         switch (turnPlayer.type) {
             case "player":
+                console.log("PLAYER", turnPlayer.name, "STATUS", turnPlayer.gameStatus);
                 if (((_f = this.table) === null || _f === void 0 ? void 0 : _f.gamePhase) != "blinding") {
                     if (turnPlayer.gameStatus == "fold" ||
-                        turnPlayer.gameStatus == "allin") {
+                        turnPlayer.gameStatus == "allin" ||
+                        turnPlayer.chips == 0) {
                         console.log("player は allIn or Fold");
                         setTimeout(() => {
                             var _a;

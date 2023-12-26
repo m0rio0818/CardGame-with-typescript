@@ -87,10 +87,12 @@ export class PokerView extends BaseScene {
         }
         switch (turnPlayer.type) {
             case "player":
+                console.log("PLAYER", turnPlayer.name,"STATUS", turnPlayer.gameStatus)
                 if (this.table?.gamePhase != "blinding") {
                     if (
                         turnPlayer.gameStatus == "fold" ||
-                        turnPlayer.gameStatus == "allin"
+                        turnPlayer.gameStatus == "allin" || 
+                        turnPlayer.chips == 0
                     ) {
                         // 何もボタンは表示しない.
                         console.log("player は allIn or Fold");
