@@ -24,7 +24,7 @@ export default class pokerPlayer extends Player {
         name: string,
         type: PokerPlayerType,
         gameType: string,
-        chips: number = 10 // getter, setterを後から
+        chips: number = 40 // getter, setterを後から
     ) {
         super(name, type, gameType, chips);
         this.gameStatus = "blind";
@@ -59,11 +59,7 @@ export default class pokerPlayer extends Player {
                 : new pokerGameDecision("blind");
         } else {
             switch (userData) {
-                case "check":
-                    const random = Math.random();
-                    if (random > 0.8)
-                        return new pokerGameDecision("call", betMoney);
-                    else return new pokerGameDecision("check");
+                case "check": return new pokerGameDecision("check");
                 case "fold":
                     return new pokerGameDecision("fold");
                 case "allin":

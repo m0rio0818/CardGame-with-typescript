@@ -214,7 +214,7 @@ export default class pokerTable extends Table {
         }
         else {
             let winnerPlayer = this.players.filter((player) => player.playerHandStatus == heighRole);
-            console.log(winnerPlayer[0].name);
+            console.log(winnerPlayer);
             winnerPlayer[0].chips += this.pot;
             this.pot = 0;
         }
@@ -274,7 +274,7 @@ export default class pokerTable extends Table {
             this.printPlayerStatus();
         }
         else {
-            console.log("PLAYERINDEXCOUNTER ", this.playerIndexCounter, "BETINDEX", this.betIndex, player.name, player.gameStatus);
+            console.log("PLAYERINDEXCOUNTER ", this.playerIndexCounter, "BETINDEX", this.betIndex, player.name, player.gameStatus, player.chips);
             if (this.onLastPlayer() &&
                 player.gameStatus != "bet" &&
                 player.gameStatus != "blind") {
@@ -379,18 +379,23 @@ export default class pokerTable extends Table {
         let player = this.getTurnPlayer();
         let playerBefore = this.getoneBeforePlayer();
         console.log("currPlayer: ", player.name);
+        this.printPlayerStatus();
         if (this.allPlayerActionResolved()) {
             this.gamePhase = "dealer turn";
             this.evaluateMove(this.dealer);
             console.log("this.gamePhase: ", "ディーラーのターンです。", this.gamePhase);
         }
         else {
-            if (playerBefore.gameStatus == "check" ||
-                (this.playerIndexCounter == this.betIndex &&
-                    player.gameStatus == "bet") ||
-                userData == "check") {
-                console.log("checkできる!");
-                this.evaluateMove(player, "check");
+            if ((userData == "check" && player.type == "player") &&
+                (playerBefore.gameStatus == "check" ||
+                    (this.playerIndexCounter == this.betIndex &&
+                        player.gameStatus == "bet")) ||
+                (userData == "check" && player.type == "player")) {
+                console.log(playerBefore.gameStatus, this.playerIndexCounter, this.betIndex, player.gameStatus, "checkできる!");
+                if (userData == "check")
+                    this.evaluateMove(player, "check");
+                else
+                    this.evaluateMove(player, userData);
             }
             else if (player.gameStatus == "fold" ||
                 player.gameStatus == "allin") {
@@ -419,6 +424,7 @@ export default class pokerTable extends Table {
                             ? this.evaluateMove(player, "bet")
                             : this.evaluateMove(player);
             }
+            this.printPlayerStatus();
             this.moveToNextPlayer();
         }
     }

@@ -5,7 +5,6 @@ import {
     PokerActionType,
     PokerHandType,
 } from "../../config/pokerConfig.js";
-import Player from "../common/Player.js";
 import Table from "../common/Table.js";
 import pokerGameDecision from "./pokerGameDecision.js";
 import pokerPlayer from "./pokerPlayer.js";
@@ -358,7 +357,7 @@ export default class pokerTable extends Table {
             let winnerPlayer: pokerPlayer[] = this.players.filter(
                 (player) => player.playerHandStatus == heighRole
             );
-            console.log(winnerPlayer[0].name);
+            console.log(winnerPlayer);
             winnerPlayer[0].chips += this.pot;
             this.pot = 0;
         }
@@ -437,7 +436,8 @@ export default class pokerTable extends Table {
                 "BETINDEX",
                 this.betIndex,
                 player.name,
-                player.gameStatus
+                player.gameStatus,
+                player.chips
             );
             if (
                 this.onLastPlayer() &&
@@ -560,6 +560,7 @@ export default class pokerTable extends Table {
         // 前のまえのプレイヤーがpassしてたらpass可能
         // else bet, raise, dropのみ選択可能。
         console.log("currPlayer: ", player.name);
+        this.printPlayerStatus();
 
         if (this.allPlayerActionResolved()) {
             this.gamePhase = "dealer turn";
@@ -571,15 +572,25 @@ export default class pokerTable extends Table {
             );
         } else {
             // checkできる条件 => 前のプレイヤーがcheck  ||  自分がそのターンの一番はじめ
+            // userDataがcheck　なら　check
+            // userDataがcheckででないならそのまま
             if (
-                playerBefore.gameStatus == "check" ||
+                (userData == "check" && player.type == "player") && 
+                (playerBefore.gameStatus == "check" ||
                 (this.playerIndexCounter == this.betIndex &&
-                    player.gameStatus == "bet" ) ||
-                userData == "check"
+                    player.gameStatus == "bet")) ||
+                (userData == "check" && player.type == "player")
             ) {
                 // checkできる。
-                console.log("checkできる!")
-                this.evaluateMove(player, "check");
+                console.log(
+                    playerBefore.gameStatus,
+                    this.playerIndexCounter,
+                    this.betIndex,
+                    player.gameStatus,
+                    "checkできる!"
+                );
+                if (userData == "check")  this.evaluateMove(player, "check");
+                else this.evaluateMove(player, userData);
             } else if (
                 player.gameStatus == "fold" ||
                 player.gameStatus == "allin"
@@ -587,8 +598,7 @@ export default class pokerTable extends Table {
                 // window.alert(player.name + "はこのゲームでは何もできません。");
                 console.log(player.name + "はこのゲームでは何もできません。");
                 this.evaluateMove(player, player.gameStatus);
-            }
-            else if (player.chips == 0){
+            } else if (player.chips == 0) {
                 this.evaluateMove(player, "fold");
             }
             // 前のプレイヤーがpassしてなかったら、passはできないように実装。
@@ -628,6 +638,7 @@ export default class pokerTable extends Table {
                     : this.evaluateMove(player);
             }
 
+            this.printPlayerStatus();
             // プレイヤーにカードを配る。
             this.moveToNextPlayer();
         }
