@@ -38,7 +38,7 @@ export default class pokerTable extends Table {
         // );
         this.dealerIndex = 0;
         this.playerIndexCounter = this.dealerIndex + 1; // 現在ターンのプレイヤーを返す。
-        this.betIndex = (this.dealerIndex + 2) % this.players.length;
+        this.betIndex = (this.dealerIndex + 2) % this.players.length; //　ラウンド開始時のベットスタートプレイヤー
         this.minbet = 5; // 最小ベット金額
         this.smallBlind = Math.floor(this.minbet / 2);
         this.bigBlind = Math.floor(this.minbet);
@@ -436,6 +436,7 @@ export default class pokerTable extends Table {
                 this.playerIndexCounter,
                 "BETINDEX",
                 this.betIndex,
+                player.name,
                 player.gameStatus
             );
             if (
@@ -448,7 +449,7 @@ export default class pokerTable extends Table {
                 return;
             }
 
-            console.log(userData);
+            console.log("userData", userData);
             let gameDecision: pokerGameDecision = player.promptPlayer(
                 userData!,
                 this.betMoney
@@ -549,7 +550,7 @@ export default class pokerTable extends Table {
             this.clearPlayerHandsAndBets();
             this.roundCounter++;
             this.gamePhase = "blinding";
-            console.log("ラウンド終了次はblinding", this.gamePhase)
+            console.log("ラウンド終了次はblinding", this.gamePhase);
             return;
         }
 
@@ -568,12 +569,12 @@ export default class pokerTable extends Table {
                 this.gamePhase
             );
         } else {
+            // checkできる条件 => 前のプレイヤーがcheck  ||  自分がそのターンの一番はじめ
             if (
-                (playerBefore.gameStatus == "check" ||
-                    (this.playerIndexCounter == this.dealerIndex + 1 &&
-                        this.gamePhase != "blinding")) &&
-                // playerBefore.gameStatus == "bet"
-                (userData == "check" || player.type == "ai")
+                playerBefore.gameStatus == "check" ||
+                (this.playerIndexCounter == this.betIndex &&
+                    player.gameStatus == "bet" ) ||
+                userData == "check"
             ) {
                 // checkできる。
                 this.evaluateMove(player, "check");
@@ -614,7 +615,6 @@ export default class pokerTable extends Table {
                 console.log("強制call");
                 this.evaluateMove(player, "call");
             } else {
-                console.log("userAction: ", player.type, userData);
                 player.type == "player"
                     ? this.evaluateMove(player, userData as PokerActionType)
                     : // ai

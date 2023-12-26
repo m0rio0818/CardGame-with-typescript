@@ -1,5 +1,5 @@
 export default class Player {
-    constructor(name, type, gameType, chips = 10) {
+    constructor(name, type, gameType, chips = 100) {
         this.gameStatus = "";
         this.bet = 0;
         this.winAmount = 0;

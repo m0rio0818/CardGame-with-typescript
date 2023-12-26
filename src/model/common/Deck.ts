@@ -20,7 +20,7 @@ export default class Deck {
 
     generateDeck(): Card[] {
         const suits: string[] = ["H", "D", "C", "S"];
-        const rank: string[] = [
+        const ranks: string[] = [
             "A",
             "2",
             "3",
@@ -40,8 +40,8 @@ export default class Deck {
 
         for (let i = 0; i < suits.length; i++) {
             let currSuit = suits[i];
-            for (let j = 0; j < rank.length; j++) {
-                let currRank = rank[j];
+            for (let j = 0; j < ranks.length; j++) {
+                let currRank = ranks[j];
                 deck.push(new Card(currSuit, currRank));
             }
         }

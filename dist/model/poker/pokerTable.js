@@ -274,7 +274,7 @@ export default class pokerTable extends Table {
             this.printPlayerStatus();
         }
         else {
-            console.log("PLAYERINDEXCOUNTER ", this.playerIndexCounter, "BETINDEX", this.betIndex, player.gameStatus);
+            console.log("PLAYERINDEXCOUNTER ", this.playerIndexCounter, "BETINDEX", this.betIndex, player.name, player.gameStatus);
             if (this.onLastPlayer() &&
                 player.gameStatus != "bet" &&
                 player.gameStatus != "blind") {
@@ -282,7 +282,7 @@ export default class pokerTable extends Table {
                 this.gamePhase = "dealer turn";
                 return;
             }
-            console.log(userData);
+            console.log("userData", userData);
             let gameDecision = player.promptPlayer(userData, this.betMoney);
             console.log(gameDecision);
             if (this.gamePhase != "blinding") {
@@ -384,10 +384,10 @@ export default class pokerTable extends Table {
             console.log("this.gamePhase: ", "ディーラーのターンです。", this.gamePhase);
         }
         else {
-            if ((playerBefore.gameStatus == "check" ||
-                (this.playerIndexCounter == this.dealerIndex + 1 &&
-                    this.gamePhase != "blinding")) &&
-                (userData == "check" || player.type == "ai")) {
+            if (playerBefore.gameStatus == "check" ||
+                (this.playerIndexCounter == this.betIndex &&
+                    player.gameStatus == "bet") ||
+                userData == "check") {
                 this.evaluateMove(player, "check");
             }
             else if (player.gameStatus == "fold" ||
@@ -413,7 +413,6 @@ export default class pokerTable extends Table {
                 this.evaluateMove(player, "call");
             }
             else {
-                console.log("userAction: ", player.type, userData);
                 player.type == "player"
                     ? this.evaluateMove(player, userData)
                     :

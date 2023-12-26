@@ -14,7 +14,7 @@ export default class Deck {
     }
     generateDeck() {
         const suits = ["H", "D", "C", "S"];
-        const rank = [
+        const ranks = [
             "A",
             "2",
             "3",
@@ -32,8 +32,8 @@ export default class Deck {
         let deck = [];
         for (let i = 0; i < suits.length; i++) {
             let currSuit = suits[i];
-            for (let j = 0; j < rank.length; j++) {
-                let currRank = rank[j];
+            for (let j = 0; j < ranks.length; j++) {
+                let currRank = ranks[j];
                 deck.push(new Card(currSuit, currRank));
             }
         }

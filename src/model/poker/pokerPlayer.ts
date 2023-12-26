@@ -6,7 +6,6 @@ import {
     pokerIndexOfNum,
 } from "../../config/pokerConfig.js";
 import Card from "../common/Card.js";
-import GameDecision from "../common/GameDecision.js";
 import Player from "../common/Player.js";
 import pokerGameDecision from "./pokerGameDecision.js";
 import pokerTable from "./pokerTable.js";
@@ -61,19 +60,23 @@ export default class pokerPlayer extends Player {
         } else {
             switch (userData) {
                 case "check":
-                    return new pokerGameDecision("check");
+                    const random = Math.random();
+                    if (random > 0.8)
+                        return new pokerGameDecision("call", betMoney);
+                    else return new pokerGameDecision("check");
                 case "fold":
                     return new pokerGameDecision("fold");
                 case "allin":
                     return new pokerGameDecision("allin", this.chips);
                 case "bet":
-                    const rand = Math.random();
-                    if (rand > 0.8)
-                        return new pokerGameDecision(
-                            "raise",
-                            (betMoney as number) * 2
-                        );
-                    else return new pokerGameDecision("call", betMoney);
+                    // const rand = Math.random();
+                    // if (rand > 0.8)
+                    //     return new pokerGameDecision(
+                    //         "raise",
+                    //         (betMoney as number) * 2
+                    //     );
+                    // else 
+                    return new pokerGameDecision("call", betMoney);
                 default:
                     return new pokerGameDecision("blind", betMoney);
             }
