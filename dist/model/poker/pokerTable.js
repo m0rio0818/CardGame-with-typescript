@@ -19,6 +19,7 @@ export default class pokerTable extends Table {
         this.smallBlind = Math.floor(this.minbet / 2);
         this.bigBlind = Math.floor(this.minbet);
         this.betMoney = this.minbet;
+        this.blindCounter = 0;
         this.pot = 0;
         this.maxTurn = maxTurn;
     }
@@ -45,6 +46,7 @@ export default class pokerTable extends Table {
             player.pairsOfTwoList = [];
         }
         this.dealer.hand = [];
+        this.blindCounter = 0;
         this.pot = 0;
         this.turnCounter = 0;
     }
@@ -214,7 +216,7 @@ export default class pokerTable extends Table {
         }
         else {
             let winnerPlayer = this.players.filter((player) => player.playerHandStatus == heighRole);
-            console.log(winnerPlayer[0].name);
+            console.log(winnerPlayer);
             winnerPlayer[0].chips += this.pot;
             this.pot = 0;
         }
@@ -259,8 +261,8 @@ export default class pokerTable extends Table {
             else if (this.turnCounter < 3) {
                 this.dealer.hand.push(this.deck.drawCard());
             }
-            this.turnCounter++;
             console.log("turnCounter !!: ", this.turnCounter);
+            this.turnCounter++;
             if (this.turnCounter == 4) {
                 console.log("最終ラウンドまで来た。");
                 this.gamePhase = "evaluating";
@@ -271,18 +273,18 @@ export default class pokerTable extends Table {
             this.betMoney = this.minbet;
             console.log("ディーラーのhand", this.dealer.hand);
             console.log("次のラウンドの開始person", this.getTurnPlayer().name);
-            this.gamePhase == "evaluating"
-                ? (this.gamePhase = "evaluating")
-                : (this.gamePhase = "betting");
             this.printPlayerStatus();
         }
         else {
+            console.log("PLAYERINDEXCOUNTER ", this.playerIndexCounter, "BETINDEX", this.betIndex, player.name, player.gameStatus, player.chips);
             if (this.onLastPlayer() &&
                 player.gameStatus != "bet" &&
                 player.gameStatus != "blind") {
                 console.log("一周してきました。ディーラーに移行");
                 this.gamePhase = "dealer turn";
+                return;
             }
+            console.log("userData", userData);
             let gameDecision = player.promptPlayer(userData, this.betMoney);
             console.log(gameDecision);
             if (this.gamePhase != "blinding") {
@@ -293,21 +295,24 @@ export default class pokerTable extends Table {
                     console.log("ベットできてません。もう一度選択してください");
                     break;
                 case "blind":
+                    console.log(this.playerIndexCounter, this.dealerIndex);
                     if (this.playerIndexCounter == this.dealerIndex + 1)
                         this.assignPlayerHands();
                     console.log(player.name, "before blind", player);
                     player.bet =
-                        this.playerIndexCounter == this.dealerIndex + 1
+                        this.blindCounter == 0
                             ? this.smallBlind
                             : this.bigBlind;
+                    this.blindCounter++;
                     console.log("player Blind bet money", player.bet);
                     player.chips -= player.bet;
                     this.pot += player.bet;
                     player.gameStatus = "bet";
                     console.log(player.name, "after blind", player);
-                    if (this.playerIndexCounter == this.dealerIndex + 2) {
+                    if (this.blindCounter == 2) {
                         this.gamePhase = "betting";
                         this.changePlayerStatusToBet();
+                        this.blindCounter = 0;
                     }
                     break;
                 case "call":
@@ -347,6 +352,7 @@ export default class pokerTable extends Table {
                     if (player.gameStatus == "allin")
                         break;
                     this.pot += gameDecision.amount;
+                    player.chips -= gameDecision.amount;
                     player.gameStatus = "allin";
                     break;
                 case "check":
@@ -363,34 +369,46 @@ export default class pokerTable extends Table {
         }
     }
     haveTurn(userData) {
-        console.log("ゲームフェーズ");
-        if (this.gamePhase == "dealer turn") {
-            console.log("ディーラーターン");
-            this.evaluateMove(this.dealer);
+        if (this.gamePhase == "dealer turn")
+            this.gamePhase = "betting";
+        else if (this.gamePhase == "evaluating") {
+            console.log("ROUND  OWARI!!!!");
+            this.resultsLog.push(this.evaluateAndGetRoundResults());
+            this.clearPlayerHandsAndBets();
+            this.roundCounter++;
+            this.gamePhase = "blinding";
+            console.log("ラウンド終了次はblinding", this.gamePhase);
+            return;
         }
         let player = this.getTurnPlayer();
         let playerBefore = this.getoneBeforePlayer();
         console.log("currPlayer: ", player.name);
+        this.printPlayerStatus();
         if (this.allPlayerActionResolved()) {
             this.gamePhase = "dealer turn";
             this.evaluateMove(this.dealer);
+            console.log("this.gamePhase: ", "ディーラーのターンです。", this.gamePhase);
         }
         else {
-            if ((playerBefore.gameStatus == "check" ||
-                playerBefore.gameStatus == "bet") &&
-                (userData == "check" || player.type == "ai")) {
-                this.evaluateMove(player, "check");
+            if ((userData == "check" &&
+                player.type == "player" &&
+                (playerBefore.gameStatus == "check" ||
+                    (this.playerIndexCounter == this.betIndex &&
+                        player.gameStatus == "bet"))) ||
+                (userData == "check" && player.type == "player")) {
+                console.log(playerBefore.gameStatus, this.playerIndexCounter, this.betIndex, player.gameStatus, "checkできる!");
+                if (userData == "check")
+                    this.evaluateMove(player, "check");
+                else
+                    this.evaluateMove(player, userData);
             }
             else if (player.gameStatus == "fold" ||
                 player.gameStatus == "allin") {
                 console.log(player.name + "はこのゲームでは何もできません。");
                 this.evaluateMove(player, player.gameStatus);
             }
-            else if (playerBefore.gameStatus !== "check" &&
-                playerBefore.gameStatus !== "fold" &&
-                userData == "check") {
-                console.log("前のプレイヤーがcheckしてなからcheckできません。");
-                this.evaluateMove(player, "call");
+            else if (player.chips == 0) {
+                this.evaluateMove(player, "fold");
             }
             else if (player.chips < this.betMoney) {
                 console.log(player.name, "の所持金が最小ベット額より少ないです！！", this.betMoney, player.chips);
@@ -404,20 +422,16 @@ export default class pokerTable extends Table {
                 this.evaluateMove(player, "call");
             }
             else {
-                console.log("userAction: ", userData);
                 player.type == "player"
                     ? this.evaluateMove(player, userData)
                     :
-                        this.evaluateMove(player);
+                        this.gamePhase == "betting"
+                            ? this.evaluateMove(player, "bet")
+                            : this.evaluateMove(player);
             }
+            console.log("after action...");
+            this.printPlayerStatus();
             this.moveToNextPlayer();
-        }
-        if (this.gamePhase == "evaluating") {
-            console.log("TURN  OWARI!!!!");
-            this.resultsLog.push(this.evaluateAndGetRoundResults());
-            this.clearPlayerHandsAndBets();
-            this.gamePhase = "blinding";
-            this.roundCounter++;
         }
     }
     playerActionResolved(player) {

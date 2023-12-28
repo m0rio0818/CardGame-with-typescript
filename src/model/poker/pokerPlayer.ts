@@ -6,7 +6,6 @@ import {
     pokerIndexOfNum,
 } from "../../config/pokerConfig.js";
 import Card from "../common/Card.js";
-import GameDecision from "../common/GameDecision.js";
 import Player from "../common/Player.js";
 import pokerGameDecision from "./pokerGameDecision.js";
 import pokerTable from "./pokerTable.js";
@@ -25,7 +24,7 @@ export default class pokerPlayer extends Player {
         name: string,
         type: PokerPlayerType,
         gameType: string,
-        chips: number = 100 // getter, setterを後から
+        chips: number = 40 // getter, setterを後から
     ) {
         super(name, type, gameType, chips);
         this.gameStatus = "blind";
@@ -59,26 +58,23 @@ export default class pokerPlayer extends Player {
                 ? new pokerGameDecision("fold")
                 : new pokerGameDecision("blind");
         } else {
-            // aiの実装
-            switch (this.gameStatus) {
-                case "blind":
-                    return new pokerGameDecision("blind", betMoney);
-                case "check":
-                    return new pokerGameDecision("check");
+            switch (userData) {
+                case "check": return new pokerGameDecision("check");
                 case "fold":
                     return new pokerGameDecision("fold");
                 case "allin":
                     return new pokerGameDecision("allin", this.chips);
+                case "bet":
+                    // const rand = Math.random();
+                    // if (rand > 0.8)
+                    //     return new pokerGameDecision(
+                    //         "raise",
+                    //         (betMoney as number) * 2
+                    //     );
+                    // else 
+                    return new pokerGameDecision("call", betMoney);
                 default:
-                    const rand = Math.random();
-                    // if (rand > 0.9) return new pokerGameDecision("fold");
-                    //else
-                    if (rand > 0.8)
-                        return new pokerGameDecision(
-                            "raise",
-                            (betMoney as number) * 2
-                        );
-                    else return new pokerGameDecision("call", betMoney);
+                    return new pokerGameDecision("blind", betMoney);
             }
         }
     }
