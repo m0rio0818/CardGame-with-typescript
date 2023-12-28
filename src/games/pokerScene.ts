@@ -99,7 +99,7 @@ export class PokerView extends BaseScene {
                     setTimeout(() => {
                         this.table?.haveTurn();
                         this.renderScene();
-                    }, 1000);
+                    }, 500);
                     break;
                 }
                 if (this.table?.gamePhase != "blinding") {
