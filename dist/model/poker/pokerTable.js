@@ -424,6 +424,7 @@ export default class pokerTable extends Table {
                             ? this.evaluateMove(player, "bet")
                             : this.evaluateMove(player);
             }
+            console.log("after action...");
             this.printPlayerStatus();
             this.moveToNextPlayer();
         }

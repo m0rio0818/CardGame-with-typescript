@@ -24,6 +24,7 @@ export class PokerView extends BaseScene {
     private handInfo: Text | null = null;
     private potInfo: Text | null = null;
     private turnData: Text | null = null;
+    private currBetInfo: Text | null = null;
 
     // destroyするためのlist
     private actionButtons: Button[] = [];
@@ -58,6 +59,7 @@ export class PokerView extends BaseScene {
         this.turnInfo();
         this.PotInfo();
         this.playerInfo();
+        this.BetInfo();
         const turnPlayer = this.table!.getTurnPlayer();
         const beforePlayer = this.table?.getoneBeforePlayer();
         console.log("THIS.TABLE.PHASE", this.table?.gamePhase);
@@ -87,11 +89,23 @@ export class PokerView extends BaseScene {
         }
         switch (turnPlayer.type) {
             case "player":
-                console.log("PLAYER", turnPlayer.name,"STATUS", turnPlayer.gameStatus)
+                console.log(
+                    "PLAYER",
+                    turnPlayer.name,
+                    "STATUS",
+                    turnPlayer.gameStatus
+                );
+                if (this.table!.allPlayerActionResolved()){
+                    setTimeout(() => {
+                        this.table?.haveTurn();
+                        this.renderScene();
+                    }, 1000);
+                    break;
+                }
                 if (this.table?.gamePhase != "blinding") {
                     if (
                         turnPlayer.gameStatus == "fold" ||
-                        turnPlayer.gameStatus == "allin" || 
+                        turnPlayer.gameStatus == "allin" ||
                         turnPlayer.chips == 0
                     ) {
                         // 何もボタンは表示しない.
@@ -141,6 +155,14 @@ export class PokerView extends BaseScene {
                 break;
         }
         console.log(turnPlayer);
+    }
+
+
+    allPlayerActionResolved(): boolean {
+        for (let player of this.table?.players!) {
+            if (!this.table?.playerActionResolved(player)) return false;
+        }
+        return true;
     }
 
     claerDealerCard() {
@@ -311,7 +333,7 @@ export class PokerView extends BaseScene {
         this.turnData?.destroy();
         const turnInfo = this.add.text(
             990,
-            40,
+            50,
             "turn: " + String(this.table?.roundCounter!),
             {
                 style: {
@@ -328,7 +350,7 @@ export class PokerView extends BaseScene {
         this.potInfo?.destroy();
         const potInfo = this.add.text(
             990,
-            30,
+            35,
             "Pot : " + String(this.table?.pot!),
             {
                 style: {
@@ -339,6 +361,23 @@ export class PokerView extends BaseScene {
             }
         );
         this.potInfo = potInfo;
+    }
+
+    BetInfo() {
+        this.currBetInfo?.destroy();
+        const betInfo = this.add.text(
+            990,
+            70,
+            "Bet: " + String(this.table?.betMoney),
+            {
+                style: {
+                    fontSize: "60px",
+                    color: "#ffffff",
+                    fontFamily: "pixel",
+                },
+            }
+        );
+        this.currBetInfo = betInfo;
     }
 
     playerInfo() {

@@ -561,6 +561,7 @@ export default class pokerTable extends Table {
         // else bet, raise, dropのみ選択可能。
         console.log("currPlayer: ", player.name);
         this.printPlayerStatus();
+        
 
         if (this.allPlayerActionResolved()) {
             this.gamePhase = "dealer turn";
@@ -637,7 +638,7 @@ export default class pokerTable extends Table {
                     ? this.evaluateMove(player, "bet")
                     : this.evaluateMove(player);
             }
-
+            console.log("after action...")
             this.printPlayerStatus();
             // プレイヤーにカードを配る。
             this.moveToNextPlayer();

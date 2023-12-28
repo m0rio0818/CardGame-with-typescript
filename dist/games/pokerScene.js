@@ -25,6 +25,7 @@ export class PokerView extends BaseScene {
         this.handInfo = null;
         this.potInfo = null;
         this.turnData = null;
+        this.currBetInfo = null;
         this.actionButtons = [];
         this.playerhandsImages = [];
         this.playerNameInfo = [];
@@ -54,6 +55,7 @@ export class PokerView extends BaseScene {
         this.turnInfo();
         this.PotInfo();
         this.playerInfo();
+        this.BetInfo();
         const turnPlayer = this.table.getTurnPlayer();
         const beforePlayer = (_a = this.table) === null || _a === void 0 ? void 0 : _a.getoneBeforePlayer();
         console.log("THIS.TABLE.PHASE", (_b = this.table) === null || _b === void 0 ? void 0 : _b.gamePhase);
@@ -83,6 +85,14 @@ export class PokerView extends BaseScene {
         switch (turnPlayer.type) {
             case "player":
                 console.log("PLAYER", turnPlayer.name, "STATUS", turnPlayer.gameStatus);
+                if (this.table.allPlayerActionResolved()) {
+                    setTimeout(() => {
+                        var _a;
+                        (_a = this.table) === null || _a === void 0 ? void 0 : _a.haveTurn();
+                        this.renderScene();
+                    }, 1000);
+                    break;
+                }
                 if (((_f = this.table) === null || _f === void 0 ? void 0 : _f.gamePhase) != "blinding") {
                     if (turnPlayer.gameStatus == "fold" ||
                         turnPlayer.gameStatus == "allin" ||
@@ -136,6 +146,14 @@ export class PokerView extends BaseScene {
                 break;
         }
         console.log(turnPlayer);
+    }
+    allPlayerActionResolved() {
+        var _a, _b;
+        for (let player of (_a = this.table) === null || _a === void 0 ? void 0 : _a.players) {
+            if (!((_b = this.table) === null || _b === void 0 ? void 0 : _b.playerActionResolved(player)))
+                return false;
+        }
+        return true;
     }
     claerDealerCard() {
         this.dealerHandInfo.forEach((hand) => hand.destroy());
@@ -287,7 +305,7 @@ export class PokerView extends BaseScene {
     turnInfo() {
         var _a, _b;
         (_a = this.turnData) === null || _a === void 0 ? void 0 : _a.destroy();
-        const turnInfo = this.add.text(990, 40, "turn: " + String((_b = this.table) === null || _b === void 0 ? void 0 : _b.roundCounter), {
+        const turnInfo = this.add.text(990, 50, "turn: " + String((_b = this.table) === null || _b === void 0 ? void 0 : _b.roundCounter), {
             style: {
                 fontSize: "60px",
                 color: "#ffffff",
@@ -299,7 +317,7 @@ export class PokerView extends BaseScene {
     PotInfo() {
         var _a, _b;
         (_a = this.potInfo) === null || _a === void 0 ? void 0 : _a.destroy();
-        const potInfo = this.add.text(990, 30, "Pot : " + String((_b = this.table) === null || _b === void 0 ? void 0 : _b.pot), {
+        const potInfo = this.add.text(990, 35, "Pot : " + String((_b = this.table) === null || _b === void 0 ? void 0 : _b.pot), {
             style: {
                 fontSize: "60px",
                 color: "#ffffff",
@@ -307,6 +325,18 @@ export class PokerView extends BaseScene {
             },
         });
         this.potInfo = potInfo;
+    }
+    BetInfo() {
+        var _a, _b;
+        (_a = this.currBetInfo) === null || _a === void 0 ? void 0 : _a.destroy();
+        const betInfo = this.add.text(990, 70, "Bet: " + String((_b = this.table) === null || _b === void 0 ? void 0 : _b.betMoney), {
+            style: {
+                fontSize: "60px",
+                color: "#ffffff",
+                fontFamily: "pixel",
+            },
+        });
+        this.currBetInfo = betInfo;
     }
     playerInfo() {
         this.playerNameText();
