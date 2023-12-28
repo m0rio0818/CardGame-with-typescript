@@ -121,7 +121,7 @@ export class PokerView extends BaseScene {
                         this.table?.playerIndexCounter ==
                             this.table?.dealerIndex! + 1
                     ) {
-                        if (turnPlayer.chips < this.table?.betMoney!) {
+                        if (turnPlayer.chips <= this.table?.betMoney!) {
                             this.createAllInButton(0, 0);
                             this.createCheckButton(0, 0);
                             this.createFoldButton(0, 0);
@@ -133,7 +133,7 @@ export class PokerView extends BaseScene {
                             this.createFoldButton(0, 0);
                         }
                     } else {
-                        if (turnPlayer.chips < this.table?.betMoney!) {
+                        if (turnPlayer.chips <= this.table?.betMoney!) {
                             this.createAllInButton(0, 0);
                             this.createFoldButton(0, 0);
                         } else {

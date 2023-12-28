@@ -20,6 +20,7 @@ export default class pokerTable extends Table {
     betIndex: number; // betStartIndex;
     smallBlind: number;
     bigBlind: number;
+    blindCounter: number; // ブラインドベットした人数を記録(foldした場合を考慮する。(dealerIndex + 2は不可))
     pot: number;
     players: pokerPlayer[];
     constructor(gameType: string, maxTurn: number) {
@@ -42,6 +43,7 @@ export default class pokerTable extends Table {
         this.smallBlind = Math.floor(this.minbet / 2);
         this.bigBlind = Math.floor(this.minbet);
         this.betMoney = this.minbet; //　ベットしないといけない金額
+        this.blindCounter = 0;
         this.pot = 0; // potに溜まった金額
         this.maxTurn = maxTurn;
     }
@@ -71,6 +73,7 @@ export default class pokerTable extends Table {
             player.pairsOfTwoList = [];
         }
         this.dealer.hand = [];
+        this.blindCounter = 0;
         this.pot = 0;
         this.turnCounter = 0;
     }
@@ -470,19 +473,26 @@ export default class pokerTable extends Table {
                         this.assignPlayerHands();
                     //　ブラインドベットをする。
                     console.log(player.name, "before blind", player);
+                    // player.bet =
+                    //     this.playerIndexCounter == this.dealerIndex + 1
+                    //         ? this.smallBlind
+                    //         : this.bigBlind;
                     player.bet =
-                        this.playerIndexCounter == this.dealerIndex + 1
+                        this.blindCounter == 0
                             ? this.smallBlind
                             : this.bigBlind;
+                    this.blindCounter++;
                     console.log("player Blind bet money", player.bet);
                     player.chips -= player.bet;
                     this.pot += player.bet;
                     player.gameStatus = "bet";
                     console.log(player.name, "after blind", player);
                     // ブラインド終了後に、全プレイヤーをbet状態にする。
-                    if (this.playerIndexCounter == this.dealerIndex + 2) {
+                    // if (this.playerIndexCounter == this.dealerIndex + 2) {
+                    if (this.blindCounter == 2) {
                         this.gamePhase = "betting";
                         this.changePlayerStatusToBet();
+                        this.blindCounter = 0;
                     }
                     break;
                 case "call":
@@ -561,7 +571,6 @@ export default class pokerTable extends Table {
         // else bet, raise, dropのみ選択可能。
         console.log("currPlayer: ", player.name);
         this.printPlayerStatus();
-        
 
         if (this.allPlayerActionResolved()) {
             this.gamePhase = "dealer turn";
@@ -576,10 +585,11 @@ export default class pokerTable extends Table {
             // userDataがcheck　なら　check
             // userDataがcheckででないならそのまま
             if (
-                (userData == "check" && player.type == "player") && 
-                (playerBefore.gameStatus == "check" ||
-                (this.playerIndexCounter == this.betIndex &&
-                    player.gameStatus == "bet")) ||
+                (userData == "check" &&
+                    player.type == "player" &&
+                    (playerBefore.gameStatus == "check" ||
+                        (this.playerIndexCounter == this.betIndex &&
+                            player.gameStatus == "bet"))) ||
                 (userData == "check" && player.type == "player")
             ) {
                 // checkできる。
@@ -590,7 +600,7 @@ export default class pokerTable extends Table {
                     player.gameStatus,
                     "checkできる!"
                 );
-                if (userData == "check")  this.evaluateMove(player, "check");
+                if (userData == "check") this.evaluateMove(player, "check");
                 else this.evaluateMove(player, userData);
             } else if (
                 player.gameStatus == "fold" ||
@@ -638,7 +648,7 @@ export default class pokerTable extends Table {
                     ? this.evaluateMove(player, "bet")
                     : this.evaluateMove(player);
             }
-            console.log("after action...")
+            console.log("after action...");
             this.printPlayerStatus();
             // プレイヤーにカードを配る。
             this.moveToNextPlayer();

@@ -19,6 +19,7 @@ export default class pokerTable extends Table {
         this.smallBlind = Math.floor(this.minbet / 2);
         this.bigBlind = Math.floor(this.minbet);
         this.betMoney = this.minbet;
+        this.blindCounter = 0;
         this.pot = 0;
         this.maxTurn = maxTurn;
     }
@@ -45,6 +46,7 @@ export default class pokerTable extends Table {
             player.pairsOfTwoList = [];
         }
         this.dealer.hand = [];
+        this.blindCounter = 0;
         this.pot = 0;
         this.turnCounter = 0;
     }
@@ -298,17 +300,19 @@ export default class pokerTable extends Table {
                         this.assignPlayerHands();
                     console.log(player.name, "before blind", player);
                     player.bet =
-                        this.playerIndexCounter == this.dealerIndex + 1
+                        this.blindCounter == 0
                             ? this.smallBlind
                             : this.bigBlind;
+                    this.blindCounter++;
                     console.log("player Blind bet money", player.bet);
                     player.chips -= player.bet;
                     this.pot += player.bet;
                     player.gameStatus = "bet";
                     console.log(player.name, "after blind", player);
-                    if (this.playerIndexCounter == this.dealerIndex + 2) {
+                    if (this.blindCounter == 2) {
                         this.gamePhase = "betting";
                         this.changePlayerStatusToBet();
+                        this.blindCounter = 0;
                     }
                     break;
                 case "call":
@@ -386,10 +390,11 @@ export default class pokerTable extends Table {
             console.log("this.gamePhase: ", "ディーラーのターンです。", this.gamePhase);
         }
         else {
-            if ((userData == "check" && player.type == "player") &&
+            if ((userData == "check" &&
+                player.type == "player" &&
                 (playerBefore.gameStatus == "check" ||
                     (this.playerIndexCounter == this.betIndex &&
-                        player.gameStatus == "bet")) ||
+                        player.gameStatus == "bet"))) ||
                 (userData == "check" && player.type == "player")) {
                 console.log(playerBefore.gameStatus, this.playerIndexCounter, this.betIndex, player.gameStatus, "checkできる!");
                 if (userData == "check")
