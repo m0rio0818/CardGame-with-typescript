@@ -624,7 +624,7 @@ export default class pokerTable extends Table {
             // }
             // playerの所持金が現在のベット金額より小さかったら allin
             // callの場合
-            else if (player.chips < this.betMoney) {
+            else if (player.chips < this.betMoney && player.chips > 0) {
                 console.log(
                     player.name,
                     "の所持金が最小ベット額より少ないです！！",
