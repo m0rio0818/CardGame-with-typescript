@@ -376,6 +376,7 @@ export default class pokerTable extends Table {
             this.resultsLog.push(this.evaluateAndGetRoundResults());
             this.clearPlayerHandsAndBets();
             this.roundCounter++;
+            this.moveToNextDealer();
             this.gamePhase = "blinding";
             console.log("ラウンド終了次はblinding", this.gamePhase);
             return;
@@ -455,6 +456,10 @@ export default class pokerTable extends Table {
     }
     onLastPlayer() {
         return this.playerIndexCounter == this.betIndex;
+    }
+    moveToNextDealer() {
+        this.dealerIndex++;
+        this.dealerIndex %= this.players.length;
     }
     moveToNextPlayer() {
         this.playerIndexCounter++;

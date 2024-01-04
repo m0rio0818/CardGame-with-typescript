@@ -34,6 +34,7 @@ export class PokerView extends BaseScene {
     private playerHandInfo: Text[] = [];
     private playerBetInfo: Text[] = [];
     private dealerHandInfo: Sprite[] = [];
+    private dealerCoinInfo: Sprite[] = [];
 
     create(data: any) {
         // reset all the scene
@@ -44,6 +45,7 @@ export class PokerView extends BaseScene {
         this.playerHandInfo = [];
         this.playerBetInfo = [];
         this.playerHandInfo = [];
+        this.dealerCoinInfo = [];
 
         const { width, height } = this.cameras.main;
         this.width = width;
@@ -54,22 +56,24 @@ export class PokerView extends BaseScene {
         setTimeout(() => {
             this.renderScene();
             setTimeout(() => {
-                this.putDealerCoin();
-                setTimeout(() => {
-                    this.playerGetCard();
-                }, 1000);
+                this.playerGetCard();
             }, 1000);
         }, 1000);
     }
 
     renderScene() {
+        this.playerInfo();
         this.turnInfo();
         this.PotInfo();
-        this.playerInfo();
         this.BetInfo();
+        setTimeout(() => {
+            this.putDealerCoin();
+            console.log("ディーラーコインを初期配置します。");
+        }, 300);
         const turnPlayer = this.table!.getTurnPlayer();
         const beforePlayer = this.table?.getoneBeforePlayer();
         console.log("THIS.TABLE.PHASE", this.table?.gamePhase);
+        console.log("現在のdelarIndx", this.table?.dealerIndex);
         if (
             this.table?.gamePhase == "betting" &&
             this.playerhandsImages[0] === undefined
@@ -82,6 +86,7 @@ export class PokerView extends BaseScene {
                 setTimeout(() => {
                     this.clearAllHand();
                     this.clearDealerCard();
+                    this.clearDealrCoin();
                     setTimeout(() => {
                         this.table?.haveTurn();
                         this.renderScene();
@@ -92,7 +97,11 @@ export class PokerView extends BaseScene {
         }
         if (this.table?.gamePhase == "dealer turn") {
             this.setDealerCard();
-            console.log(turnPlayer.name, this.table.dealer.hand);
+            console.log(
+                "ディーラーきた",
+                turnPlayer.name,
+                this.table.dealer.hand
+            );
         }
         switch (turnPlayer.type) {
             case "player":
@@ -120,7 +129,7 @@ export class PokerView extends BaseScene {
                         setTimeout(() => {
                             this.table?.haveTurn();
                             this.renderScene();
-                        }, 1000);
+                        }, 500);
                         break;
                     }
                     if (
@@ -172,6 +181,7 @@ export class PokerView extends BaseScene {
                 "orange-button"
             );
             dealerCoin.setOrigin(0.5, 0.5);
+            this.dealerCoinInfo.push(dealerCoin);
         } else if (this.table?.dealerIndex == 1) {
             const dealerCoin = this.add.sprite(
                 this.setXPosition(1) + 120,
@@ -179,6 +189,7 @@ export class PokerView extends BaseScene {
                 "orange-button"
             );
             dealerCoin.setOrigin(0.5, 0.5);
+            this.dealerCoinInfo.push(dealerCoin);
         } else if (this.table?.dealerIndex == 2) {
             const dealerCoin = this.add.sprite(
                 this.setXPosition(2) + 30,
@@ -186,6 +197,7 @@ export class PokerView extends BaseScene {
                 "orange-button"
             );
             dealerCoin.setOrigin(0.5, 0.5);
+            this.dealerCoinInfo.push(dealerCoin);
         } else {
             const dealerCoin = this.add.sprite(
                 this.setXPosition(3) - 45,
@@ -194,6 +206,7 @@ export class PokerView extends BaseScene {
             );
 
             dealerCoin.setOrigin(0.5, 0.5);
+            this.dealerCoinInfo.push(dealerCoin);
         }
     }
 
@@ -206,6 +219,10 @@ export class PokerView extends BaseScene {
 
     clearDealerCard() {
         this.dealerHandInfo.forEach((hand) => hand.destroy());
+    }
+
+    clearDealrCoin() {
+        this.dealerCoinInfo.forEach((hand) => hand.destroy());
     }
 
     setDealerCard() {
@@ -416,9 +433,11 @@ export class PokerView extends BaseScene {
     playerInfo() {
         this.playerNameText();
         this.playerChipText();
-        setTimeout(() => {
-            this.playerHandText();
-        }, 4000);
+        if (this.table?.gamePhase != "blinding") {
+            setTimeout(() => {
+                this.playerHandText();
+            }, 4000);
+        } else this.playerHandText();
     }
 
     playerNameText() {
@@ -432,7 +451,7 @@ export class PokerView extends BaseScene {
                 i == 0
                     ? this.height - 150
                     : i == 1
-                    ? this.height / 2 - 140
+                    ? this.height / 2 - 160
                     : i == 2
                     ? 40
                     : this.height / 2 + 100,
@@ -443,7 +462,11 @@ export class PokerView extends BaseScene {
                     fontFamily: "pixel",
                 }
             );
-            if (this.table?.playerIndexCounter == i) {
+            if (
+                this.table?.playerIndexCounter == i &&
+                (currPlayer?.gameStatus == "bet" ||
+                    currPlayer?.gameStatus == "blind")
+            ) {
                 playerInfo.setFont("bold 17px pixel");
                 playerInfo.setColor("#ffd700");
             }
@@ -455,24 +478,28 @@ export class PokerView extends BaseScene {
         this.playerHandInfo.forEach((hand) => hand.destroy());
         if (this.table?.gamePhase == "evaluating") {
             for (let i = 0; i < this.table?.players.length; i++) {
-                const currPlyer = this.table?.players[i];
+                const currPlayer = this.table?.players[i];
                 const playerInfo = this.add.text(
                     this.setXPosition(i),
                     i == 0
                         ? this.height - 110
                         : i == 1
-                        ? this.height / 2 - 120
+                        ? this.height / 2 - 110
                         : i == 2
                         ? 80
                         : this.height / 2 + 150,
-                    "Hand: " + currPlyer?.playerHandStatus,
+                    "Hand: " + currPlayer?.playerHandStatus,
                     {
                         fontSize: "15px",
                         color: "#ffffff",
                         fontFamily: "pixel",
                     }
                 );
-                if (this.table?.playerIndexCounter == i) {
+                if (
+                    this.table?.playerIndexCounter == i &&
+                    (currPlayer?.gameStatus == "bet" ||
+                        currPlayer?.gameStatus == "blind")
+                ) {
                     playerInfo.setFont("bold 17px pixel");
                     playerInfo.setColor("#ffd700");
                 }
@@ -514,7 +541,7 @@ export class PokerView extends BaseScene {
                 i == 0
                     ? this.height - 130
                     : i == 1
-                    ? this.height / 2 - 110
+                    ? this.height / 2 - 130
                     : i == 2
                     ? 60
                     : this.height / 2 + 120,
@@ -525,7 +552,11 @@ export class PokerView extends BaseScene {
                     fontFamily: "pixel",
                 }
             );
-            if (this.table?.playerIndexCounter == i) {
+            if (
+                this.table?.playerIndexCounter == i &&
+                (currPlayer?.gameStatus == "bet" ||
+                    currPlayer?.gameStatus == "blind")
+            ) {
                 playerInfo.setFont("bold 17px pixel");
                 playerInfo.setColor("#ffd700");
             }
