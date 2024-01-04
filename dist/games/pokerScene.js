@@ -47,8 +47,15 @@ export class PokerView extends BaseScene {
         this.height = height;
         super.create(data);
         this.table = data.table;
-        this.playerGetCard();
-        this.renderScene();
+        setTimeout(() => {
+            this.renderScene();
+            setTimeout(() => {
+                this.putDealerCoin();
+                setTimeout(() => {
+                    this.playerGetCard();
+                }, 1000);
+            }, 1000);
+        }, 1000);
     }
     renderScene() {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
@@ -56,7 +63,6 @@ export class PokerView extends BaseScene {
         this.PotInfo();
         this.playerInfo();
         this.BetInfo();
-        this.putDealerCoin();
         const turnPlayer = this.table.getTurnPlayer();
         const beforePlayer = (_a = this.table) === null || _a === void 0 ? void 0 : _a.getoneBeforePlayer();
         console.log("THIS.TABLE.PHASE", (_b = this.table) === null || _b === void 0 ? void 0 : _b.gamePhase);
@@ -361,7 +367,9 @@ export class PokerView extends BaseScene {
     playerInfo() {
         this.playerNameText();
         this.playerChipText();
-        this.playerHandText();
+        setTimeout(() => {
+            this.playerHandText();
+        }, 4000);
     }
     playerNameText() {
         var _a, _b;
