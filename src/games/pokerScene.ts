@@ -81,7 +81,7 @@ export class PokerView extends BaseScene {
                 this.filpCard();
                 setTimeout(() => {
                     this.clearAllHand();
-                    this.claerDealerCard();
+                    this.clearDealerCard();
                     setTimeout(() => {
                         this.table?.haveTurn();
                         this.renderScene();
@@ -204,7 +204,7 @@ export class PokerView extends BaseScene {
         return true;
     }
 
-    claerDealerCard() {
+    clearDealerCard() {
         this.dealerHandInfo.forEach((hand) => hand.destroy());
     }
 
@@ -295,21 +295,21 @@ export class PokerView extends BaseScene {
                 });
 
                 if (j == 0) {
+                    cardDeck.setScale(1.5);
+                    cardDeck.setOrigin(0.5, 0.5);
                     setTimeout(() => {
-                        cardDeck.setScale(1.5);
                         this.add.tween({
                             targets: cardDeck,
                             scaleY: 0,
                             duration: 500,
-                            ease: "linear",
+                            ease: 'Linear',
                             onComplete: () => {
-                                cardDeck.setScale(1.5);
                                 cardDeck.setTexture(`${card.rank}${card.suit}`);
                                 this.add.tween({
                                     targets: cardDeck,
-                                    scaleY: 1,
+                                    scaleY: 1.5,
                                     duration: 500,
-                                    ease: "linear",
+                                    ease: 'Linear',
                                 });
                             },
                         });
