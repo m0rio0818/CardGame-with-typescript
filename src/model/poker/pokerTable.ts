@@ -36,7 +36,7 @@ export default class pokerTable extends Table {
         // this.dealerIndex = Math.floor(
         //     Math.random() * (this.players.length - 1)
         // );
-        this.dealerIndex = 0;
+        this.dealerIndex = 1;
         this.playerIndexCounter = this.dealerIndex + 1; // 現在ターンのプレイヤーを返す。
         this.betIndex = (this.dealerIndex + 2) % this.players.length; //　ラウンド開始時のベットスタートプレイヤー
         this.minbet = 5; // 最小ベット金額
@@ -92,6 +92,7 @@ export default class pokerTable extends Table {
             PokerHandType,
             number
         >();
+
         hashMap.set("royal flush", 0);
         hashMap.set("straight flush", 0);
         hashMap.set("four card", 0);
@@ -105,6 +106,9 @@ export default class pokerTable extends Table {
         hashMap.set("fold", 0);
 
         console.log("ログ、勝敗判定します");
+        this.players.map((player) => {
+            console.log(player.name, player.playerHandStatus);
+        });
 
         this.players.map((player) => {
             if (player.gameStatus != "fold") {
@@ -406,7 +410,7 @@ export default class pokerTable extends Table {
     }
 
     // 他のプレイヤーがgiveUp or AllIn Check
-    checkAllOtherPlayerStatus(player: pokerPlayer) {
+    checkAllOtherPlayerStatus(player: pokerPlayer): boolean {
         for (let i = 0; i < this.players.length; i++) {
             let currPlayer = this.players[i];
             if (currPlayer != player) {
@@ -417,8 +421,8 @@ export default class pokerTable extends Table {
                     return true;
                 }
             }
-            return false;
         }
+        return false;
     }
 
     // プレイヤーのアクションを評価し、ゲームの進行状態を変更するメソッド。
@@ -439,7 +443,9 @@ export default class pokerTable extends Table {
                 this.gamePhase = "evaluating";
             }
             this.clearPlayerBet();
+            // ディーラーがカード引いた時点で、プレイヤーの情報更新
             this.changePlayerStatusToBet();
+            this.updatePlayerHandStatus();
             this.playerIndexCounter = this.dealerIndex + 1;
             this.betMoney = this.minbet;
             console.log("ディーラーのhand", this.dealer.hand);
@@ -477,7 +483,11 @@ export default class pokerTable extends Table {
             console.log(gameDecision);
 
             if (this.gamePhase != "blinding") {
-                console.log("player Info: ", player.getHandScore(this.dealer)); // プレイヤーのstatusをcheck,
+                console.log(
+                    player.name,
+                    "Info: ",
+                    player.getHandScore(this.dealer)
+                ); // プレイヤーのstatusをcheck,
             }
             switch (gameDecision.action) {
                 case "bet":
@@ -684,6 +694,16 @@ export default class pokerTable extends Table {
         );
     }
 
+    playerallFoldorAllIn(player: pokerPlayer): boolean {
+        return player.gameStatus == "allin" || player.gameStatus == "fold";
+    }
+
+    updatePlayerHandStatus() {
+        for (let player of this.players) {
+            player.getHandScore(this.dealer);
+        }
+    }
+
     /*
     allPlayerActionsResolved(): boolean
     ラウンド中の全プレイヤーの行動が完了しているかどうかを返す
@@ -691,6 +711,14 @@ export default class pokerTable extends Table {
     allPlayerActionResolved(): boolean {
         for (let player of this.players) {
             if (!this.playerActionResolved(player)) return false;
+        }
+        return true;
+    }
+
+    // 全員がallin or fold
+    allplayerAllInOrFold(): boolean {
+        for (let player of this.players) {
+            if (!this.playerallFoldorAllIn(player)) return false;
         }
         return true;
     }

@@ -24,7 +24,7 @@ export default class pokerPlayer extends Player {
         name: string,
         type: PokerPlayerType,
         gameType: string,
-        chips: number = 10 // getter, setterを後から
+        chips: number = 40 // getter, setterを後から
     ) {
         super(name, type, gameType, chips);
         this.gameStatus = "blind";
@@ -59,7 +59,8 @@ export default class pokerPlayer extends Player {
                 : new pokerGameDecision("blind");
         } else {
             switch (userData) {
-                case "check": return new pokerGameDecision("check");
+                case "check":
+                    return new pokerGameDecision("check");
                 case "fold":
                     return new pokerGameDecision("fold");
                 case "allin":
@@ -71,7 +72,7 @@ export default class pokerPlayer extends Player {
                     //         "raise",
                     //         (betMoney as number) * 2
                     //     );
-                    // else 
+                    // else
                     return new pokerGameDecision("call", betMoney);
                 default:
                     return new pokerGameDecision("blind", betMoney);
@@ -112,7 +113,6 @@ export default class pokerPlayer extends Player {
 
         console.log("CardMap", CardsMap);
         Object.keys(CardsMap).forEach((data) => {
-            console.log("D: ", data, CardsMap[data]);
             if (CardsMap[data] == 2) {
                 pairsOfTwo++;
                 pairsOfTwoList.push(data);
@@ -130,6 +130,8 @@ export default class pokerPlayer extends Player {
         let allRankList = Object.keys(CardsMap).sort((a, b) => {
             return pokerIndexOfNum.indexOf(a) - pokerIndexOfNum.indexOf(b);
         });
+
+        console.log("allRankList", allRankList);
 
         let count =
             pairsOfTwoList.length * 2 +
@@ -149,15 +151,24 @@ export default class pokerPlayer extends Player {
             }
         }
 
-        console.log("beforeSort: ", pairsOfTwoList);
         this.sortList(pairsOfTwoList);
-        console.log("afterSort: ", pairsOfTwoList);
         this.sortList(pairsOfThreeList);
         this.sortList(parisOfFourList);
         this.sortList(parisOfCardList);
-
-        console.log("MaxVaue", CardsMap, pairsOfThree, pairsOfTwo);
         this.parisOfCardList = parisOfCardList;
+
+        console.log(
+            "MaxVaue",
+            CardsMap,
+            "two",
+            pairsOfTwoList,
+            "three",
+            pairsOfThreeList,
+            "four",
+            parisOfFourList,
+            "other",
+            parisOfCardList
+        );
 
         if (this.isRoyalFlush()) {
             this.playerHandStatus = "royal flush";

@@ -52,7 +52,7 @@ export class PokerView extends BaseScene {
         this.renderScene();
     }
     renderScene() {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
         this.playerInfo();
         this.tableInfo();
         setTimeout(() => {
@@ -88,11 +88,17 @@ export class PokerView extends BaseScene {
                 this.setDealerCard();
                 setTimeout(() => {
                     var _a;
+                    this.playerHandText();
                     (_a = this.table) === null || _a === void 0 ? void 0 : _a.haveTurn();
                     this.renderScene();
-                }, 1100);
+                }, 2000);
             }, 1000);
             return;
+        }
+        if ((_g = this.table) === null || _g === void 0 ? void 0 : _g.allplayerAllInOrFold()) {
+            console.log("PLPAYER全員が何もできない状況です。");
+            (_h = this.table) === null || _h === void 0 ? void 0 : _h.haveTurn();
+            this.renderScene();
         }
         switch (turnPlayer.type) {
             case "player":
@@ -105,7 +111,7 @@ export class PokerView extends BaseScene {
                     }, 500);
                     break;
                 }
-                if (((_g = this.table) === null || _g === void 0 ? void 0 : _g.gamePhase) != "blinding") {
+                if (((_j = this.table) === null || _j === void 0 ? void 0 : _j.gamePhase) != "blinding") {
                     if (turnPlayer.gameStatus == "fold" ||
                         turnPlayer.gameStatus == "allin" ||
                         turnPlayer.chips == 0) {
@@ -118,9 +124,9 @@ export class PokerView extends BaseScene {
                         break;
                     }
                     if ((beforePlayer === null || beforePlayer === void 0 ? void 0 : beforePlayer.gameStatus) == "check" ||
-                        ((_h = this.table) === null || _h === void 0 ? void 0 : _h.playerIndexCounter) ==
-                            ((_j = this.table) === null || _j === void 0 ? void 0 : _j.dealerIndex) + 1) {
-                        if (turnPlayer.chips <= ((_k = this.table) === null || _k === void 0 ? void 0 : _k.betMoney)) {
+                        ((_k = this.table) === null || _k === void 0 ? void 0 : _k.playerIndexCounter) ==
+                            ((_l = this.table) === null || _l === void 0 ? void 0 : _l.dealerIndex) + 1) {
+                        if (turnPlayer.chips <= ((_m = this.table) === null || _m === void 0 ? void 0 : _m.betMoney)) {
                             this.createCheckButton(600);
                             this.createAllInButton(640);
                             this.createFoldButton(690);
@@ -133,9 +139,14 @@ export class PokerView extends BaseScene {
                         }
                     }
                     else {
-                        if (turnPlayer.chips <= ((_l = this.table) === null || _l === void 0 ? void 0 : _l.betMoney)) {
-                            this.createAllInButton(570);
-                            this.createFoldButton(610);
+                        if (turnPlayer.chips <= ((_o = this.table) === null || _o === void 0 ? void 0 : _o.betMoney)) {
+                            this.createAllInButton(630);
+                            this.createFoldButton(670);
+                        }
+                        else if (turnPlayer.chips * 2 <=
+                            ((_p = this.table) === null || _p === void 0 ? void 0 : _p.betMoney)) {
+                            this.createAllInButton(630);
+                            this.createFoldButton(670);
                         }
                         else {
                             this.createCallButton(600);
@@ -145,8 +156,21 @@ export class PokerView extends BaseScene {
                     }
                 }
                 else {
-                    this.table.haveTurn();
-                    this.renderScene();
+                    if (this.table.allPlayerActionResolved()) {
+                        setTimeout(() => {
+                            var _a;
+                            (_a = this.table) === null || _a === void 0 ? void 0 : _a.haveTurn();
+                            this.renderScene();
+                        }, 500);
+                        break;
+                    }
+                    else {
+                        setTimeout(() => {
+                            var _a;
+                            (_a = this.table) === null || _a === void 0 ? void 0 : _a.haveTurn();
+                            this.renderScene();
+                        }, 1000);
+                    }
                 }
                 break;
             default:
@@ -234,9 +258,7 @@ export class PokerView extends BaseScene {
             for (let j = 0; j < ((_a = this.table) === null || _a === void 0 ? void 0 : _a.players.length); j++) {
                 const player = this.table.players[j];
                 const playerHand = player.hand;
-                console.log(player.name, playerHand);
                 const card = playerHand[i];
-                console.log("CAAARRRDDDDD", card);
                 if (j == 0) {
                     targetX =
                         i == 0 ? this.width / 2 - 50 : this.width / 2 + 50;
@@ -328,8 +350,9 @@ export class PokerView extends BaseScene {
     clearAllHand() {
         return __awaiter(this, void 0, void 0, function* () {
             this.playerhandsImages.forEach((player) => player.forEach((hand) => hand.destroy()));
-            this.playerhandsImages = [];
             this.playerHandInfo.forEach((hand) => hand.destroy());
+            this.playerhandsImages = [];
+            this.playerHandInfo = [];
         });
     }
     setXPosition(i) {
@@ -372,16 +395,11 @@ export class PokerView extends BaseScene {
         this.currBetInfo = betInfo;
     }
     playerInfo() {
-        var _a;
         this.playerNameText();
         this.playerChipText();
-        if (((_a = this.table) === null || _a === void 0 ? void 0 : _a.gamePhase) != "blinding") {
-            setTimeout(() => {
-                this.playerHandText();
-            }, 4000);
-        }
-        else
+        setTimeout(() => {
             this.playerHandText();
+        }, 2000);
     }
     tableInfo() {
         this.turnInfo();

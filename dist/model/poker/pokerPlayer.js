@@ -2,7 +2,7 @@ import { pokerIndexOfNum, } from "../../config/pokerConfig.js";
 import Player from "../common/Player.js";
 import pokerGameDecision from "./pokerGameDecision.js";
 export default class pokerPlayer extends Player {
-    constructor(name, type, gameType, chips = 10) {
+    constructor(name, type, gameType, chips = 40) {
         super(name, type, gameType, chips);
         this.gameStatus = "blind";
         this.Cards = this.hand;
@@ -33,7 +33,8 @@ export default class pokerPlayer extends Player {
         }
         else {
             switch (userData) {
-                case "check": return new pokerGameDecision("check");
+                case "check":
+                    return new pokerGameDecision("check");
                 case "fold":
                     return new pokerGameDecision("fold");
                 case "allin":
@@ -73,7 +74,6 @@ export default class pokerPlayer extends Player {
         const parisOfCardList = [];
         console.log("CardMap", CardsMap);
         Object.keys(CardsMap).forEach((data) => {
-            console.log("D: ", data, CardsMap[data]);
             if (CardsMap[data] == 2) {
                 pairsOfTwo++;
                 pairsOfTwoList.push(data);
@@ -90,6 +90,7 @@ export default class pokerPlayer extends Player {
         let allRankList = Object.keys(CardsMap).sort((a, b) => {
             return pokerIndexOfNum.indexOf(a) - pokerIndexOfNum.indexOf(b);
         });
+        console.log("allRankList", allRankList);
         let count = pairsOfTwoList.length * 2 +
             pairsOfThreeList.length * 3 +
             this.pairsOfFourList.length * 4;
@@ -104,14 +105,12 @@ export default class pokerPlayer extends Player {
                 count++;
             }
         }
-        console.log("beforeSort: ", pairsOfTwoList);
         this.sortList(pairsOfTwoList);
-        console.log("afterSort: ", pairsOfTwoList);
         this.sortList(pairsOfThreeList);
         this.sortList(parisOfFourList);
         this.sortList(parisOfCardList);
-        console.log("MaxVaue", CardsMap, pairsOfThree, pairsOfTwo);
         this.parisOfCardList = parisOfCardList;
+        console.log("MaxVaue", CardsMap, "two", pairsOfTwoList, "three", pairsOfThreeList, "four", parisOfFourList, "other", parisOfCardList);
         if (this.isRoyalFlush()) {
             this.playerHandStatus = "royal flush";
             return "royal flush";

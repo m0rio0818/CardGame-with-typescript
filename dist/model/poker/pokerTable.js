@@ -12,7 +12,7 @@ export default class pokerTable extends Table {
             new pokerPlayer("p3", "ai", gameType),
             new pokerPlayer("p4", "ai", gameType),
         ];
-        this.dealerIndex = 0;
+        this.dealerIndex = 1;
         this.playerIndexCounter = this.dealerIndex + 1;
         this.betIndex = (this.dealerIndex + 2) % this.players.length;
         this.minbet = 5;
@@ -71,6 +71,9 @@ export default class pokerTable extends Table {
         hashMap.set("no pair", 0);
         hashMap.set("fold", 0);
         console.log("ログ、勝敗判定します");
+        this.players.map((player) => {
+            console.log(player.name, player.playerHandStatus);
+        });
         this.players.map((player) => {
             if (player.gameStatus != "fold") {
                 hashMap.set(player.playerHandStatus, hashMap.get(player.playerHandStatus) + 1);
@@ -260,8 +263,8 @@ export default class pokerTable extends Table {
                     return true;
                 }
             }
-            return false;
         }
+        return false;
     }
     evaluateMove(player, userData) {
         if (player.type == "dealer") {
@@ -281,6 +284,7 @@ export default class pokerTable extends Table {
             }
             this.clearPlayerBet();
             this.changePlayerStatusToBet();
+            this.updatePlayerHandStatus();
             this.playerIndexCounter = this.dealerIndex + 1;
             this.betMoney = this.minbet;
             console.log("ディーラーのhand", this.dealer.hand);
@@ -300,7 +304,7 @@ export default class pokerTable extends Table {
             let gameDecision = player.promptPlayer(userData, this.betMoney);
             console.log(gameDecision);
             if (this.gamePhase != "blinding") {
-                console.log("player Info: ", player.getHandScore(this.dealer));
+                console.log(player.name, "Info: ", player.getHandScore(this.dealer));
             }
             switch (gameDecision.action) {
                 case "bet":
@@ -455,9 +459,24 @@ export default class pokerTable extends Table {
             player.gameStatus == "raise" ||
             player.gameStatus == "allin");
     }
+    playerallFoldorAllIn(player) {
+        return player.gameStatus == "allin" || player.gameStatus == "fold";
+    }
+    updatePlayerHandStatus() {
+        for (let player of this.players) {
+            player.getHandScore(this.dealer);
+        }
+    }
     allPlayerActionResolved() {
         for (let player of this.players) {
             if (!this.playerActionResolved(player))
+                return false;
+        }
+        return true;
+    }
+    allplayerAllInOrFold() {
+        for (let player of this.players) {
+            if (!this.playerallFoldorAllIn(player))
                 return false;
         }
         return true;

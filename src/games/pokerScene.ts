@@ -5,7 +5,6 @@ import Text = Phaser.GameObjects.Text;
 import Image = Phaser.GameObjects.Image;
 import Sprite = Phaser.GameObjects.Sprite;
 import Phaser from "phaser";
-import { shallowReactive } from "vue";
 export class PokerView extends BaseScene {
     private width: number = 0;
     private height: number = 0;
@@ -75,6 +74,7 @@ export class PokerView extends BaseScene {
         ) {
             this.dealInitialHands();
         }
+
         if (this.table?.gamePhase == "evaluating") {
             setTimeout(() => {
                 this.filpCard();
@@ -99,12 +99,21 @@ export class PokerView extends BaseScene {
             setTimeout(() => {
                 this.setDealerCard();
                 setTimeout(() => {
+                    this.playerHandText();
                     this.table?.haveTurn();
                     this.renderScene();
-                }, 1100);
+                }, 2000);
             }, 1000);
             return;
         }
+
+        // テーブル全員がallin or foldの場合
+        if (this.table?.allplayerAllInOrFold()) {
+            console.log("PLPAYER全員が何もできない状況です。");
+            this.table?.haveTurn();
+            this.renderScene();
+        }
+
         switch (turnPlayer.type) {
             case "player":
                 console.log(
@@ -152,8 +161,14 @@ export class PokerView extends BaseScene {
                         }
                     } else {
                         if (turnPlayer.chips <= this.table?.betMoney!) {
-                            this.createAllInButton(570);
-                            this.createFoldButton(610);
+                            this.createAllInButton(630);
+                            this.createFoldButton(670);
+                        } else if (
+                            turnPlayer.chips * 2 <=
+                            this.table?.betMoney!
+                        ) {
+                            this.createAllInButton(630);
+                            this.createFoldButton(670);
                         } else {
                             this.createCallButton(600);
                             this.createRaiseButton(640);
@@ -161,8 +176,18 @@ export class PokerView extends BaseScene {
                         }
                     }
                 } else {
-                    this.table.haveTurn();
-                    this.renderScene();
+                    if (this.table!.allPlayerActionResolved()) {
+                        setTimeout(() => {
+                            this.table?.haveTurn();
+                            this.renderScene();
+                        }, 500);
+                        break;
+                    } else {
+                        setTimeout(() => {
+                            this.table?.haveTurn();
+                            this.renderScene();
+                        }, 1000);
+                    }
                 }
                 break;
             default:
@@ -273,11 +298,7 @@ export class PokerView extends BaseScene {
             for (let j = 0; j < this.table?.players.length!; j++) {
                 const player = this.table!.players[j];
                 const playerHand = player.hand;
-
-                console.log(player.name, playerHand);
                 const card = playerHand[i];
-                console.log("CAAARRRDDDDD", card);
-
                 if (j == 0) {
                     targetX =
                         i == 0 ? this.width / 2 - 50 : this.width / 2 + 50;
@@ -374,8 +395,9 @@ export class PokerView extends BaseScene {
         this.playerhandsImages.forEach((player) =>
             player.forEach((hand) => hand.destroy())
         );
-        this.playerhandsImages = [];
         this.playerHandInfo.forEach((hand) => hand.destroy());
+        this.playerhandsImages = [];
+        this.playerHandInfo = [];
     }
 
     setXPosition(i: number): number {
@@ -436,11 +458,11 @@ export class PokerView extends BaseScene {
     playerInfo() {
         this.playerNameText();
         this.playerChipText();
-        if (this.table?.gamePhase != "blinding") {
-            setTimeout(() => {
-                this.playerHandText();
-            }, 4000);
-        } else this.playerHandText();
+        // if (this.table?.gamePhase != "blinding") {
+        setTimeout(() => {
+            this.playerHandText();
+        }, 2000);
+        // } else this.playerHandText();
     }
 
     tableInfo() {
