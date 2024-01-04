@@ -405,6 +405,22 @@ export default class pokerTable extends Table {
         return flag;
     }
 
+    // 他のプレイヤーがgiveUp or AllIn Check
+    checkAllOtherPlayerStatus(player: pokerPlayer) {
+        for (let i = 0; i < this.players.length; i++) {
+            let currPlayer = this.players[i];
+            if (currPlayer != player) {
+                if (
+                    currPlayer.gameStatus != "allin" &&
+                    currPlayer.gameStatus != "fold"
+                ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     // プレイヤーのアクションを評価し、ゲームの進行状態を変更するメソッド。
     evaluateMove(player: pokerPlayer, userData?: PokerActionType): void {
         if (player.type == "dealer") {
@@ -473,10 +489,6 @@ export default class pokerTable extends Table {
                         this.assignPlayerHands();
                     //　ブラインドベットをする。
                     console.log(player.name, "before blind", player);
-                    // player.bet =
-                    //     this.playerIndexCounter == this.dealerIndex + 1
-                    //         ? this.smallBlind
-                    //         : this.bigBlind;
                     player.bet =
                         this.blindCounter == 0
                             ? this.smallBlind
@@ -488,7 +500,6 @@ export default class pokerTable extends Table {
                     player.gameStatus = "bet";
                     console.log(player.name, "after blind", player);
                     // ブラインド終了後に、全プレイヤーをbet状態にする。
-                    // if (this.playerIndexCounter == this.dealerIndex + 2) {
                     if (this.blindCounter == 2) {
                         this.gamePhase = "betting";
                         this.changePlayerStatusToBet();
@@ -567,6 +578,8 @@ export default class pokerTable extends Table {
         }
 
         let player = this.getTurnPlayer();
+        this.checkAllOtherPlayerStatus(player);
+
         let playerBefore = this.getoneBeforePlayer();
         // 前のまえのプレイヤーがpassしてたらpass可能
         // else bet, raise, dropのみ選択可能。
@@ -698,7 +711,7 @@ export default class pokerTable extends Table {
         return this.playerIndexCounter == this.betIndex;
     }
 
-    moveToNextDealer() : void {
+    moveToNextDealer(): void {
         this.dealerIndex++;
         this.dealerIndex %= this.players.length;
     }

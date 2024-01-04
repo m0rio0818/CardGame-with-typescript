@@ -251,6 +251,18 @@ export default class pokerTable extends Table {
         }
         return flag;
     }
+    checkAllOtherPlayerStatus(player) {
+        for (let i = 0; i < this.players.length; i++) {
+            let currPlayer = this.players[i];
+            if (currPlayer != player) {
+                if (currPlayer.gameStatus != "allin" &&
+                    currPlayer.gameStatus != "fold") {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
     evaluateMove(player, userData) {
         if (player.type == "dealer") {
             if (this.turnCounter == 0) {
@@ -382,6 +394,7 @@ export default class pokerTable extends Table {
             return;
         }
         let player = this.getTurnPlayer();
+        this.checkAllOtherPlayerStatus(player);
         let playerBefore = this.getoneBeforePlayer();
         console.log("currPlayer: ", player.name);
         this.printPlayerStatus();

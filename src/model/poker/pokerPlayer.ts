@@ -24,7 +24,7 @@ export default class pokerPlayer extends Player {
         name: string,
         type: PokerPlayerType,
         gameType: string,
-        chips: number = 40 // getter, setterを後から
+        chips: number = 10 // getter, setterを後から
     ) {
         super(name, type, gameType, chips);
         this.gameStatus = "blind";

@@ -53,27 +53,22 @@ export class PokerView extends BaseScene {
         super.create(data);
         this.table = data.table;
 
-        setTimeout(() => {
-            this.renderScene();
-            setTimeout(() => {
-                this.playerGetCard();
-            }, 1000);
-        }, 1000);
+        this.renderScene();
     }
 
     renderScene() {
         this.playerInfo();
-        this.turnInfo();
-        this.PotInfo();
-        this.BetInfo();
+        this.tableInfo();
+
         setTimeout(() => {
             this.putDealerCoin();
-            console.log("ディーラーコインを初期配置します。");
         }, 300);
+
         const turnPlayer = this.table!.getTurnPlayer();
         const beforePlayer = this.table?.getoneBeforePlayer();
         console.log("THIS.TABLE.PHASE", this.table?.gamePhase);
         console.log("現在のdelarIndx", this.table?.dealerIndex);
+
         if (
             this.table?.gamePhase == "betting" &&
             this.playerhandsImages[0] === undefined
@@ -96,12 +91,19 @@ export class PokerView extends BaseScene {
             return;
         }
         if (this.table?.gamePhase == "dealer turn") {
-            this.setDealerCard();
             console.log(
                 "ディーラーきた",
                 turnPlayer.name,
                 this.table.dealer.hand
             );
+            setTimeout(() => {
+                this.setDealerCard();
+                setTimeout(() => {
+                    this.table?.haveTurn();
+                    this.renderScene();
+                }, 1100);
+            }, 1000);
+            return;
         }
         switch (turnPlayer.type) {
             case "player":
@@ -138,24 +140,24 @@ export class PokerView extends BaseScene {
                             this.table?.dealerIndex! + 1
                     ) {
                         if (turnPlayer.chips <= this.table?.betMoney!) {
-                            this.createAllInButton(0, 0);
-                            this.createCheckButton(0, 0);
-                            this.createFoldButton(0, 0);
+                            this.createCheckButton(600);
+                            this.createAllInButton(640);
+                            this.createFoldButton(690);
                         } else {
                             // チェックも選択肢にあり
-                            this.createCallButton(0, 0);
-                            this.createRaiseButton(0, 0);
-                            this.createCheckButton(0, 0);
-                            this.createFoldButton(0, 0);
+                            this.createCheckButton(570);
+                            this.createCallButton(610);
+                            this.createRaiseButton(650);
+                            this.createFoldButton(690);
                         }
                     } else {
                         if (turnPlayer.chips <= this.table?.betMoney!) {
-                            this.createAllInButton(0, 0);
-                            this.createFoldButton(0, 0);
+                            this.createAllInButton(570);
+                            this.createFoldButton(610);
                         } else {
-                            this.createCallButton(0, 0);
-                            this.createRaiseButton(0, 0);
-                            this.createFoldButton(0, 0);
+                            this.createCallButton(600);
+                            this.createRaiseButton(640);
+                            this.createFoldButton(690);
                         }
                     }
                 } else {
@@ -373,6 +375,7 @@ export class PokerView extends BaseScene {
             player.forEach((hand) => hand.destroy())
         );
         this.playerhandsImages = [];
+        this.playerHandInfo.forEach((hand) => hand.destroy());
     }
 
     setXPosition(i: number): number {
@@ -440,6 +443,12 @@ export class PokerView extends BaseScene {
         } else this.playerHandText();
     }
 
+    tableInfo() {
+        this.turnInfo();
+        this.PotInfo();
+        this.BetInfo();
+    }
+
     playerNameText() {
         this.playerNameInfo.forEach((name) => name.destroy());
         for (let i = 0; i < this.table?.players.length!; i++) {
@@ -495,14 +504,6 @@ export class PokerView extends BaseScene {
                         fontFamily: "pixel",
                     }
                 );
-                if (
-                    this.table?.playerIndexCounter == i &&
-                    (currPlayer?.gameStatus == "bet" ||
-                        currPlayer?.gameStatus == "blind")
-                ) {
-                    playerInfo.setFont("bold 17px pixel");
-                    playerInfo.setColor("#ffd700");
-                }
                 this.playerHandInfo.push(playerInfo);
             }
         }
@@ -577,11 +578,11 @@ export class PokerView extends BaseScene {
         }
     }
 
-    createCallButton(x: number, y: number) {
+    createCallButton(y: number) {
         const callButton = new Button(
             this,
             750,
-            570,
+            y,
             "call",
             "gray-button",
             () => {
@@ -595,11 +596,11 @@ export class PokerView extends BaseScene {
         this.actionButtons.push(callButton);
     }
 
-    createAllInButton(x: number, y: number) {
+    createAllInButton(y: number) {
         const allInButton = new Button(
             this,
             750,
-            690,
+            y,
             "allIn",
             "gray-button",
             () => {
@@ -613,11 +614,11 @@ export class PokerView extends BaseScene {
         this.actionButtons.push(allInButton);
     }
 
-    createCheckButton(x: number, y: number) {
+    createCheckButton(y: number) {
         const checkButton = new Button(
             this,
             750,
-            650,
+            y,
             "check",
             "gray-button",
             () => {
@@ -631,11 +632,11 @@ export class PokerView extends BaseScene {
         this.actionButtons.push(checkButton);
     }
 
-    createFoldButton(x: number, y: number) {
+    createFoldButton(y: number) {
         const foldButton = new Button(
             this,
             750,
-            530,
+            y,
             "fold",
             "gray-button",
             () => {
@@ -650,11 +651,11 @@ export class PokerView extends BaseScene {
         this.actionButtons.push(foldButton);
     }
 
-    createRaiseButton(x: number, y: number) {
+    createRaiseButton(y: number) {
         this.raiseButton = new Button(
             this,
             750,
-            610,
+            y,
             "raise",
             "gray-button",
             () => {

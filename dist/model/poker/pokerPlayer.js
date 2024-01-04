@@ -2,7 +2,7 @@ import { pokerIndexOfNum, } from "../../config/pokerConfig.js";
 import Player from "../common/Player.js";
 import pokerGameDecision from "./pokerGameDecision.js";
 export default class pokerPlayer extends Player {
-    constructor(name, type, gameType, chips = 40) {
+    constructor(name, type, gameType, chips = 10) {
         super(name, type, gameType, chips);
         this.gameStatus = "blind";
         this.Cards = this.hand;
