@@ -326,29 +326,25 @@ export class PokerView extends BaseScene {
                 ? 50
                 : i == 2
                     ? this.width / 2 + 100
-                    : this.width - 150;
+                    : this.width - 120;
     }
     turnInfo() {
         var _a, _b;
         (_a = this.turnData) === null || _a === void 0 ? void 0 : _a.destroy();
-        const turnInfo = this.add.text(990, 50, "turn: " + String((_b = this.table) === null || _b === void 0 ? void 0 : _b.roundCounter), {
-            style: {
-                fontSize: "60px",
-                color: "#ffffff",
-                fontFamily: "pixel",
-            },
+        const turnInfo = this.add.text(990, 55, "Round: " + String((_b = this.table) === null || _b === void 0 ? void 0 : _b.roundCounter), {
+            fontSize: "15px",
+            color: "#ffffff",
+            fontFamily: "pixel",
         });
         this.turnData = turnInfo;
     }
     PotInfo() {
         var _a, _b;
         (_a = this.potInfo) === null || _a === void 0 ? void 0 : _a.destroy();
-        const potInfo = this.add.text(990, 35, "Pot : " + String((_b = this.table) === null || _b === void 0 ? void 0 : _b.pot), {
-            style: {
-                fontSize: "60px",
-                color: "#ffffff",
-                fontFamily: "pixel",
-            },
+        const potInfo = this.add.text(990, 30, "Pot : " + String((_b = this.table) === null || _b === void 0 ? void 0 : _b.pot), {
+            fontSize: "20px",
+            color: "#ffffff",
+            fontFamily: "pixel",
         });
         this.potInfo = potInfo;
     }
@@ -356,11 +352,9 @@ export class PokerView extends BaseScene {
         var _a, _b;
         (_a = this.currBetInfo) === null || _a === void 0 ? void 0 : _a.destroy();
         const betInfo = this.add.text(990, 70, "Bet: " + String((_b = this.table) === null || _b === void 0 ? void 0 : _b.betMoney), {
-            style: {
-                fontSize: "60px",
-                color: "#ffffff",
-                fontFamily: "pixel",
-            },
+            fontSize: "15px",
+            color: "#ffffff",
+            fontFamily: "pixel",
         });
         this.currBetInfo = betInfo;
     }
@@ -383,11 +377,9 @@ export class PokerView extends BaseScene {
                     : i == 2
                         ? 40
                         : this.height / 2 + 100, "Name: " + (currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.name), {
-                style: {
-                    fontSize: "100px",
-                    color: "#ffffff",
-                    fontFamily: "pixel",
-                },
+                fontSize: "15px",
+                color: "#ffffff",
+                fontFamily: "pixel",
             });
             this.playerNameInfo.push(playerInfo);
         }
@@ -404,14 +396,22 @@ export class PokerView extends BaseScene {
                         ? this.height / 2 - 120
                         : i == 2
                             ? 80
-                            : this.height / 2 + 150, "Hand: " + (currPlyer === null || currPlyer === void 0 ? void 0 : currPlyer.playerHandStatus));
+                            : this.height / 2 + 150, "Hand: " + (currPlyer === null || currPlyer === void 0 ? void 0 : currPlyer.playerHandStatus), {
+                    fontSize: "15px",
+                    color: "#ffffff",
+                    fontFamily: "pixel",
+                });
                 this.playerHandInfo.push(playerInfo);
             }
         }
         if (((_d = this.table) === null || _d === void 0 ? void 0 : _d.gamePhase) == "betting" ||
             ((_e = this.table) === null || _e === void 0 ? void 0 : _e.gamePhase) == "dealer turn") {
             const currPlayer = (_f = this.table) === null || _f === void 0 ? void 0 : _f.players[0];
-            const playerInfo = this.add.text(this.setXPosition(0), this.height - 110, "Hand: " + (currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.playerHandStatus));
+            const playerInfo = this.add.text(this.setXPosition(0), this.height - 110, "Hand: " + (currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.playerHandStatus), {
+                fontSize: "15px",
+                color: "#ffffff",
+                fontFamily: "pixel",
+            });
             this.playerHandInfo.push(playerInfo);
         }
     }
@@ -430,11 +430,9 @@ export class PokerView extends BaseScene {
                     : i == 2
                         ? 60
                         : this.height / 2 + 120, "CHIP: " + String(currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.chips), {
-                style: {
-                    fontSize: "50px",
-                    color: "#ffffff",
-                    fontFamily: "pixel",
-                },
+                fontSize: "15px",
+                color: "#ffffff",
+                fontFamily: "pixel",
             });
             console.log(currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.chips);
             this.playerChipsInfo.push(playerInfo);

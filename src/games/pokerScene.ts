@@ -51,15 +51,15 @@ export class PokerView extends BaseScene {
         super.create(data);
         this.table = data.table;
 
-        setTimeout(()=>{
+        setTimeout(() => {
             this.renderScene();
-            setTimeout(()=>{
+            setTimeout(() => {
                 this.putDealerCoin();
-                setTimeout(()=>{
+                setTimeout(() => {
                     this.playerGetCard();
-                }, 1000)
-            }, 1000)
-        }, 1000)
+                }, 1000);
+            }, 1000);
+        }, 1000);
     }
 
     renderScene() {
@@ -167,28 +167,28 @@ export class PokerView extends BaseScene {
     putDealerCoin() {
         if (this.table?.dealerIndex == 0) {
             const dealerCoin = this.add.sprite(
-                this.setXPosition(0)+30,
+                this.setXPosition(0) + 30,
                 this.height - 50,
                 "orange-button"
             );
             dealerCoin.setOrigin(0.5, 0.5);
         } else if (this.table?.dealerIndex == 1) {
             const dealerCoin = this.add.sprite(
-                this.setXPosition(1)+120,
+                this.setXPosition(1) + 120,
                 this.height / 2 - 120,
                 "orange-button"
             );
             dealerCoin.setOrigin(0.5, 0.5);
         } else if (this.table?.dealerIndex == 2) {
             const dealerCoin = this.add.sprite(
-                this.setXPosition(2)+30,
+                this.setXPosition(2) + 30,
                 130,
                 "orange-button"
             );
             dealerCoin.setOrigin(0.5, 0.5);
         } else {
             const dealerCoin = this.add.sprite(
-                this.setXPosition(3)-45,
+                this.setXPosition(3) - 45,
                 this.height / 2 + 120,
                 "orange-button"
             );
@@ -365,21 +365,19 @@ export class PokerView extends BaseScene {
             ? 50
             : i == 2
             ? this.width / 2 + 100
-            : this.width - 150;
+            : this.width - 120;
     }
 
     turnInfo() {
         this.turnData?.destroy();
         const turnInfo = this.add.text(
             990,
-            50,
-            "turn: " + String(this.table?.roundCounter!),
+            55,
+            "Round: " + String(this.table?.roundCounter!),
             {
-                style: {
-                    fontSize: "60px",
-                    color: "#ffffff",
-                    fontFamily: "pixel",
-                },
+                fontSize: "15px",
+                color: "#ffffff",
+                fontFamily: "pixel",
             }
         );
         this.turnData = turnInfo;
@@ -389,14 +387,12 @@ export class PokerView extends BaseScene {
         this.potInfo?.destroy();
         const potInfo = this.add.text(
             990,
-            35,
+            30,
             "Pot : " + String(this.table?.pot!),
             {
-                style: {
-                    fontSize: "60px",
-                    color: "#ffffff",
-                    fontFamily: "pixel",
-                },
+                fontSize: "20px",
+                color: "#ffffff",
+                fontFamily: "pixel",
             }
         );
         this.potInfo = potInfo;
@@ -409,11 +405,9 @@ export class PokerView extends BaseScene {
             70,
             "Bet: " + String(this.table?.betMoney),
             {
-                style: {
-                    fontSize: "60px",
-                    color: "#ffffff",
-                    fontFamily: "pixel",
-                },
+                fontSize: "15px",
+                color: "#ffffff",
+                fontFamily: "pixel",
             }
         );
         this.currBetInfo = betInfo;
@@ -422,9 +416,9 @@ export class PokerView extends BaseScene {
     playerInfo() {
         this.playerNameText();
         this.playerChipText();
-        setTimeout(()=>{
+        setTimeout(() => {
             this.playerHandText();
-        }, 4000)
+        }, 4000);
     }
 
     playerNameText() {
@@ -444,11 +438,9 @@ export class PokerView extends BaseScene {
                     : this.height / 2 + 100,
                 "Name: " + currPlayer?.name!,
                 {
-                    style: {
-                        fontSize: "100px",
-                        color: "#ffffff",
-                        fontFamily: "pixel",
-                    },
+                    fontSize: "15px",
+                    color: "#ffffff",
+                    fontFamily: "pixel",
                 }
             );
             this.playerNameInfo.push(playerInfo);
@@ -469,7 +461,12 @@ export class PokerView extends BaseScene {
                         : i == 2
                         ? 80
                         : this.height / 2 + 150,
-                    "Hand: " + currPlyer?.playerHandStatus
+                    "Hand: " + currPlyer?.playerHandStatus,
+                    {
+                        fontSize: "15px",
+                        color: "#ffffff",
+                        fontFamily: "pixel",
+                    }
                 );
                 this.playerHandInfo.push(playerInfo);
             }
@@ -482,7 +479,12 @@ export class PokerView extends BaseScene {
             const playerInfo = this.add.text(
                 this.setXPosition(0),
                 this.height - 110,
-                "Hand: " + currPlayer?.playerHandStatus
+                "Hand: " + currPlayer?.playerHandStatus,
+                {
+                    fontSize: "15px",
+                    color: "#ffffff",
+                    fontFamily: "pixel",
+                }
             );
             this.playerHandInfo.push(playerInfo);
         }
@@ -510,11 +512,9 @@ export class PokerView extends BaseScene {
                     : this.height / 2 + 120,
                 "CHIP: " + String(currPlayer?.chips!),
                 {
-                    style: {
-                        fontSize: "50px",
-                        color: "#ffffff",
-                        fontFamily: "pixel",
-                    },
+                    fontSize: "15px",
+                    color: "#ffffff",
+                    fontFamily: "pixel",
                 }
             );
             console.log(currPlayer?.chips);
