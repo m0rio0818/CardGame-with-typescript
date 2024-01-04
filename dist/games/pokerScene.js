@@ -264,14 +264,14 @@ export class PokerView extends BaseScene {
                             targets: cardDeck,
                             scaleY: 0,
                             duration: 500,
-                            ease: 'Linear',
+                            ease: "Linear",
                             onComplete: () => {
                                 cardDeck.setTexture(`${card.rank}${card.suit}`);
                                 this.add.tween({
                                     targets: cardDeck,
                                     scaleY: 1.5,
                                     duration: 500,
-                                    ease: 'Linear',
+                                    ease: "Linear",
                                 });
                             },
                         });
@@ -366,7 +366,7 @@ export class PokerView extends BaseScene {
         }, 4000);
     }
     playerNameText() {
-        var _a, _b;
+        var _a, _b, _c;
         this.playerNameInfo.forEach((name) => name.destroy());
         for (let i = 0; i < ((_a = this.table) === null || _a === void 0 ? void 0 : _a.players.length); i++) {
             const currPlayer = (_b = this.table) === null || _b === void 0 ? void 0 : _b.players[i];
@@ -381,11 +381,15 @@ export class PokerView extends BaseScene {
                 color: "#ffffff",
                 fontFamily: "pixel",
             });
+            if (((_c = this.table) === null || _c === void 0 ? void 0 : _c.playerIndexCounter) == i) {
+                playerInfo.setFont("bold 17px pixel");
+                playerInfo.setColor("#ffd700");
+            }
             this.playerNameInfo.push(playerInfo);
         }
     }
     playerHandText() {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f, _g;
         this.playerHandInfo.forEach((hand) => hand.destroy());
         if (((_a = this.table) === null || _a === void 0 ? void 0 : _a.gamePhase) == "evaluating") {
             for (let i = 0; i < ((_b = this.table) === null || _b === void 0 ? void 0 : _b.players.length); i++) {
@@ -401,12 +405,16 @@ export class PokerView extends BaseScene {
                     color: "#ffffff",
                     fontFamily: "pixel",
                 });
+                if (((_d = this.table) === null || _d === void 0 ? void 0 : _d.playerIndexCounter) == i) {
+                    playerInfo.setFont("bold 17px pixel");
+                    playerInfo.setColor("#ffd700");
+                }
                 this.playerHandInfo.push(playerInfo);
             }
         }
-        if (((_d = this.table) === null || _d === void 0 ? void 0 : _d.gamePhase) == "betting" ||
-            ((_e = this.table) === null || _e === void 0 ? void 0 : _e.gamePhase) == "dealer turn") {
-            const currPlayer = (_f = this.table) === null || _f === void 0 ? void 0 : _f.players[0];
+        if (((_e = this.table) === null || _e === void 0 ? void 0 : _e.gamePhase) == "betting" ||
+            ((_f = this.table) === null || _f === void 0 ? void 0 : _f.gamePhase) == "dealer turn") {
+            const currPlayer = (_g = this.table) === null || _g === void 0 ? void 0 : _g.players[0];
             const playerInfo = this.add.text(this.setXPosition(0), this.height - 110, "Hand: " + (currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.playerHandStatus), {
                 fontSize: "15px",
                 color: "#ffffff",
@@ -419,7 +427,7 @@ export class PokerView extends BaseScene {
         this.playerBetInfo.forEach((bet) => bet.destroy());
     }
     playerChipText() {
-        var _a, _b;
+        var _a, _b, _c;
         this.playerChipsInfo.forEach((chip) => chip.destroy());
         for (let i = 0; i < ((_a = this.table) === null || _a === void 0 ? void 0 : _a.players.length); i++) {
             const currPlayer = (_b = this.table) === null || _b === void 0 ? void 0 : _b.players[i];
@@ -434,6 +442,10 @@ export class PokerView extends BaseScene {
                 color: "#ffffff",
                 fontFamily: "pixel",
             });
+            if (((_c = this.table) === null || _c === void 0 ? void 0 : _c.playerIndexCounter) == i) {
+                playerInfo.setFont("bold 17px pixel");
+                playerInfo.setColor("#ffd700");
+            }
             console.log(currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.chips);
             this.playerChipsInfo.push(playerInfo);
         }

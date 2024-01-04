@@ -302,14 +302,14 @@ export class PokerView extends BaseScene {
                             targets: cardDeck,
                             scaleY: 0,
                             duration: 500,
-                            ease: 'Linear',
+                            ease: "Linear",
                             onComplete: () => {
                                 cardDeck.setTexture(`${card.rank}${card.suit}`);
                                 this.add.tween({
                                     targets: cardDeck,
                                     scaleY: 1.5,
                                     duration: 500,
-                                    ease: 'Linear',
+                                    ease: "Linear",
                                 });
                             },
                         });
@@ -443,6 +443,10 @@ export class PokerView extends BaseScene {
                     fontFamily: "pixel",
                 }
             );
+            if (this.table?.playerIndexCounter == i) {
+                playerInfo.setFont("bold 17px pixel");
+                playerInfo.setColor("#ffd700");
+            }
             this.playerNameInfo.push(playerInfo);
         }
     }
@@ -468,6 +472,10 @@ export class PokerView extends BaseScene {
                         fontFamily: "pixel",
                     }
                 );
+                if (this.table?.playerIndexCounter == i) {
+                    playerInfo.setFont("bold 17px pixel");
+                    playerInfo.setColor("#ffd700");
+                }
                 this.playerHandInfo.push(playerInfo);
             }
         }
@@ -517,6 +525,10 @@ export class PokerView extends BaseScene {
                     fontFamily: "pixel",
                 }
             );
+            if (this.table?.playerIndexCounter == i) {
+                playerInfo.setFont("bold 17px pixel");
+                playerInfo.setColor("#ffd700");
+            }
             console.log(currPlayer?.chips);
             this.playerChipsInfo.push(playerInfo);
         }
