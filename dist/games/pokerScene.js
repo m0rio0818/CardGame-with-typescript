@@ -56,6 +56,7 @@ export class PokerView extends BaseScene {
         this.PotInfo();
         this.playerInfo();
         this.BetInfo();
+        this.putDealerCoin();
         const turnPlayer = this.table.getTurnPlayer();
         const beforePlayer = (_a = this.table) === null || _a === void 0 ? void 0 : _a.getoneBeforePlayer();
         console.log("THIS.TABLE.PHASE", (_b = this.table) === null || _b === void 0 ? void 0 : _b.gamePhase);
@@ -146,6 +147,25 @@ export class PokerView extends BaseScene {
                 break;
         }
         console.log(turnPlayer);
+    }
+    putDealerCoin() {
+        var _a, _b, _c;
+        if (((_a = this.table) === null || _a === void 0 ? void 0 : _a.dealerIndex) == 0) {
+            const dealerCoin = this.add.sprite(this.setXPosition(0) + 30, this.height - 50, "orange-button");
+            dealerCoin.setOrigin(0.5, 0.5);
+        }
+        else if (((_b = this.table) === null || _b === void 0 ? void 0 : _b.dealerIndex) == 1) {
+            const dealerCoin = this.add.sprite(this.setXPosition(1) + 120, this.height / 2 - 120, "orange-button");
+            dealerCoin.setOrigin(0.5, 0.5);
+        }
+        else if (((_c = this.table) === null || _c === void 0 ? void 0 : _c.dealerIndex) == 2) {
+            const dealerCoin = this.add.sprite(this.setXPosition(2) + 30, 130, "orange-button");
+            dealerCoin.setOrigin(0.5, 0.5);
+        }
+        else {
+            const dealerCoin = this.add.sprite(this.setXPosition(3) - 45, this.height / 2 + 120, "orange-button");
+            dealerCoin.setOrigin(0.5, 0.5);
+        }
     }
     allPlayerActionResolved() {
         var _a, _b;

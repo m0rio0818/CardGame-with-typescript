@@ -60,6 +60,7 @@ export class PokerView extends BaseScene {
         this.PotInfo();
         this.playerInfo();
         this.BetInfo();
+        this.putDealerCoin();
         const turnPlayer = this.table!.getTurnPlayer();
         const beforePlayer = this.table?.getoneBeforePlayer();
         console.log("THIS.TABLE.PHASE", this.table?.gamePhase);
@@ -95,7 +96,7 @@ export class PokerView extends BaseScene {
                     "STATUS",
                     turnPlayer.gameStatus
                 );
-                if (this.table!.allPlayerActionResolved()){
+                if (this.table!.allPlayerActionResolved()) {
                     setTimeout(() => {
                         this.table?.haveTurn();
                         this.renderScene();
@@ -157,6 +158,38 @@ export class PokerView extends BaseScene {
         console.log(turnPlayer);
     }
 
+    putDealerCoin() {
+        if (this.table?.dealerIndex == 0) {
+            const dealerCoin = this.add.sprite(
+                this.setXPosition(0)+30,
+                this.height - 50,
+                "orange-button"
+            );
+            dealerCoin.setOrigin(0.5, 0.5);
+        } else if (this.table?.dealerIndex == 1) {
+            const dealerCoin = this.add.sprite(
+                this.setXPosition(1)+120,
+                this.height / 2 - 120,
+                "orange-button"
+            );
+            dealerCoin.setOrigin(0.5, 0.5);
+        } else if (this.table?.dealerIndex == 2) {
+            const dealerCoin = this.add.sprite(
+                this.setXPosition(2)+30,
+                130,
+                "orange-button"
+            );
+            dealerCoin.setOrigin(0.5, 0.5);
+        } else {
+            const dealerCoin = this.add.sprite(
+                this.setXPosition(3)-45,
+                this.height / 2 + 120,
+                "orange-button"
+            );
+
+            dealerCoin.setOrigin(0.5, 0.5);
+        }
+    }
 
     allPlayerActionResolved(): boolean {
         for (let player of this.table?.players!) {

@@ -410,7 +410,7 @@ export default class pokerTable extends Table {
             else if (player.chips == 0) {
                 this.evaluateMove(player, "fold");
             }
-            else if (player.chips < this.betMoney) {
+            else if (player.chips < this.betMoney && player.chips > 0) {
                 console.log(player.name, "の所持金が最小ベット額より少ないです！！", this.betMoney, player.chips);
                 this.evaluateMove(player, "allin");
             }

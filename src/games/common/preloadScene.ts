@@ -68,6 +68,7 @@ export class PreloadScene extends Phaser.Scene {
         this.load.image("background", "public/assets/ui/background.jpeg");
         this.load.image("gray-button", "public/assets/ui/gray-button.png");
         this.load.image("blue-button", "public/assets/ui/blue-button.png");
+        this.load.image("orange-button", "public/assets/ui/orange-button.png");
     }
 
     create(data: any) {
