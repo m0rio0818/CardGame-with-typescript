@@ -27,20 +27,20 @@ export default class pokerTable extends Table {
     assignPlayerHands() {
         for (let i = 0; i < this.players.length; i++) {
             if (i == 0) {
-                this.players[i].hand.push(new Card("D", "4"));
-                this.players[i].hand.push(new Card("H", "4"));
+                this.players[i].hand.push(new Card("H", "J"));
+                this.players[i].hand.push(new Card("D", "Q"));
             }
             else if (i == 1) {
-                this.players[i].hand.push(new Card("C", "4"));
-                this.players[i].hand.push(new Card("H", "4"));
+                this.players[i].hand.push(new Card("C", "6"));
+                this.players[i].hand.push(new Card("H", "7"));
             }
             else if (i == 2) {
-                this.players[i].hand.push(new Card("H", "4"));
-                this.players[i].hand.push(new Card("S", "4"));
+                this.players[i].hand.push(new Card("H", "9"));
+                this.players[i].hand.push(new Card("S", "K"));
             }
             else {
-                this.players[i].hand.push(new Card("D", "4"));
-                this.players[i].hand.push(new Card("S", "4"));
+                this.players[i].hand.push(new Card("D", "10"));
+                this.players[i].hand.push(new Card("S", "K"));
             }
         }
     }
@@ -242,34 +242,21 @@ export default class pokerTable extends Table {
                 console.log(currIndex, winnerPlayer[currIndex].name, flag);
             }
             else {
-                let currHand = winnerPlayer[0].pairsOfTwoList[winnerPlayer[0].pairsOfTwoList.length - 1];
-                let currIndex = 0;
-                let flag = false;
-                for (let j = winnerPlayer[0].parisOfCardList.length - 1; j >= 0; j--) {
-                    currHand = winnerPlayer[0].parisOfCardList[j];
+                let currPlayer = winnerPlayer[0];
+                let currHand = currPlayer.parisOfCardList[currPlayer.parisOfCardList.length - 1];
+                for (let j = currPlayer.parisOfCardList.length - 1; j >= 0; j--) {
                     for (let i = 0; i < winnerPlayer.length; i++) {
+                        currHand = winnerPlayer[0].parisOfCardList[j];
                         let currPlayerHand = winnerPlayer[i].parisOfCardList[j];
-                        console.log(currIndex, currHand, currPlayerHand);
                         if (currHand != currPlayerHand) {
-                            flag = true;
-                            if (pokerIndexOfNum.indexOf(currHand) <
-                                pokerIndexOfNum.indexOf(currPlayerHand)) {
+                            if (pokerIndexOfNum.indexOf(currHand) < pokerIndexOfNum.indexOf(currPlayerHand)) {
                                 currHand = currPlayerHand;
-                                currIndex = i;
-                                console.log("currHand", currHand, "currIndex", currIndex, flag);
                             }
                         }
                     }
-                    if (flag)
-                        break;
+                    winnerPlayer = winnerPlayer.filter(player => player.parisOfCardList[j] == currHand);
                 }
-                if (!flag) {
-                    winnerPlayer.map((player) => (player.chips += Math.floor(this.pot / winnerPlayer.length)));
-                }
-                else {
-                    winnerPlayer[currIndex].chips += this.pot;
-                }
-                console.log(currIndex, winnerPlayer[currIndex].name, flag);
+                winnerPlayer.length > 1 ? this.drawSplitChip(winnerPlayer) : winnerPlayer[0].chips += this.pot;
             }
             winnerPlayer.map((player) => {
                 console.log(player.name, player.pairsOfTwoList, player.pairsOfThreeList, player.parisOfCardList);
@@ -330,15 +317,15 @@ export default class pokerTable extends Table {
     evaluateMove(player, userData) {
         if (player.type == "dealer") {
             if (this.turnCounter == 0) {
-                this.dealer.hand.push(new Card("H", "3"));
-                this.dealer.hand.push(new Card("H", "2"));
                 this.dealer.hand.push(new Card("H", "A"));
+                this.dealer.hand.push(new Card("H", "2"));
+                this.dealer.hand.push(new Card("H", "3"));
             }
             else if (this.turnCounter == 1) {
-                this.dealer.hand.push(new Card("H", "5"));
+                this.dealer.hand.push(new Card("H", "4"));
             }
             else if (this.turnCounter == 2) {
-                this.dealer.hand.push(new Card("H", "4"));
+                this.dealer.hand.push(new Card("H", "5"));
             }
             console.log("turnCounter !!: ", this.turnCounter);
             this.turnCounter++;
@@ -353,7 +340,6 @@ export default class pokerTable extends Table {
             this.betMoney = this.minbet;
             console.log("ディーラーのhand", this.dealer.hand);
             console.log("次のラウンドの開始person", this.getTurnPlayer().name);
-            this.printPlayerStatus();
         }
         else {
             console.log("PLAYERINDEXCOUNTER ", this.playerIndexCounter, "BETINDEX", this.betIndex, player.name, player.gameStatus, player.chips);
@@ -413,7 +399,6 @@ export default class pokerTable extends Table {
                     console.log(player.name, "after call", player);
                     break;
                 case "raise":
-                    console.log(player.chips);
                     console.log(player.name, "before raise", player);
                     let playerRaiseMoney = gameDecision.amount;
                     this.betMoney = gameDecision.amount;
@@ -424,9 +409,7 @@ export default class pokerTable extends Table {
                     this.betIndex = this.playerIndexCounter;
                     this.changePlayerStatusToBet();
                     player.gameStatus = "raise";
-                    this.printPlayerStatus();
                     console.log(player.name, "after raise", player);
-                    console.log(player.chips);
                     break;
                 case "allin":
                     if (player.gameStatus == "allin")
@@ -466,7 +449,6 @@ export default class pokerTable extends Table {
         this.checkAllOtherPlayerStatus(player);
         let playerBefore = this.getoneBeforePlayer();
         console.log("currPlayer: ", player.name);
-        this.printPlayerStatus();
         if (this.allPlayerActionResolved()) {
             this.gamePhase = "dealer turn";
             this.evaluateMove(this.dealer);
@@ -513,7 +495,6 @@ export default class pokerTable extends Table {
                             : this.evaluateMove(player);
             }
             console.log("after action...");
-            this.printPlayerStatus();
             this.moveToNextPlayer();
         }
     }

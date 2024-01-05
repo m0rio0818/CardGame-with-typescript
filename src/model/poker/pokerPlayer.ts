@@ -81,7 +81,7 @@ export default class pokerPlayer extends Player {
     }
 
     getHandScore(dealer: Player): PokerHandType {
-        console.log("before Concat", this.Cards);
+        console.log(this.name, "before Concat", this.Cards);
         this.Cards = this.hand.concat(dealer.hand);
         const CardsMap: Record<string, number> = {};
         this.Cards.sort((a, b) => {
@@ -90,7 +90,7 @@ export default class pokerPlayer extends Player {
                 pokerIndexOfNum.indexOf(b.rank)
             );
         });
-        console.log("after Concat", this.Cards);
+        console.log(this.name, "after Concat", this.Cards);
 
         for (let card of this.Cards) {
             if (CardsMap[card.rank] == undefined) {
@@ -99,8 +99,6 @@ export default class pokerPlayer extends Player {
                 CardsMap[card.rank] += 1;
             }
         }
-
-        console.log(this.name, "CARDS TOTTALLLLLLLLL !!!", this.Cards);
 
         this.maxValue = Math.max(...Object.values(CardsMap));
         let pairsOfTwo = 0;
@@ -131,7 +129,7 @@ export default class pokerPlayer extends Player {
             return pokerIndexOfNum.indexOf(a) - pokerIndexOfNum.indexOf(b);
         });
 
-        console.log("allRankList", allRankList);
+        console.log(this.name, "allRankList", allRankList);
 
         let count =
             pairsOfTwoList.length * 2 +
