@@ -28,7 +28,7 @@ export default class pokerPlayer extends Player {
     ) {
         super(name, type, gameType, chips);
         this.gameStatus = "blind";
-        this.Cards = this.hand;
+        this.Cards = [];
         this.maxValue = 0;
         this.playerHandStatus = "no pair";
         this.pairsOfTwoList = [];

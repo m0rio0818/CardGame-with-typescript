@@ -64,15 +64,16 @@ export default class pokerTable extends Table {
     }
 
     clearPlayerHandsAndBets(): void {
-        for (let player of this.players) {
-            player.hand = [];
+        this.players.map((player) => {
             player.bet = 0;
             player.gameStatus = "blind";
+            player.hand = [];
+            player.Cards = [];
             player.parisOfCardList = [];
             player.pairsOfFourList = [];
             player.pairsOfThreeList = [];
             player.pairsOfTwoList = [];
-        }
+        });
         this.dealer.hand = [];
         this.blindCounter = 0;
         this.pot = 0;
@@ -119,20 +120,23 @@ export default class pokerTable extends Table {
                 );
             }
         });
-        let heighRole: PokerHandType = "";
-        // 今回のポーカーの役で一番強いものを決める => もしダブってたら、手札の強い順？
+        let highRole: PokerHandType = "";
+        // 今回のポーカーの役で一番強いものを決める
         for (const [key, value] of hashMap) {
             if (value > 0) {
-                heighRole = key;
+                highRole = key;
                 break;
             }
         }
+
         // 誰だったかを取得
-        console.log(heighRole, hashMap.get(heighRole));
+        console.log(highRole, hashMap.get(highRole));
 
         let winnerPlayer: pokerPlayer[] = this.players.filter(
-            (player) => player.playerHandStatus == heighRole
+            (player) => player.playerHandStatus == highRole
         );
+
+        let strongestHand: PokerHandType = winnerPlayer[0].playerHandStatus;
 
         // 複数人いた際は、手札の強い方で判定。
         if (winnerPlayer.length > 1) {
@@ -145,13 +149,10 @@ export default class pokerTable extends Table {
                     player.parisOfCardList
                 );
             });
-            console.log(
-                "複数人います。",
-                winnerPlayer.map((player) => player.playerHandStatus)
-            );
+            console.log("複数人います。");
 
             // フォーカード　比較
-            if (winnerPlayer[0].playerHandStatus == "four card") {
+            if (strongestHand == "four card") {
                 let maxFourCard = winnerPlayer[0].pairsOfFourList[0];
                 let maxFourCardIndex = 0;
                 for (let i = 1; i < winnerPlayer.length; i++) {
@@ -167,15 +168,17 @@ export default class pokerTable extends Table {
                 if (winnerPlayer[0].pairsOfFourList[0] != maxFourCard) {
                     winnerPlayer[maxFourCardIndex].chips += this.pot;
                 } else {
+                    winnerPlayer = winnerPlayer.filter(
+                        (player) => player.pairsOfFourList[0] == maxFourCard
+                    );
                     this.drawSplitChip(winnerPlayer);
                 }
             }
             // フルハウス or スリーカード
             else if (
-                winnerPlayer[0].playerHandStatus == "full house" ||
-                winnerPlayer[0].playerHandStatus == "three card"
+                strongestHand == "full house" ||
+                strongestHand == "three card"
             ) {
-                let status: PokerHandType = winnerPlayer[0].playerHandStatus;
                 let maxThreeCard = winnerPlayer[0].pairsOfThreeList[0];
                 let maxThreeCardIndex = 0;
                 let maxTwoCard = winnerPlayer[0].pairsOfTwoList[0];
@@ -183,7 +186,7 @@ export default class pokerTable extends Table {
                 // まず3の数字を確認
                 for (let i = 1; i < winnerPlayer.length; i++) {
                     let currPlayer = winnerPlayer[i];
-                    if (status == "full house") {
+                    if (strongestHand == "full house") {
                         if (
                             pokerIndexOfNum.indexOf(maxTwoCard) <
                             pokerIndexOfNum.indexOf(
@@ -213,7 +216,11 @@ export default class pokerTable extends Table {
                 }
                 // 同じだったら => full houseならpairs of two　で確認 else 引き分け
                 else {
-                    if (status == "three card") {
+                    if (strongestHand == "three card") {
+                        winnerPlayer = winnerPlayer.filter(
+                            (player) =>
+                                player.pairsOfThreeList[0] == maxThreeCard
+                        );
                         this.drawSplitChip(winnerPlayer);
                     } else {
                         if (winnerPlayer[0].pairsOfTwoList[0] != maxTwoCard) {
@@ -224,6 +231,10 @@ export default class pokerTable extends Table {
                             );
                             winnerPlayer[maxTwoCardIndex].chips += this.pot;
                         } else {
+                            winnerPlayer = winnerPlayer.filter(
+                                (player) =>
+                                    player.pairsOfTwoList[0] == maxTwoCard
+                            );
                             this.drawSplitChip(winnerPlayer);
                         }
                     }
@@ -231,8 +242,8 @@ export default class pokerTable extends Table {
             }
             //　ツーペア ワンペア比較
             else if (
-                winnerPlayer[0].playerHandStatus == "two pair" ||
-                winnerPlayer[0].playerHandStatus == "one pair"
+                strongestHand == "two pair" ||
+                strongestHand == "one pair"
             ) {
                 let startPlayer = winnerPlayer[0];
                 let currHand =
@@ -416,7 +427,7 @@ export default class pokerTable extends Table {
         } else {
             // 勝ちプレイヤー取得。
             let winnerPlayer: pokerPlayer[] = this.players.filter(
-                (player) => player.playerHandStatus == heighRole
+                (player) => player.playerHandStatus == highRole
             );
             console.log(winnerPlayer);
             winnerPlayer[0].chips += this.pot;
@@ -559,7 +570,7 @@ export default class pokerTable extends Table {
                     break;
                 case "blind":
                     console.log(this.playerIndexCounter, this.dealerIndex);
-                    if (this.playerIndexCounter == this.dealerIndex + 1)
+                    if (this.blindCounter == 0)
                         this.assignPlayerHands();
                     //　ブラインドベットをする。
                     console.log(player.name, "before blind", player);
@@ -645,6 +656,9 @@ export default class pokerTable extends Table {
             this.resultsLog.push(this.evaluateAndGetRoundResults());
             this.clearPlayerHandsAndBets();
             this.roundCounter++;
+            console.log("デッキ長 BEFORE",this.deck.cards.length)
+            this.deck.resetDeck();
+            console.log("デッキ長 AFTER",this.deck.cards.length)
             this.moveToNextDealer();
             this.gamePhase = "blinding";
             console.log("ラウンド終了次はblinding", this.gamePhase);
