@@ -443,7 +443,9 @@ export class PokerView extends BaseScene {
                         ? this.height / 2 - 110
                         : i == 2
                             ? 80
-                            : this.height / 2 + 150, "Hand: " + (currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.playerHandStatus), {
+                            : this.height / 2 + 150, currPlayer.gameStatus == "fold"
+                    ? "fold"
+                    : "Hand: " + (currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.playerHandStatus), {
                     fontSize: "15px",
                     color: "#ffffff",
                     fontFamily: "pixel",
@@ -454,7 +456,9 @@ export class PokerView extends BaseScene {
         if (((_d = this.table) === null || _d === void 0 ? void 0 : _d.gamePhase) == "betting" ||
             ((_e = this.table) === null || _e === void 0 ? void 0 : _e.gamePhase) == "dealer turn") {
             const currPlayer = (_f = this.table) === null || _f === void 0 ? void 0 : _f.players[0];
-            const playerInfo = this.add.text(this.setXPosition(0), this.height - 110, "Hand: " + (currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.playerHandStatus), {
+            const playerInfo = this.add.text(this.setXPosition(0), this.height - 110, currPlayer.gameStatus == "fold"
+                ? "fold"
+                : "Hand: " + (currPlayer === null || currPlayer === void 0 ? void 0 : currPlayer.playerHandStatus), {
                 fontSize: "15px",
                 color: "#ffffff",
                 fontFamily: "pixel",

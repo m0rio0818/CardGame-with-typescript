@@ -13,7 +13,7 @@ export default class pokerTable extends Table {
             new pokerPlayer("p3", "ai", gameType),
             new pokerPlayer("p4", "ai", gameType),
         ];
-        this.dealerIndex = 1;
+        this.dealerIndex = Math.floor(Math.random() * this.players.length);
         this.playerIndexCounter = this.dealerIndex + 1;
         this.betIndex = (this.dealerIndex + 2) % this.players.length;
         this.minbet = 5;
@@ -25,9 +25,23 @@ export default class pokerTable extends Table {
         this.maxTurn = maxTurn;
     }
     assignPlayerHands() {
-        for (let player of this.players) {
-            player.hand.push(this.deck.drawCard());
-            player.hand.push(this.deck.drawCard());
+        for (let i = 0; i < this.players.length; i++) {
+            if (i == 0) {
+                this.players[i].hand.push(new Card("D", "4"));
+                this.players[i].hand.push(new Card("H", "4"));
+            }
+            else if (i == 1) {
+                this.players[i].hand.push(new Card("C", "4"));
+                this.players[i].hand.push(new Card("H", "4"));
+            }
+            else if (i == 2) {
+                this.players[i].hand.push(new Card("H", "4"));
+                this.players[i].hand.push(new Card("S", "4"));
+            }
+            else {
+                this.players[i].hand.push(new Card("D", "4"));
+                this.players[i].hand.push(new Card("S", "4"));
+            }
         }
     }
     sortPlayerScore() {
@@ -316,12 +330,15 @@ export default class pokerTable extends Table {
     evaluateMove(player, userData) {
         if (player.type == "dealer") {
             if (this.turnCounter == 0) {
-                this.dealer.hand.push(new Card("S", "3"));
-                this.dealer.hand.push(new Card("D", "3"));
                 this.dealer.hand.push(new Card("H", "3"));
+                this.dealer.hand.push(new Card("H", "2"));
+                this.dealer.hand.push(new Card("H", "A"));
             }
-            else if (this.turnCounter < 3) {
-                this.dealer.hand.push(this.deck.drawCard());
+            else if (this.turnCounter == 1) {
+                this.dealer.hand.push(new Card("H", "5"));
+            }
+            else if (this.turnCounter == 2) {
+                this.dealer.hand.push(new Card("H", "4"));
             }
             console.log("turnCounter !!: ", this.turnCounter);
             this.turnCounter++;
@@ -350,7 +367,7 @@ export default class pokerTable extends Table {
             console.log("userData", userData);
             let gameDecision = player.promptPlayer(userData, this.betMoney);
             console.log(gameDecision);
-            if (this.gamePhase != "blinding") {
+            if (this.gamePhase != "blinding" && player.gameStatus != "fold") {
                 console.log(player.name, "Info: ", player.getHandScore(this.dealer));
             }
             switch (gameDecision.action) {
@@ -439,9 +456,7 @@ export default class pokerTable extends Table {
             this.resultsLog.push(this.evaluateAndGetRoundResults());
             this.clearPlayerHandsAndBets();
             this.roundCounter++;
-            console.log("デッキ長 BEFORE", this.deck.cards.length);
             this.deck.resetDeck();
-            console.log("デッキ長 AFTER", this.deck.cards.length);
             this.moveToNextDealer();
             this.gamePhase = "blinding";
             console.log("ラウンド終了次はblinding", this.gamePhase);
@@ -514,7 +529,9 @@ export default class pokerTable extends Table {
     }
     updatePlayerHandStatus() {
         for (let player of this.players) {
-            player.getHandScore(this.dealer);
+            if (player.gameStatus != "fold") {
+                player.getHandScore(this.dealer);
+            }
         }
     }
     allPlayerActionResolved() {

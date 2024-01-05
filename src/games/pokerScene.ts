@@ -519,7 +519,9 @@ export class PokerView extends BaseScene {
                         : i == 2
                         ? 80
                         : this.height / 2 + 150,
-                    "Hand: " + currPlayer?.playerHandStatus,
+                    currPlayer.gameStatus == "fold"
+                        ? "fold"
+                        : "Hand: " + currPlayer?.playerHandStatus,
                     {
                         fontSize: "15px",
                         color: "#ffffff",
@@ -537,7 +539,9 @@ export class PokerView extends BaseScene {
             const playerInfo = this.add.text(
                 this.setXPosition(0),
                 this.height - 110,
-                "Hand: " + currPlayer?.playerHandStatus,
+                currPlayer.gameStatus == "fold"
+                    ? "fold"
+                    : "Hand: " + currPlayer?.playerHandStatus,
                 {
                     fontSize: "15px",
                     color: "#ffffff",

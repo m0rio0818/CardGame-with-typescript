@@ -6,6 +6,7 @@ import {
     PokerHandType,
 } from "../../config/pokerConfig.js";
 import Card from "../common/Card.js";
+import Deck from "../common/Deck.js";
 import Table from "../common/Table.js";
 import pokerGameDecision from "./pokerGameDecision.js";
 import pokerPlayer from "./pokerPlayer.js";
@@ -34,10 +35,8 @@ export default class pokerTable extends Table {
             new pokerPlayer("p3", "ai", gameType),
             new pokerPlayer("p4", "ai", gameType),
         ];
-        // this.dealerIndex = Math.floor(
-        //     Math.random() * (this.players.length - 1)
-        // );
-        this.dealerIndex = 1;
+        this.dealerIndex = Math.floor(Math.random() * this.players.length);
+        // this.dealerIndex = 1;
         this.playerIndexCounter = this.dealerIndex + 1; // 現在ターンのプレイヤーを返す。
         this.betIndex = (this.dealerIndex + 2) % this.players.length; //　ラウンド開始時のベットスタートプレイヤー
         this.minbet = 5; // 最小ベット金額
@@ -50,9 +49,24 @@ export default class pokerTable extends Table {
     }
 
     assignPlayerHands(): void {
-        for (let player of this.players) {
-            player.hand.push(this.deck.drawCard());
-            player.hand.push(this.deck.drawCard());
+        // for (let player of this.players) {
+        //     player.hand.push(this.deck.drawCard());
+        //     player.hand.push(this.deck.drawCard());
+        // }
+        for (let i = 0; i < this.players.length; i++) {
+            if (i == 0) {
+                this.players[i].hand.push(new Card("D", "4"));
+                this.players[i].hand.push(new Card("H", "4"));
+            } else if (i == 1) {
+                this.players[i].hand.push(new Card("C", "4"));
+                this.players[i].hand.push(new Card("H", "4"));
+            } else if (i == 2) {
+                this.players[i].hand.push(new Card("H", "4"));
+                this.players[i].hand.push(new Card("S", "4"));
+            } else {
+                this.players[i].hand.push(new Card("D", "4"));
+                this.players[i].hand.push(new Card("S", "4"));
+            }
         }
     }
 
@@ -504,12 +518,17 @@ export default class pokerTable extends Table {
                 // this.dealer.hand.push(this.deck.drawCard());
                 // this.dealer.hand.push(this.deck.drawCard());
                 // this.dealer.hand.push(this.deck.drawCard());
-                this.dealer.hand.push(new Card("S", "3"));
-                this.dealer.hand.push(new Card("D", "3"));
                 this.dealer.hand.push(new Card("H", "3"));
-            } else if (this.turnCounter < 3) {
-                this.dealer.hand.push(this.deck.drawCard());
+                this.dealer.hand.push(new Card("H", "2"));
+                this.dealer.hand.push(new Card("H", "A"));
+            } else if (this.turnCounter == 1) {
+                this.dealer.hand.push(new Card("H", "5"));
+            } else if (this.turnCounter == 2) {
+                this.dealer.hand.push(new Card("H", "4"));
             }
+            // } else if (this.turnCounter < 3) {
+            //     this.dealer.hand.push(this.deck.drawCard());
+            // }
             console.log("turnCounter !!: ", this.turnCounter);
             this.turnCounter++;
 
@@ -557,7 +576,7 @@ export default class pokerTable extends Table {
 
             console.log(gameDecision);
 
-            if (this.gamePhase != "blinding") {
+            if (this.gamePhase != "blinding" && player.gameStatus != "fold") {
                 console.log(
                     player.name,
                     "Info: ",
@@ -570,8 +589,7 @@ export default class pokerTable extends Table {
                     break;
                 case "blind":
                     console.log(this.playerIndexCounter, this.dealerIndex);
-                    if (this.blindCounter == 0)
-                        this.assignPlayerHands();
+                    if (this.blindCounter == 0) this.assignPlayerHands();
                     //　ブラインドベットをする。
                     console.log(player.name, "before blind", player);
                     player.bet =
@@ -656,9 +674,7 @@ export default class pokerTable extends Table {
             this.resultsLog.push(this.evaluateAndGetRoundResults());
             this.clearPlayerHandsAndBets();
             this.roundCounter++;
-            console.log("デッキ長 BEFORE",this.deck.cards.length)
             this.deck.resetDeck();
-            console.log("デッキ長 AFTER",this.deck.cards.length)
             this.moveToNextDealer();
             this.gamePhase = "blinding";
             console.log("ラウンド終了次はblinding", this.gamePhase);
@@ -778,7 +794,9 @@ export default class pokerTable extends Table {
 
     updatePlayerHandStatus() {
         for (let player of this.players) {
-            player.getHandScore(this.dealer);
+            if (player.gameStatus != "fold") {
+                player.getHandScore(this.dealer);
+            }
         }
     }
 
