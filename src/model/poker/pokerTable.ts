@@ -5,6 +5,7 @@ import {
     PokerActionType,
     PokerHandType,
 } from "../../config/pokerConfig.js";
+import Card from "../common/Card.js";
 import Table from "../common/Table.js";
 import pokerGameDecision from "./pokerGameDecision.js";
 import pokerPlayer from "./pokerPlayer.js";
@@ -129,11 +130,12 @@ export default class pokerTable extends Table {
         // 誰だったかを取得
         console.log(heighRole, hashMap.get(heighRole));
 
+        let winnerPlayer: pokerPlayer[] = this.players.filter(
+            (player) => player.playerHandStatus == heighRole
+        );
+
         // 複数人いた際は、手札の強い方で判定。
-        if (hashMap.get(heighRole)! > 1) {
-            let winnerPlayer: pokerPlayer[] = this.players.filter(
-                (player) => player.playerHandStatus == heighRole
-            );
+        if (winnerPlayer.length > 1) {
             // ツーカード　or ワンペア
             winnerPlayer.map((player) => {
                 console.log(
@@ -150,23 +152,80 @@ export default class pokerTable extends Table {
 
             // フォーカード　比較
             if (winnerPlayer[0].playerHandStatus == "four card") {
+                let maxFourCard = winnerPlayer[0].pairsOfFourList[0];
+                let maxFourCardIndex = 0;
+                for (let i = 1; i < winnerPlayer.length; i++) {
+                    let currPlayer = winnerPlayer[i];
+                    if (
+                        pokerIndexOfNum.indexOf(maxFourCard) <
+                        pokerIndexOfNum.indexOf(currPlayer.pairsOfFourList[0])
+                    ) {
+                        maxFourCard = currPlayer.pairsOfFourList[0];
+                        maxFourCardIndex = i;
+                    }
+                }
+                if (winnerPlayer[0].pairsOfFourList[0] != maxFourCard) {
+                    winnerPlayer[maxFourCardIndex].chips += this.pot;
+                } else {
+                    this.drawSplitChip(winnerPlayer);
+                }
             }
             // フルハウス or スリーカード
             else if (
                 winnerPlayer[0].playerHandStatus == "full house" ||
                 winnerPlayer[0].playerHandStatus == "three card"
             ) {
+                let status: PokerHandType = winnerPlayer[0].playerHandStatus;
                 let maxThreeCard = winnerPlayer[0].pairsOfThreeList[0];
                 let maxThreeCardIndex = 0;
+                let maxTwoCard = winnerPlayer[0].pairsOfTwoList[0];
+                let maxTwoCardIndex = 0;
+                // まず3の数字を確認
                 for (let i = 1; i < winnerPlayer.length; i++) {
+                    let currPlayer = winnerPlayer[i];
+                    if (status == "full house") {
+                        if (
+                            pokerIndexOfNum.indexOf(maxTwoCard) <
+                            pokerIndexOfNum.indexOf(
+                                currPlayer.pairsOfTwoList[0]
+                            )
+                        ) {
+                            maxTwoCard = currPlayer.pairsOfTwoList[0];
+                            maxTwoCardIndex = i;
+                        }
+                    }
                     if (
                         pokerIndexOfNum.indexOf(maxThreeCard) <
-                        pokerIndexOfNum.indexOf(
-                            winnerPlayer[i].pairsOfThreeList[0]
-                        )
+                        pokerIndexOfNum.indexOf(currPlayer.pairsOfThreeList[0])
                     ) {
-                        maxThreeCard = winnerPlayer[i].pairsOfThreeList[0];
+                        maxThreeCard = currPlayer.pairsOfThreeList[0];
                         maxThreeCardIndex = i;
+                    }
+                }
+                // 初めと値が違ったら　=> 最大の人いる。
+                if (winnerPlayer[0].pairsOfThreeList[0] != maxThreeCard) {
+                    console.log(
+                        "最大pairsOfTwo 判断",
+                        maxThreeCardIndex,
+                        maxThreeCard
+                    );
+                    winnerPlayer[maxThreeCardIndex].chips += this.pot;
+                }
+                // 同じだったら => full houseならpairs of two　で確認 else 引き分け
+                else {
+                    if (status == "three card") {
+                        this.drawSplitChip(winnerPlayer);
+                    } else {
+                        if (winnerPlayer[0].pairsOfTwoList[0] != maxTwoCard) {
+                            console.log(
+                                "最大pairsOfTwo 判断",
+                                maxTwoCardIndex,
+                                maxTwoCard
+                            );
+                            winnerPlayer[maxTwoCardIndex].chips += this.pot;
+                        } else {
+                            this.drawSplitChip(winnerPlayer);
+                        }
                     }
                 }
             }
@@ -283,12 +342,7 @@ export default class pokerTable extends Table {
                 if (!flag) {
                     // 引き分け
                     console.log("引き分け");
-                    for (let player of winnerPlayer) {
-                        console.log(player, player.name);
-                        player.chips += Math.floor(
-                            this.pot / winnerPlayer.length
-                        );
-                    }
+                    this.drawSplitChip(winnerPlayer);
                 } else {
                     // 勝利プレイヤーに分配
                     winnerPlayer[currIndex].chips += this.pot;
@@ -337,12 +391,12 @@ export default class pokerTable extends Table {
 
                 if (!flag) {
                     // 引き分け
-                    for (let player of winnerPlayer) {
-                        console.log(player, player.name);
-                        player.chips += Math.floor(
-                            this.pot / winnerPlayer.length
-                        );
-                    }
+                    winnerPlayer.map(
+                        (player) =>
+                            (player.chips += Math.floor(
+                                this.pot / winnerPlayer.length
+                            ))
+                    );
                 } else {
                     // 勝利プレイヤーに分配
                     winnerPlayer[currIndex].chips += this.pot;
@@ -375,6 +429,13 @@ export default class pokerTable extends Table {
                 (i != this.players.length - 1 ? "," : "");
         }
         return roundLog;
+    }
+
+    drawSplitChip(winnerPlayers: pokerPlayer[]): void {
+        winnerPlayers.map(
+            (player) =>
+                (player.chips += Math.floor(this.pot / winnerPlayers.length))
+        );
     }
 
     compairPairsOfTwo(playerList: pokerPlayer[]): boolean {
@@ -429,9 +490,12 @@ export default class pokerTable extends Table {
     evaluateMove(player: pokerPlayer, userData?: PokerActionType): void {
         if (player.type == "dealer") {
             if (this.turnCounter == 0) {
-                this.dealer.hand.push(this.deck.drawCard());
-                this.dealer.hand.push(this.deck.drawCard());
-                this.dealer.hand.push(this.deck.drawCard());
+                // this.dealer.hand.push(this.deck.drawCard());
+                // this.dealer.hand.push(this.deck.drawCard());
+                // this.dealer.hand.push(this.deck.drawCard());
+                this.dealer.hand.push(new Card("S", "3"));
+                this.dealer.hand.push(new Card("D", "3"));
+                this.dealer.hand.push(new Card("H", "3"));
             } else if (this.turnCounter < 3) {
                 this.dealer.hand.push(this.deck.drawCard());
             }

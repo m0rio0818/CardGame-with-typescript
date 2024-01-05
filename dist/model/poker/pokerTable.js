@@ -1,4 +1,5 @@
 import { pokerIndexOfNum, } from "../../config/pokerConfig.js";
+import Card from "../common/Card.js";
 import Table from "../common/Table.js";
 import pokerPlayer from "./pokerPlayer.js";
 export default class pokerTable extends Table {
@@ -87,23 +88,68 @@ export default class pokerTable extends Table {
             }
         }
         console.log(heighRole, hashMap.get(heighRole));
-        if (hashMap.get(heighRole) > 1) {
-            let winnerPlayer = this.players.filter((player) => player.playerHandStatus == heighRole);
+        let winnerPlayer = this.players.filter((player) => player.playerHandStatus == heighRole);
+        if (winnerPlayer.length > 1) {
             winnerPlayer.map((player) => {
                 console.log(player.name, player.pairsOfTwoList, player.pairsOfThreeList, player.parisOfCardList);
             });
             console.log("複数人います。", winnerPlayer.map((player) => player.playerHandStatus));
             if (winnerPlayer[0].playerHandStatus == "four card") {
+                let maxFourCard = winnerPlayer[0].pairsOfFourList[0];
+                let maxFourCardIndex = 0;
+                for (let i = 1; i < winnerPlayer.length; i++) {
+                    let currPlayer = winnerPlayer[i];
+                    if (pokerIndexOfNum.indexOf(maxFourCard) <
+                        pokerIndexOfNum.indexOf(currPlayer.pairsOfFourList[0])) {
+                        maxFourCard = currPlayer.pairsOfFourList[0];
+                        maxFourCardIndex = i;
+                    }
+                }
+                if (winnerPlayer[0].pairsOfFourList[0] != maxFourCard) {
+                    winnerPlayer[maxFourCardIndex].chips += this.pot;
+                }
+                else {
+                    this.drawSplitChip(winnerPlayer);
+                }
             }
             else if (winnerPlayer[0].playerHandStatus == "full house" ||
                 winnerPlayer[0].playerHandStatus == "three card") {
+                let status = winnerPlayer[0].playerHandStatus;
                 let maxThreeCard = winnerPlayer[0].pairsOfThreeList[0];
                 let maxThreeCardIndex = 0;
+                let maxTwoCard = winnerPlayer[0].pairsOfTwoList[0];
+                let maxTwoCardIndex = 0;
                 for (let i = 1; i < winnerPlayer.length; i++) {
+                    let currPlayer = winnerPlayer[i];
+                    if (status == "full house") {
+                        if (pokerIndexOfNum.indexOf(maxTwoCard) <
+                            pokerIndexOfNum.indexOf(currPlayer.pairsOfTwoList[0])) {
+                            maxTwoCard = currPlayer.pairsOfTwoList[0];
+                            maxTwoCardIndex = i;
+                        }
+                    }
                     if (pokerIndexOfNum.indexOf(maxThreeCard) <
-                        pokerIndexOfNum.indexOf(winnerPlayer[i].pairsOfThreeList[0])) {
-                        maxThreeCard = winnerPlayer[i].pairsOfThreeList[0];
+                        pokerIndexOfNum.indexOf(currPlayer.pairsOfThreeList[0])) {
+                        maxThreeCard = currPlayer.pairsOfThreeList[0];
                         maxThreeCardIndex = i;
+                    }
+                }
+                if (winnerPlayer[0].pairsOfThreeList[0] != maxThreeCard) {
+                    console.log("最大pairsOfTwo 判断", maxThreeCardIndex, maxThreeCard);
+                    winnerPlayer[maxThreeCardIndex].chips += this.pot;
+                }
+                else {
+                    if (status == "three card") {
+                        this.drawSplitChip(winnerPlayer);
+                    }
+                    else {
+                        if (winnerPlayer[0].pairsOfTwoList[0] != maxTwoCard) {
+                            console.log("最大pairsOfTwo 判断", maxTwoCardIndex, maxTwoCard);
+                            winnerPlayer[maxTwoCardIndex].chips += this.pot;
+                        }
+                        else {
+                            this.drawSplitChip(winnerPlayer);
+                        }
                     }
                 }
             }
@@ -170,10 +216,7 @@ export default class pokerTable extends Table {
                 }
                 if (!flag) {
                     console.log("引き分け");
-                    for (let player of winnerPlayer) {
-                        console.log(player, player.name);
-                        player.chips += Math.floor(this.pot / winnerPlayer.length);
-                    }
+                    this.drawSplitChip(winnerPlayer);
                 }
                 else {
                     winnerPlayer[currIndex].chips += this.pot;
@@ -203,10 +246,7 @@ export default class pokerTable extends Table {
                         break;
                 }
                 if (!flag) {
-                    for (let player of winnerPlayer) {
-                        console.log(player, player.name);
-                        player.chips += Math.floor(this.pot / winnerPlayer.length);
-                    }
+                    winnerPlayer.map((player) => (player.chips += Math.floor(this.pot / winnerPlayer.length)));
                 }
                 else {
                     winnerPlayer[currIndex].chips += this.pot;
@@ -229,6 +269,9 @@ export default class pokerTable extends Table {
                     (i != this.players.length - 1 ? "," : "");
         }
         return roundLog;
+    }
+    drawSplitChip(winnerPlayers) {
+        winnerPlayers.map((player) => (player.chips += Math.floor(this.pot / winnerPlayers.length)));
     }
     compairPairsOfTwo(playerList) {
         let currHand;
@@ -269,9 +312,9 @@ export default class pokerTable extends Table {
     evaluateMove(player, userData) {
         if (player.type == "dealer") {
             if (this.turnCounter == 0) {
-                this.dealer.hand.push(this.deck.drawCard());
-                this.dealer.hand.push(this.deck.drawCard());
-                this.dealer.hand.push(this.deck.drawCard());
+                this.dealer.hand.push(new Card("S", "3"));
+                this.dealer.hand.push(new Card("D", "3"));
+                this.dealer.hand.push(new Card("H", "3"));
             }
             else if (this.turnCounter < 3) {
                 this.dealer.hand.push(this.deck.drawCard());
