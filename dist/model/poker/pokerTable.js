@@ -31,12 +31,12 @@ export default class pokerTable extends Table {
                 this.players[i].hand.push(new Card("D", "Q"));
             }
             else if (i == 1) {
-                this.players[i].hand.push(new Card("C", "6"));
+                this.players[i].hand.push(new Card("C", "4"));
                 this.players[i].hand.push(new Card("H", "7"));
             }
             else if (i == 2) {
-                this.players[i].hand.push(new Card("H", "9"));
-                this.players[i].hand.push(new Card("S", "K"));
+                this.players[i].hand.push(new Card("H", "4"));
+                this.players[i].hand.push(new Card("S", "7"));
             }
             else {
                 this.players[i].hand.push(new Card("D", "10"));
@@ -173,80 +173,48 @@ export default class pokerTable extends Table {
             }
             else if (strongestHand == "two pair" ||
                 strongestHand == "one pair") {
-                let startPlayer = winnerPlayer[0];
-                let currHand = startPlayer.pairsOfTwoList[startPlayer.pairsOfTwoList.length - 1];
-                let currIndex = 0;
-                console.log("currHand", currHand);
-                let flag = false;
-                for (let j = startPlayer.pairsOfTwoList.length - 1; j >= 0; j--) {
-                    currHand = startPlayer.pairsOfTwoList[j];
+                console.log("paris of two pair || one pair");
+                for (let j = winnerPlayer[0].pairsOfTwoList.length - 1; j >= 0; j--) {
+                    let currHand = winnerPlayer[0].pairsOfTwoList[j];
                     for (let i = 0; i < winnerPlayer.length; i++) {
                         let currPlayerHand = winnerPlayer[i].pairsOfTwoList[j];
-                        console.log("currHand", currHand, "playerHand", currPlayerHand);
+                        console.log(currHand, currPlayerHand);
                         if (currHand != currPlayerHand) {
-                            flag = true;
+                            if (pokerIndexOfNum.indexOf(currHand) < pokerIndexOfNum.indexOf(currPlayerHand)) {
+                                currHand = currPlayerHand;
+                            }
+                        }
+                    }
+                    winnerPlayer = winnerPlayer.filter((player) => player.pairsOfTwoList[j] == currHand);
+                    if (winnerPlayer.length == 1) {
+                        winnerPlayer[0].chips += this.pot;
+                        break;
+                    }
+                }
+                console.log("two pairの判定終了", winnerPlayer);
+                console.log("two pairだけでは判断できなかったから、残りの手札で判断!");
+                for (let j = winnerPlayer[0].parisOfCardList.length - 1; j >= 0; j--) {
+                    let currHand = winnerPlayer[0].parisOfCardList[j];
+                    for (let i = 0; i < winnerPlayer.length; i++) {
+                        let currPlayerHand = winnerPlayer[i].parisOfCardList[j];
+                        console.log(currHand, currPlayerHand);
+                        if (currHand != currPlayerHand) {
                             if (pokerIndexOfNum.indexOf(currHand) <
                                 pokerIndexOfNum.indexOf(currPlayerHand)) {
-                                winnerPlayer;
                                 currHand = currPlayerHand;
-                                currIndex = i;
-                                console.log("currHand", currHand, "currIndex", currIndex, "flag", flag);
                             }
                         }
                     }
-                    console.log("currhand:", currHand);
-                    if (flag) {
-                        winnerPlayer = winnerPlayer.filter((player) => player.pairsOfTwoList[j] == currHand);
-                    }
+                    winnerPlayer = winnerPlayer.filter(player => player.parisOfCardList[j] == currHand);
+                    if (winnerPlayer.length == 1)
+                        break;
                 }
-                if (winnerPlayer.length == 1) {
-                    console.log("Winner", winnerPlayer[0].name);
-                    winners.push(winnerPlayer[0]);
-                    for (let i = 0; i < this.players.length; i++) {
-                        roundLog +=
-                            this.players[i].chips +
-                                (i != this.players.length - 1 ? "," : "");
-                    }
-                    return roundLog;
-                }
-                else {
-                    flag = false;
-                    if (!flag) {
-                        for (let j = winnerPlayer[0].parisOfCardList.length - 1; j >= 0; j--) {
-                            currHand = winnerPlayer[0].parisOfCardList[j];
-                            for (let i = 0; i < winnerPlayer.length; i++) {
-                                let currPlayerHand = winnerPlayer[i].parisOfCardList[j];
-                                console.log(currIndex, currHand, currPlayerHand);
-                                if (currHand != currPlayerHand) {
-                                    flag = true;
-                                    if (pokerIndexOfNum.indexOf(currHand) <
-                                        pokerIndexOfNum.indexOf(currPlayerHand)) {
-                                        currHand = currPlayerHand;
-                                        currIndex = i;
-                                        console.log("currHand", currHand, "currIndex", currIndex, flag);
-                                    }
-                                }
-                            }
-                            if (flag)
-                                break;
-                        }
-                    }
-                }
-                if (!flag) {
-                    console.log("引き分け");
-                    this.drawSplitChip(winnerPlayer);
-                }
-                else {
-                    winnerPlayer[currIndex].chips += this.pot;
-                }
-                console.log(currIndex, winnerPlayer[currIndex].name, flag);
+                winnerPlayer.length > 1 ? this.drawSplitChip(winnerPlayer) : winnerPlayer[0].chips += this.pot;
             }
             else {
-                let currPlayer = winnerPlayer[0];
-                let currHand = currPlayer.parisOfCardList[currPlayer.parisOfCardList.length - 1];
-                for (let j = currPlayer.parisOfCardList.length - 1; j >= 0; j--) {
+                for (let j = winnerPlayer[0].parisOfCardList.length - 1; j >= 0; j--) {
+                    let currHand = winnerPlayer[0].parisOfCardList[j];
                     for (let i = 0; i < winnerPlayer.length; i++) {
-                        currHand = winnerPlayer[0].parisOfCardList[j];
                         let currPlayerHand = winnerPlayer[i].parisOfCardList[j];
                         if (currHand != currPlayerHand) {
                             if (pokerIndexOfNum.indexOf(currHand) < pokerIndexOfNum.indexOf(currPlayerHand)) {
@@ -255,6 +223,8 @@ export default class pokerTable extends Table {
                         }
                     }
                     winnerPlayer = winnerPlayer.filter(player => player.parisOfCardList[j] == currHand);
+                    if (winnerPlayer.length == 1)
+                        break;
                 }
                 winnerPlayer.length > 1 ? this.drawSplitChip(winnerPlayer) : winnerPlayer[0].chips += this.pot;
             }
