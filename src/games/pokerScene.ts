@@ -120,7 +120,9 @@ export class PokerView extends BaseScene {
                     "PLAYER",
                     turnPlayer.name,
                     "STATUS",
-                    turnPlayer.gameStatus
+                    turnPlayer.gameStatus,
+                    this.table?.turnCounter,
+                    this.table?.dealerIndex
                 );
                 if (this.table!.allPlayerActionResolved()) {
                     setTimeout(() => {
@@ -170,9 +172,20 @@ export class PokerView extends BaseScene {
                             this.createAllInButton(630);
                             this.createFoldButton(670);
                         } else {
-                            this.createCallButton(600);
-                            this.createRaiseButton(640);
-                            this.createFoldButton(690);
+                            if (
+                                turnPlayer.gameStatus == "bet" &&
+                                this.table?.turnCounter ==
+                                    (this.table?.dealerIndex! + 2) %
+                                        this.table?.players.length!
+                            ) {
+                                this.createPassButton(610);
+                                this.createRaiseButton(650);
+                                this.createFoldButton(690);
+                            } else {
+                                this.createCallButton(600);
+                                this.createRaiseButton(640);
+                                this.createFoldButton(690);
+                            }
                         }
                     }
                 } else {
@@ -602,6 +615,24 @@ export class PokerView extends BaseScene {
                 console.log(player);
             }
         }
+    }
+
+    createPassButton(y: number) {
+        const callButton = new Button(
+            this,
+            750,
+            y,
+            "pass",
+            "gray-button",
+            () => {
+                console.log("pass");
+                this.table?.haveTurn("call");
+                this.renderScene();
+                this.actionButtons.forEach((button) => button.destroy());
+                this.playerInfo();
+            }
+        );
+        this.actionButtons.push(callButton);
     }
 
     createCallButton(y: number) {

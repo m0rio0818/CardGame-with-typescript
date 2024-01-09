@@ -52,7 +52,7 @@ export class PokerView extends BaseScene {
         this.renderScene();
     }
     renderScene() {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u;
         this.playerInfo();
         this.tableInfo();
         setTimeout(() => {
@@ -102,7 +102,7 @@ export class PokerView extends BaseScene {
         }
         switch (turnPlayer.type) {
             case "player":
-                console.log("PLAYER", turnPlayer.name, "STATUS", turnPlayer.gameStatus);
+                console.log("PLAYER", turnPlayer.name, "STATUS", turnPlayer.gameStatus, (_j = this.table) === null || _j === void 0 ? void 0 : _j.turnCounter, (_k = this.table) === null || _k === void 0 ? void 0 : _k.dealerIndex);
                 if (this.table.allPlayerActionResolved()) {
                     setTimeout(() => {
                         var _a;
@@ -111,7 +111,7 @@ export class PokerView extends BaseScene {
                     }, 500);
                     break;
                 }
-                if (((_j = this.table) === null || _j === void 0 ? void 0 : _j.gamePhase) != "blinding") {
+                if (((_l = this.table) === null || _l === void 0 ? void 0 : _l.gamePhase) != "blinding") {
                     if (turnPlayer.gameStatus == "fold" ||
                         turnPlayer.gameStatus == "allin" ||
                         turnPlayer.chips == 0) {
@@ -124,9 +124,9 @@ export class PokerView extends BaseScene {
                         break;
                     }
                     if ((beforePlayer === null || beforePlayer === void 0 ? void 0 : beforePlayer.gameStatus) == "check" ||
-                        ((_k = this.table) === null || _k === void 0 ? void 0 : _k.playerIndexCounter) ==
-                            ((_l = this.table) === null || _l === void 0 ? void 0 : _l.dealerIndex) + 1) {
-                        if (turnPlayer.chips <= ((_m = this.table) === null || _m === void 0 ? void 0 : _m.betMoney)) {
+                        ((_m = this.table) === null || _m === void 0 ? void 0 : _m.playerIndexCounter) ==
+                            ((_o = this.table) === null || _o === void 0 ? void 0 : _o.dealerIndex) + 1) {
+                        if (turnPlayer.chips <= ((_p = this.table) === null || _p === void 0 ? void 0 : _p.betMoney)) {
                             this.createCheckButton(600);
                             this.createAllInButton(640);
                             this.createFoldButton(690);
@@ -139,19 +139,29 @@ export class PokerView extends BaseScene {
                         }
                     }
                     else {
-                        if (turnPlayer.chips <= ((_o = this.table) === null || _o === void 0 ? void 0 : _o.betMoney)) {
+                        if (turnPlayer.chips <= ((_q = this.table) === null || _q === void 0 ? void 0 : _q.betMoney)) {
                             this.createAllInButton(630);
                             this.createFoldButton(670);
                         }
                         else if (turnPlayer.chips * 2 <=
-                            ((_p = this.table) === null || _p === void 0 ? void 0 : _p.betMoney)) {
+                            ((_r = this.table) === null || _r === void 0 ? void 0 : _r.betMoney)) {
                             this.createAllInButton(630);
                             this.createFoldButton(670);
                         }
                         else {
-                            this.createCallButton(600);
-                            this.createRaiseButton(640);
-                            this.createFoldButton(690);
+                            if (turnPlayer.gameStatus == "bet" &&
+                                ((_s = this.table) === null || _s === void 0 ? void 0 : _s.turnCounter) ==
+                                    (((_t = this.table) === null || _t === void 0 ? void 0 : _t.dealerIndex) + 2) %
+                                        ((_u = this.table) === null || _u === void 0 ? void 0 : _u.players.length)) {
+                                this.createPassButton(610);
+                                this.createRaiseButton(650);
+                                this.createFoldButton(690);
+                            }
+                            else {
+                                this.createCallButton(600);
+                                this.createRaiseButton(640);
+                                this.createFoldButton(690);
+                            }
                         }
                     }
                 }
@@ -503,6 +513,17 @@ export class PokerView extends BaseScene {
                 console.log(player);
             }
         }
+    }
+    createPassButton(y) {
+        const callButton = new Button(this, 750, y, "pass", "gray-button", () => {
+            var _a;
+            console.log("pass");
+            (_a = this.table) === null || _a === void 0 ? void 0 : _a.haveTurn("call");
+            this.renderScene();
+            this.actionButtons.forEach((button) => button.destroy());
+            this.playerInfo();
+        });
+        this.actionButtons.push(callButton);
     }
     createCallButton(y) {
         const callButton = new Button(this, 750, y, "call", "gray-button", () => {

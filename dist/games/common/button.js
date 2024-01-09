@@ -4,11 +4,9 @@ export class Button extends Phaser.GameObjects.Container {
     constructor(scene, x, y, text, key, callback) {
         super(scene, x, y);
         this.text = new Text(scene, 0, 0, text, {
-            style: {
-                color: "#ffffff",
-                fontSize: "10px",
-                fontFamily: "pixel",
-            },
+            color: "#ffffff",
+            fontSize: "14px",
+            fontFamily: "pixel",
         });
         this.image = new Image(scene, 0, 0, key);
         this.image.setInteractive();

@@ -35,8 +35,8 @@ export default class pokerTable extends Table {
             new pokerPlayer("p3", "ai", gameType),
             new pokerPlayer("p4", "ai", gameType),
         ];
-        this.dealerIndex = Math.floor(Math.random() * this.players.length);
-        // this.dealerIndex = 1;
+        // this.dealerIndex = Math.floor(Math.random() * this.players.length);
+        this.dealerIndex = 2;
         this.playerIndexCounter = this.dealerIndex + 1; // 現在ターンのプレイヤーを返す。
         this.betIndex = (this.dealerIndex + 2) % this.players.length; //　ラウンド開始時のベットスタートプレイヤー
         this.minbet = 5; // 最小ベット金額
@@ -49,25 +49,25 @@ export default class pokerTable extends Table {
     }
 
     assignPlayerHands(): void {
-        // for (let player of this.players) {
-        //     player.hand.push(this.deck.drawCard());
-        //     player.hand.push(this.deck.drawCard());
-        // }
-        for (let i = 0; i < this.players.length; i++) {
-            if (i == 0) {
-                this.players[i].hand.push(new Card("H", "J"));
-                this.players[i].hand.push(new Card("D", "Q"));
-            } else if (i == 1) {
-                this.players[i].hand.push(new Card("C", "4"));
-                this.players[i].hand.push(new Card("H", "7"));
-            } else if (i == 2) {
-                this.players[i].hand.push(new Card("H", "4"));
-                this.players[i].hand.push(new Card("S", "7"));
-            } else {
-                this.players[i].hand.push(new Card("D", "10"));
-                this.players[i].hand.push(new Card("S", "K"));
-            }
+        for (let player of this.players) {
+            player.hand.push(this.deck.drawCard());
+            player.hand.push(this.deck.drawCard());
         }
+        // for (let i = 0; i < this.players.length; i++) {
+        //     if (i == 0) {
+        //         this.players[i].hand.push(new Card("H", "J"));
+        //         this.players[i].hand.push(new Card("D", "Q"));
+        //     } else if (i == 1) {
+        //         this.players[i].hand.push(new Card("C", "4"));
+        //         this.players[i].hand.push(new Card("H", "7"));
+        //     } else if (i == 2) {
+        //         this.players[i].hand.push(new Card("H", "4"));
+        //         this.players[i].hand.push(new Card("S", "7"));
+        //     } else {
+        //         this.players[i].hand.push(new Card("D", "10"));
+        //         this.players[i].hand.push(new Card("S", "K"));
+        //     }
+        // }
     }
 
     sortPlayerScore(): pokerPlayer[] {
@@ -321,24 +321,12 @@ export default class pokerTable extends Table {
                 }
                 winnerPlayer.length > 1 ? this.drawSplitChip(winnerPlayer) : winnerPlayer[0].chips += this.pot;
             }
-
-            // ツーカード　or ワンペア
-            winnerPlayer.map((player) => {
-                console.log(
-                    player.name,
-                    player.pairsOfTwoList,
-                    player.pairsOfThreeList,
-                    player.parisOfCardList
-                );
-            });
         } else {
-            // 勝ちプレイヤー取得。
             let winnerPlayer: pokerPlayer[] = this.players.filter(
                 (player) => player.playerHandStatus == highRole
             );
             console.log(winnerPlayer);
             winnerPlayer[0].chips += this.pot;
-            this.pot = 0;
         }
 
         for (let i = 0; i < this.players.length; i++) {
@@ -354,38 +342,6 @@ export default class pokerTable extends Table {
             (player) =>
                 (player.chips += Math.floor(this.pot / winnerPlayers.length))
         );
-    }
-
-    compairPairsOfTwo(playerList: pokerPlayer[]): boolean {
-        let currHand;
-        let currIndex = 0;
-        let flag = false;
-        for (let j = playerList[0].pairsOfTwoList.length - 1; j >= 0; j--) {
-            currHand = playerList[0].pairsOfTwoList[j];
-            for (let i = 0; i < playerList.length; i++) {
-                let currPlayerHand = playerList[i].pairsOfTwoList[j];
-                console.log(currIndex, currHand, currPlayerHand);
-                if (currHand != currPlayerHand) {
-                    flag = true;
-                    if (
-                        pokerIndexOfNum.indexOf(currHand) <
-                        pokerIndexOfNum.indexOf(currPlayerHand)
-                    ) {
-                        currHand = currPlayerHand;
-                        currIndex = i;
-                        console.log(
-                            "currHand",
-                            currHand,
-                            "currIndex",
-                            currIndex,
-                            flag
-                        );
-                    }
-                }
-            }
-            if (flag) break;
-        }
-        return flag;
     }
 
     // 他のプレイヤーがgiveUp or AllIn Check
@@ -408,20 +364,20 @@ export default class pokerTable extends Table {
     evaluateMove(player: pokerPlayer, userData?: PokerActionType): void {
         if (player.type == "dealer") {
             if (this.turnCounter == 0) {
-                // this.dealer.hand.push(this.deck.drawCard());
-                // this.dealer.hand.push(this.deck.drawCard());
-                // this.dealer.hand.push(this.deck.drawCard());
-                this.dealer.hand.push(new Card("H", "A"));
-                this.dealer.hand.push(new Card("H", "2"));
-                this.dealer.hand.push(new Card("H", "3"));
-            } else if (this.turnCounter == 1) {
-                this.dealer.hand.push(new Card("H", "4"));
-            } else if (this.turnCounter == 2) {
-                this.dealer.hand.push(new Card("H", "5"));
-            }
-            // } else if (this.turnCounter < 3) {
-            //     this.dealer.hand.push(this.deck.drawCard());
+                this.dealer.hand.push(this.deck.drawCard());
+                this.dealer.hand.push(this.deck.drawCard());
+                this.dealer.hand.push(this.deck.drawCard());
+                // this.dealer.hand.push(new Card("H", "A"));
+                // this.dealer.hand.push(new Card("H", "2"));
+                // this.dealer.hand.push(new Card("H", "3"));
+            // } else if (this.turnCounter == 1) {
+            //     // this.dealer.hand.push(new Card("H", "4"));
+            // } else if (this.turnCounter == 2) {
+            //     this.dealer.hand.push(new Card("H", "5"));
             // }
+            } else if (this.turnCounter < 3) {
+                this.dealer.hand.push(this.deck.drawCard());
+            }
             console.log("turnCounter !!: ", this.turnCounter);
             this.turnCounter++;
 
