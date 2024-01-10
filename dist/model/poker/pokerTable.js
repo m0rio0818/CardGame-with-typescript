@@ -165,7 +165,8 @@ export default class pokerTable extends Table {
                         let currPlayerHand = winnerPlayer[i].pairsOfTwoList[j];
                         console.log(currHand, currPlayerHand);
                         if (currHand != currPlayerHand) {
-                            if (pokerIndexOfNum.indexOf(currHand) < pokerIndexOfNum.indexOf(currPlayerHand)) {
+                            if (pokerIndexOfNum.indexOf(currHand) <
+                                pokerIndexOfNum.indexOf(currPlayerHand)) {
                                 currHand = currPlayerHand;
                             }
                         }
@@ -190,11 +191,13 @@ export default class pokerTable extends Table {
                             }
                         }
                     }
-                    winnerPlayer = winnerPlayer.filter(player => player.parisOfCardList[j] == currHand);
+                    winnerPlayer = winnerPlayer.filter((player) => player.parisOfCardList[j] == currHand);
                     if (winnerPlayer.length == 1)
                         break;
                 }
-                winnerPlayer.length > 1 ? this.drawSplitChip(winnerPlayer) : winnerPlayer[0].chips += this.pot;
+                winnerPlayer.length > 1
+                    ? this.drawSplitChip(winnerPlayer)
+                    : (winnerPlayer[0].chips += this.pot);
             }
             else {
                 for (let j = winnerPlayer[0].parisOfCardList.length - 1; j >= 0; j--) {
@@ -202,16 +205,19 @@ export default class pokerTable extends Table {
                     for (let i = 0; i < winnerPlayer.length; i++) {
                         let currPlayerHand = winnerPlayer[i].parisOfCardList[j];
                         if (currHand != currPlayerHand) {
-                            if (pokerIndexOfNum.indexOf(currHand) < pokerIndexOfNum.indexOf(currPlayerHand)) {
+                            if (pokerIndexOfNum.indexOf(currHand) <
+                                pokerIndexOfNum.indexOf(currPlayerHand)) {
                                 currHand = currPlayerHand;
                             }
                         }
                     }
-                    winnerPlayer = winnerPlayer.filter(player => player.parisOfCardList[j] == currHand);
+                    winnerPlayer = winnerPlayer.filter((player) => player.parisOfCardList[j] == currHand);
                     if (winnerPlayer.length == 1)
                         break;
                 }
-                winnerPlayer.length > 1 ? this.drawSplitChip(winnerPlayer) : winnerPlayer[0].chips += this.pot;
+                winnerPlayer.length > 1
+                    ? this.drawSplitChip(winnerPlayer)
+                    : (winnerPlayer[0].chips += this.pot);
             }
         }
         else {
@@ -356,6 +362,11 @@ export default class pokerTable extends Table {
         }
     }
     haveTurn(userData) {
+        if (this.checkchipsEqualsZero()) {
+            this.roundCounter == this.maxTurn;
+        }
+        if (this.roundCounter == this.maxTurn) {
+        }
         if (this.gamePhase == "dealer turn")
             this.gamePhase = "betting";
         else if (this.gamePhase == "evaluating") {
@@ -399,11 +410,11 @@ export default class pokerTable extends Table {
             else if (player.chips == 0) {
                 this.evaluateMove(player, "fold");
             }
-            else if (player.chips < this.betMoney && player.chips > 0) {
+            else if (player.chips <= this.betMoney && player.chips > 0) {
                 console.log(player.name, "の所持金が最小ベット額より少ないです！！", this.betMoney, player.chips);
                 this.evaluateMove(player, "allin");
             }
-            else if (player.chips < this.betMoney * 2 &&
+            else if (player.chips <= this.betMoney * 2 &&
                 player.chips > 0 &&
                 userData == "raise") {
                 console.log("所持金足りないからRAISEできませんよ!!!!!");
@@ -457,6 +468,10 @@ export default class pokerTable extends Table {
         for (let player of this.players) {
             console.log(player.type, player.name, player.gameStatus, player.chips);
         }
+    }
+    checkchipsEqualsZero() {
+        let player = this.players.filter((player) => player.chips == 0);
+        return player.length == 1;
     }
     onLastPlayer() {
         return this.playerIndexCounter == this.betIndex;
