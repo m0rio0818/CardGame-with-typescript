@@ -283,41 +283,37 @@ export default class pokerTable extends Table {
                     winnerPlayer = winnerPlayer.filter(
                         (player) => player.pairsOfTwoList[j] == currHand
                     );
-                    // 一人のみしか残っていない場合は、勝者にして終了
-                    if (winnerPlayer.length == 1) {
-                        winnerPlayer[0].chips += this.pot;
-                        break;
-                    }
+                    if (winnerPlayer.length == 1) break;
                 }
 
                 console.log("two pairの判定終了", winnerPlayer);
-                console.log(
-                    "two pairだけでは判断できなかったから、残りの手札で判断!"
-                );
 
-                // winnersPlayerがこの時点で決まってたら終了
-                for (
-                    let j = winnerPlayer[0].parisOfCardList.length - 1;
-                    j >= 0;
-                    j--
-                ) {
-                    let currHand = winnerPlayer[0].parisOfCardList[j];
-                    for (let i = 0; i < winnerPlayer.length; i++) {
-                        let currPlayerHand = winnerPlayer[i].parisOfCardList[j];
-                        console.log(currHand, currPlayerHand);
-                        if (currHand != currPlayerHand) {
-                            if (
-                                pokerIndexOfNum.indexOf(currHand) <
-                                pokerIndexOfNum.indexOf(currPlayerHand)
-                            ) {
-                                currHand = currPlayerHand;
+                if (winnerPlayer.length > 1) {
+                    // winnersPlayerがこの時点で決まってたら終了
+                    for (
+                        let j = winnerPlayer[0].parisOfCardList.length - 1;
+                        j >= 0;
+                        j--
+                    ) {
+                        let currHand = winnerPlayer[0].parisOfCardList[j];
+                        for (let i = 0; i < winnerPlayer.length; i++) {
+                            let currPlayerHand =
+                                winnerPlayer[i].parisOfCardList[j];
+                            console.log(currHand, currPlayerHand);
+                            if (currHand != currPlayerHand) {
+                                if (
+                                    pokerIndexOfNum.indexOf(currHand) <
+                                    pokerIndexOfNum.indexOf(currPlayerHand)
+                                ) {
+                                    currHand = currPlayerHand;
+                                }
                             }
                         }
+                        winnerPlayer = winnerPlayer.filter(
+                            (player) => player.parisOfCardList[j] == currHand
+                        );
+                        if (winnerPlayer.length == 1) break;
                     }
-                    winnerPlayer = winnerPlayer.filter(
-                        (player) => player.parisOfCardList[j] == currHand
-                    );
-                    if (winnerPlayer.length == 1) break;
                 }
                 winnerPlayer.length > 1
                     ? this.drawSplitChip(winnerPlayer)
@@ -400,11 +396,11 @@ export default class pokerTable extends Table {
                 this.dealer.hand.push(new Card("S", "9"));
                 this.dealer.hand.push(new Card("C", "3"));
                 this.dealer.hand.push(new Card("D", "4"));
-                } else if (this.turnCounter == 1) {
-                    this.dealer.hand.push(new Card("H", "3"));
-                } else if (this.turnCounter == 2) {
-                    this.dealer.hand.push(new Card("S", "10"));
-                }
+            } else if (this.turnCounter == 1) {
+                this.dealer.hand.push(new Card("H", "3"));
+            } else if (this.turnCounter == 2) {
+                this.dealer.hand.push(new Card("S", "10"));
+            }
             // } else if (this.turnCounter < 3) {
             //     this.dealer.hand.push(this.deck.drawCard());
             // }
@@ -550,7 +546,6 @@ export default class pokerTable extends Table {
         }
         // 最終ラウンドまで来たら、result表示 => ゲームを終了させる。
         if (this.roundCounter == this.maxTurn) {
-
         }
         if (this.gamePhase == "dealer turn") this.gamePhase = "betting";
         else if (this.gamePhase == "evaluating") {
