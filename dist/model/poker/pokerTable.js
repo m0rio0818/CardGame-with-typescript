@@ -61,7 +61,6 @@ export default class pokerTable extends Table {
             player.pairsOfFourList = [];
             player.parisOfCardList = [];
             player.playerHandStatus = "no pair";
-            console.log(player.name, player.pairsOfTwoList, player.pairsOfThreeList, player.pairsOfFourList, player.parisOfCardList);
         });
         this.dealer.hand = [];
         this.dealer.Cards = [];
@@ -76,8 +75,6 @@ export default class pokerTable extends Table {
         }
     }
     evaluateAndGetRoundResults() {
-        let winners = [];
-        let roundLog = "";
         const hashMap = new Map();
         hashMap.set("royal flush", 0);
         hashMap.set("straight flush", 0);
@@ -95,6 +92,7 @@ export default class pokerTable extends Table {
             console.log(player.name, player.playerHandStatus);
         });
         this.players.map((player) => {
+            console.log(player.gameStatus);
             if (player.gameStatus != "fold") {
                 hashMap.set(player.playerHandStatus, hashMap.get(player.playerHandStatus) + 1);
             }
@@ -243,15 +241,19 @@ export default class pokerTable extends Table {
             console.log(winnerPlayer);
             winnerPlayer[0].chips += this.pot;
         }
+        return "";
+    }
+    drawSplitChip(winnerPlayers) {
+        winnerPlayers.map((player) => (player.chips += Math.floor(this.pot / winnerPlayers.length)));
+    }
+    getResultLog() {
+        let roundLog = "";
         for (let i = 0; i < this.players.length; i++) {
             roundLog +=
                 this.players[i].chips +
                     (i != this.players.length - 1 ? "," : "");
         }
         return roundLog;
-    }
-    drawSplitChip(winnerPlayers) {
-        winnerPlayers.map((player) => (player.chips += Math.floor(this.pot / winnerPlayers.length)));
     }
     checkAllOtherPlayerStatus(player) {
         for (let i = 0; i < this.players.length; i++) {
@@ -293,7 +295,6 @@ export default class pokerTable extends Table {
             console.log("次のラウンドの開始person", this.getTurnPlayer().name);
         }
         else {
-            console.log("PLAYERINDEXCOUNTER ", this.playerIndexCounter, "BETINDEX", this.betIndex, player.name, player.gameStatus, player.chips);
             if (this.onLastPlayer() &&
                 player.gameStatus != "bet" &&
                 player.gameStatus != "blind") {
@@ -304,9 +305,6 @@ export default class pokerTable extends Table {
             console.log("userData", userData);
             let gameDecision = player.promptPlayer(userData, this.betMoney);
             console.log(gameDecision);
-            if (this.gamePhase != "blinding" && player.gameStatus != "fold") {
-                console.log(player.name, "Info: ", player.playerHandStatus);
-            }
             switch (gameDecision.action) {
                 case "bet":
                     console.log("ベットできてません。もう一度選択してください");
@@ -383,23 +381,29 @@ export default class pokerTable extends Table {
         }
     }
     haveTurn(userData) {
-        if (this.checkchipsEqualsZeroExceptOne()) {
-            console.log("自分以外は所持金ありません。");
-            this.gamePhase == "evaluating";
-        }
         if (this.gamePhase == "dealer turn")
             this.gamePhase = "betting";
         else if (this.gamePhase == "evaluating") {
             console.log("ROUND  OWARI!!!!");
-            this.resultsLog.push(this.evaluateAndGetRoundResults());
+            this.evaluateAndGetRoundResults();
             this.clearPlayerHandsAndBets();
-            this.roundCounter++;
             this.deck.resetDeck();
             this.moveToNextDealer();
             this.gamePhase = "blinding";
-            console.log("ラウンド終了次はblinding", this.gamePhase);
-            console.log(this.resultsLog);
-            return;
+            if (this.checkchipsEqualsZeroExceptOne()) {
+                console.log("自分以外は所持金ありません。", "終了させます");
+                this.moveToFinalRoundandGetResult();
+                this.roundCounter = this.maxTurn;
+                console.log(this.resultsLog);
+                return;
+            }
+            else {
+                this.resultsLog.push(this.getResultLog());
+                this.roundCounter++;
+                console.log("ラウンド終了次はblinding", this.gamePhase);
+                console.log(this.resultsLog);
+                return;
+            }
         }
         let player = this.getTurnPlayer();
         this.checkAllOtherPlayerStatus(player);
@@ -464,6 +468,11 @@ export default class pokerTable extends Table {
     playerallFoldorAllIn(player) {
         return player.gameStatus == "allin" || player.gameStatus == "fold";
     }
+    moveToFinalRoundandGetResult() {
+        for (let i = this.roundCounter; i < this.maxTurn; i++) {
+            this.resultsLog.push(this.getResultLog());
+        }
+    }
     updatePlayerHandStatus() {
         for (let player of this.players) {
             if (player.gameStatus != "fold") {
@@ -490,8 +499,16 @@ export default class pokerTable extends Table {
             console.log(player.type, player.name, player.gameStatus, player.chips);
         }
     }
+    changeFoldwithnomoney() {
+        this.players.map((player) => {
+            if (player.chips == 0 && player.gameStatus != "allin") {
+                player.gameStatus = "fold";
+            }
+        });
+    }
     checkchipsEqualsZeroExceptOne() {
-        let player = this.players.filter((player) => player.chips == 0);
+        let player = this.players.filter((player) => player.chips != 0);
+        console.log("所持金0のプレイヤ-", player);
         return player.length == 1;
     }
     onLastPlayer() {

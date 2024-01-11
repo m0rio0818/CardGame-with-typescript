@@ -87,8 +87,7 @@ export default class pokerTable extends Table {
             player.pairsOfThreeList = [];
             player.pairsOfFourList = [];
             player.parisOfCardList = [];
-            player.playerHandStatus = "no pair"
-            console.log(player.name, player.pairsOfTwoList, player.pairsOfThreeList, player.pairsOfFourList, player.parisOfCardList);
+            player.playerHandStatus = "no pair";
         });
         this.dealer.hand = [];
         this.dealer.Cards = [];
@@ -106,8 +105,6 @@ export default class pokerTable extends Table {
 
     // ラウンド結果を評価し、結果を文字列として返すメソッド.
     evaluateAndGetRoundResults(): string {
-        let winners: pokerPlayer[] = [];
-        let roundLog = "";
         const hashMap: Map<PokerHandType, number> = new Map<
             PokerHandType,
             number
@@ -131,6 +128,7 @@ export default class pokerTable extends Table {
         });
 
         this.players.map((player) => {
+            console.log(player.gameStatus);
             if (player.gameStatus != "fold") {
                 hashMap.set(
                     player.playerHandStatus,
@@ -358,13 +356,7 @@ export default class pokerTable extends Table {
             console.log(winnerPlayer);
             winnerPlayer[0].chips += this.pot;
         }
-
-        for (let i = 0; i < this.players.length; i++) {
-            roundLog +=
-                this.players[i].chips +
-                (i != this.players.length - 1 ? "," : "");
-        }
-        return roundLog;
+        return "";
     }
 
     drawSplitChip(winnerPlayers: pokerPlayer[]): void {
@@ -372,6 +364,16 @@ export default class pokerTable extends Table {
             (player) =>
                 (player.chips += Math.floor(this.pot / winnerPlayers.length))
         );
+    }
+
+    getResultLog(): string {
+        let roundLog: string = "";
+        for (let i = 0; i < this.players.length; i++) {
+            roundLog +=
+                this.players[i].chips +
+                (i != this.players.length - 1 ? "," : "");
+        }
+        return roundLog;
     }
 
     // 他のプレイヤーがgiveUp or AllIn Check
@@ -428,15 +430,6 @@ export default class pokerTable extends Table {
         } else {
             // playerIndexCounter == betIndex : 1周してきた時
             // bet状態じゃない or ブラインドベットじゃない => dealer.turn
-            console.log(
-                "PLAYERINDEXCOUNTER ",
-                this.playerIndexCounter,
-                "BETINDEX",
-                this.betIndex,
-                player.name,
-                player.gameStatus,
-                player.chips
-            );
             if (
                 this.onLastPlayer() &&
                 player.gameStatus != "bet" &&
@@ -455,20 +448,13 @@ export default class pokerTable extends Table {
 
             console.log(gameDecision);
 
-            if (this.gamePhase != "blinding" && player.gameStatus != "fold") {
-                console.log(
-                    player.name,
-                    "Info: ",
-                    player.playerHandStatus
-                ); // プレイヤーのstatusをcheck,
-            }
             switch (gameDecision.action) {
                 case "bet":
                     console.log("ベットできてません。もう一度選択してください");
                     break;
                 case "blind":
                     console.log(this.playerIndexCounter, this.dealerIndex);
-                    console.log("ブラインドカウンター：",this.blindCounter)
+                    console.log("ブラインドカウンター：", this.blindCounter);
                     if (this.blindCounter == 0) this.assignPlayerHands();
                     //　ブラインドベットをする。
                     console.log(player.name, "before blind", player);
@@ -545,25 +531,29 @@ export default class pokerTable extends Table {
 
     // プレイヤーのターンを処理するメソッド.
     haveTurn(userData?: PokerActionType): void {
-        if (this.checkchipsEqualsZeroExceptOne()) {
-            console.log("自分以外は所持金ありません。")
-            this.gamePhase == "evaluating";
-        }
         // 最終ラウンドまで来たら、result表示 => ゲームを終了させる。
         if (this.gamePhase == "dealer turn") this.gamePhase = "betting";
         else if (this.gamePhase == "evaluating") {
             console.log("ROUND  OWARI!!!!");
-            this.resultsLog.push(this.evaluateAndGetRoundResults());
+            this.evaluateAndGetRoundResults();
             this.clearPlayerHandsAndBets();
-            this.roundCounter++;
             this.deck.resetDeck();
             this.moveToNextDealer();
             this.gamePhase = "blinding";
-            console.log("ラウンド終了次はblinding", this.gamePhase);
-            console.log(this.resultsLog);
-            return;
+            if (this.checkchipsEqualsZeroExceptOne()) {
+                console.log("自分以外は所持金ありません。", "終了させます");
+                this.moveToFinalRoundandGetResult();
+                this.roundCounter = this.maxTurn;
+                console.log(this.resultsLog);
+                return;
+            }else {
+                this.resultsLog.push(this.getResultLog());
+                this.roundCounter++;
+                console.log("ラウンド終了次はblinding", this.gamePhase);
+                console.log(this.resultsLog);
+                return;
+            }
         }
-
         let player = this.getTurnPlayer();
         this.checkAllOtherPlayerStatus(player);
 
@@ -675,6 +665,13 @@ export default class pokerTable extends Table {
         return player.gameStatus == "allin" || player.gameStatus == "fold";
     }
 
+    // 現在のラウンドから最後のラウンドまでスキップ + ログ保存
+    moveToFinalRoundandGetResult() {
+        for (let i = this.roundCounter; i < this.maxTurn; i++) {
+            this.resultsLog.push(this.getResultLog());
+        }
+    }
+
     updatePlayerHandStatus() {
         for (let player of this.players) {
             if (player.gameStatus != "fold") {
@@ -713,9 +710,19 @@ export default class pokerTable extends Table {
         }
     }
 
+    // 所持金0のプレイヤーをfoldにする。
+    changeFoldwithnomoney() {
+        this.players.map((player) => {
+            if (player.chips == 0 && player.gameStatus != "allin") {
+                player.gameStatus = "fold";
+            }
+        });
+    }
+
     //　1人以外所持金0のプレイヤーかどうかチェック
     checkchipsEqualsZeroExceptOne(): boolean {
-        let player = this.players.filter((player) => player.chips == 0);
+        let player = this.players.filter((player) => player.chips != 0);
+        console.log("所持金0のプレイヤ-", player);
         return player.length == 1;
     }
 
