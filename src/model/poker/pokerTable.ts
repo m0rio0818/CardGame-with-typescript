@@ -83,15 +83,19 @@ export default class pokerTable extends Table {
             player.gameStatus = "blind";
             player.hand = [];
             player.Cards = [];
-            player.parisOfCardList = [];
-            player.pairsOfFourList = [];
-            player.pairsOfThreeList = [];
             player.pairsOfTwoList = [];
+            player.pairsOfThreeList = [];
+            player.pairsOfFourList = [];
+            player.parisOfCardList = [];
+            player.playerHandStatus = "no pair"
+            console.log(player.name, player.pairsOfTwoList, player.pairsOfThreeList, player.pairsOfFourList, player.parisOfCardList);
         });
         this.dealer.hand = [];
+        this.dealer.Cards = [];
         this.blindCounter = 0;
         this.pot = 0;
         this.turnCounter = 0;
+        this.blindCounter = 0;
     }
 
     clearPlayerBet(): void {
@@ -455,7 +459,7 @@ export default class pokerTable extends Table {
                 console.log(
                     player.name,
                     "Info: ",
-                    player.getHandScore(this.dealer)
+                    player.playerHandStatus
                 ); // プレイヤーのstatusをcheck,
             }
             switch (gameDecision.action) {
@@ -464,6 +468,7 @@ export default class pokerTable extends Table {
                     break;
                 case "blind":
                     console.log(this.playerIndexCounter, this.dealerIndex);
+                    console.log("ブラインドカウンター：",this.blindCounter)
                     if (this.blindCounter == 0) this.assignPlayerHands();
                     //　ブラインドベットをする。
                     console.log(player.name, "before blind", player);
@@ -481,7 +486,6 @@ export default class pokerTable extends Table {
                     if (this.blindCounter == 2) {
                         this.gamePhase = "betting";
                         this.changePlayerStatusToBet();
-                        this.blindCounter = 0;
                     }
                     break;
                 case "call":
@@ -541,7 +545,8 @@ export default class pokerTable extends Table {
 
     // プレイヤーのターンを処理するメソッド.
     haveTurn(userData?: PokerActionType): void {
-        if (this.checkchipsEqualsZero()) {
+        if (this.checkchipsEqualsZeroExceptOne()) {
+            console.log("自分以外は所持金ありません。")
             this.gamePhase == "evaluating";
         }
         // 最終ラウンドまで来たら、result表示 => ゲームを終了させる。
@@ -709,7 +714,7 @@ export default class pokerTable extends Table {
     }
 
     //　1人以外所持金0のプレイヤーかどうかチェック
-    checkchipsEqualsZero(): boolean {
+    checkchipsEqualsZeroExceptOne(): boolean {
         let player = this.players.filter((player) => player.chips == 0);
         return player.length == 1;
     }

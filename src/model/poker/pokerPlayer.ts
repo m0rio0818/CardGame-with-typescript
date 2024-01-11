@@ -83,6 +83,7 @@ export default class pokerPlayer extends Player {
     getHandScore(dealer: Player): PokerHandType {
         console.log(this.name, "before Concat", this.Cards);
         this.Cards = this.hand.concat(dealer.hand);
+        console.log(this.hand, dealer.hand, this.Cards);
         const CardsMap: Record<string, number> = {};
         this.Cards.sort((a, b) => {
             return (
@@ -218,7 +219,6 @@ export default class pokerPlayer extends Player {
     }
 
     isRoyalFlush(): boolean {
-        console.log("this.card", this.Cards);
         return (
             this.isStraightFlush() &&
             this.Cards[this.Cards.length - 1].rank === "A"

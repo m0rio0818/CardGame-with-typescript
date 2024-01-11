@@ -1,4 +1,4 @@
-import { pokerIndexOfNum, } from "../../config/pokerConfig.js";
+import { pokerIndexOfNum } from "../../config/pokerConfig.js";
 import Player from "../common/Player.js";
 import pokerGameDecision from "./pokerGameDecision.js";
 export default class pokerPlayer extends Player {
@@ -210,4 +210,4 @@ export default class pokerPlayer extends Player {
         }
     }
 }
-//# sourceMappingURL=pokerPlayer.js.map
+//# sourceMappingURL=pokerPlayer.1.js.map

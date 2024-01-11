@@ -58,6 +58,7 @@ export class PokerView extends BaseScene {
                 tableData[0].push(`Round${i}`);
             }
         }
+
         for (let i = 0; i < this.table?.players.length!; i++) {
             let currPlayer = this.table!.players[i];
             tableData.push([currPlayer.name]);
@@ -142,7 +143,6 @@ export class PokerView extends BaseScene {
         );
         if (this.table!.roundCounter == this.table!.maxTurn) {
             this.renderResultLog();
-            // this.renderBackButton();
         } else {
             this.playerInfo();
             this.tableInfo();
