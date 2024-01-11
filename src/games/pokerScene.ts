@@ -176,8 +176,8 @@ export class PokerView extends BaseScene {
                                 turnPlayer.gameStatus == "bet" &&
                                 this.table?.playerIndexCounter ==
                                     (this.table?.dealerIndex! + 2) %
-                                        this.table?.players.length! &&
-                                this.table.turnCounter == 0
+                                        this.table?.players.length!
+                                         && this.table.turnCounter == 0
                             ) {
                                 this.createPassButton(610);
                                 this.createRaiseButton(650);
@@ -535,8 +535,7 @@ export class PokerView extends BaseScene {
                         : this.height / 2 + 150,
                     currPlayer.gameStatus == "fold"
                         ? "fold"
-                        : "Hand: " +
-                              currPlayer?.getHandScore(this.table.dealer),
+                        : "Hand: " + currPlayer?.getHandScore(this.table.dealer),
                     {
                         fontSize: "15px",
                         color: "#ffffff",

@@ -49,25 +49,25 @@ export default class pokerTable extends Table {
     }
 
     assignPlayerHands(): void {
-        for (let player of this.players) {
-            player.hand.push(this.deck.drawCard());
-            player.hand.push(this.deck.drawCard());
-        }
-        // for (let i = 0; i < this.players.length; i++) {
-        //     if (i == 0) {
-        //         this.players[i].hand.push(new Card("H", "J"));
-        //         this.players[i].hand.push(new Card("D", "Q"));
-        //     } else if (i == 1) {
-        //         this.players[i].hand.push(new Card("C", "4"));
-        //         this.players[i].hand.push(new Card("H", "7"));
-        //     } else if (i == 2) {
-        //         this.players[i].hand.push(new Card("H", "4"));
-        //         this.players[i].hand.push(new Card("S", "7"));
-        //     } else {
-        //         this.players[i].hand.push(new Card("D", "10"));
-        //         this.players[i].hand.push(new Card("S", "K"));
-        //     }
+        // for (let player of this.players) {
+        //     player.hand.push(this.deck.drawCard());
+        //     player.hand.push(this.deck.drawCard());
         // }
+        for (let i = 0; i < this.players.length; i++) {
+            if (i == 0) {
+                this.players[i].hand.push(new Card("H", "10"));
+                this.players[i].hand.push(new Card("D", "4"));
+            } else if (i == 1) {
+                this.players[i].hand.push(new Card("C", "4"));
+                this.players[i].hand.push(new Card("H", "9"));
+            } else if (i == 2) {
+                this.players[i].hand.push(new Card("H", "K"));
+                this.players[i].hand.push(new Card("S", "2"));
+            } else {
+                this.players[i].hand.push(new Card("D", "2"));
+                this.players[i].hand.push(new Card("S", "K"));
+            }
+        }
     }
 
     sortPlayerScore(): pokerPlayer[] {
@@ -394,20 +394,20 @@ export default class pokerTable extends Table {
     evaluateMove(player: pokerPlayer, userData?: PokerActionType): void {
         if (player.type == "dealer") {
             if (this.turnCounter == 0) {
-                this.dealer.hand.push(this.deck.drawCard());
-                this.dealer.hand.push(this.deck.drawCard());
-                this.dealer.hand.push(this.deck.drawCard());
-                // this.dealer.hand.push(new Card("H", "A"));
-                // this.dealer.hand.push(new Card("H", "2"));
-                // this.dealer.hand.push(new Card("H", "3"));
-                // } else if (this.turnCounter == 1) {
-                //     // this.dealer.hand.push(new Card("H", "4"));
-                // } else if (this.turnCounter == 2) {
-                //     this.dealer.hand.push(new Card("H", "5"));
-                // }
-            } else if (this.turnCounter < 3) {
-                this.dealer.hand.push(this.deck.drawCard());
-            }
+                // this.dealer.hand.push(this.deck.drawCard());
+                // this.dealer.hand.push(this.deck.drawCard());
+                // this.dealer.hand.push(this.deck.drawCard());
+                this.dealer.hand.push(new Card("S", "9"));
+                this.dealer.hand.push(new Card("C", "3"));
+                this.dealer.hand.push(new Card("D", "4"));
+                } else if (this.turnCounter == 1) {
+                    this.dealer.hand.push(new Card("H", "3"));
+                } else if (this.turnCounter == 2) {
+                    this.dealer.hand.push(new Card("S", "10"));
+                }
+            // } else if (this.turnCounter < 3) {
+            //     this.dealer.hand.push(this.deck.drawCard());
+            // }
             console.log("turnCounter !!: ", this.turnCounter);
             this.turnCounter++;
 
@@ -548,7 +548,7 @@ export default class pokerTable extends Table {
         if (this.checkchipsEqualsZero()) {
             this.roundCounter == this.maxTurn;
         }
-        // ゲームを終了させる。
+        // 最終ラウンドまで来たら、result表示 => ゲームを終了させる。
         if (this.roundCounter == this.maxTurn) {
 
         }

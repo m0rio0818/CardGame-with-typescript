@@ -118,7 +118,7 @@ export default class pokerPlayer extends Player {
             this.playerHandStatus = "straight flush";
             return "straight flush";
         }
-        else if (this.isFourCard(pairsOfFour)) {
+        else if (this.isFourCard()) {
             this.pairsOfFourList = parisOfFourList;
             this.playerHandStatus = "four card";
             return "four card";
@@ -143,7 +143,12 @@ export default class pokerPlayer extends Player {
             return "three card";
         }
         else if (this.isTwoPair(pairsOfTwo)) {
-            this.pairsOfTwoList = pairsOfTwoList;
+            if (pairsOfTwo > 2) {
+                this.pairsOfTwoList = pairsOfTwoList.slice(-2);
+            }
+            else {
+                this.parisOfCardList = pairsOfTwoList;
+            }
             this.playerHandStatus = "two pair";
             return "two pair";
         }
@@ -170,7 +175,7 @@ export default class pokerPlayer extends Player {
     isStraightFlush() {
         return this.isStraight() && this.isFlush();
     }
-    isFourCard(pairsOfFour) {
+    isFourCard() {
         return this.maxValue == 4;
     }
     isFullHouse(pairsOfTwo, pairsOfThree) {
@@ -194,7 +199,7 @@ export default class pokerPlayer extends Player {
         return this.maxValue === 3 && pairsOfThree === 1;
     }
     isTwoPair(pairsOfTwo) {
-        return pairsOfTwo === 2;
+        return pairsOfTwo >= 2;
     }
     isOnePair(pairsOfTwo) {
         return pairsOfTwo === 1;
