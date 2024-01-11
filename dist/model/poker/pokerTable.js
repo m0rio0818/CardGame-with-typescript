@@ -380,9 +380,7 @@ export default class pokerTable extends Table {
     }
     haveTurn(userData) {
         if (this.checkchipsEqualsZero()) {
-            this.roundCounter == this.maxTurn;
-        }
-        if (this.roundCounter == this.maxTurn) {
+            this.gamePhase == "evaluating";
         }
         if (this.gamePhase == "dealer turn")
             this.gamePhase = "betting";
@@ -395,6 +393,7 @@ export default class pokerTable extends Table {
             this.moveToNextDealer();
             this.gamePhase = "blinding";
             console.log("ラウンド終了次はblinding", this.gamePhase);
+            console.log(this.resultsLog);
             return;
         }
         let player = this.getTurnPlayer();

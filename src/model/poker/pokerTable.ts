@@ -542,11 +542,9 @@ export default class pokerTable extends Table {
     // プレイヤーのターンを処理するメソッド.
     haveTurn(userData?: PokerActionType): void {
         if (this.checkchipsEqualsZero()) {
-            this.roundCounter == this.maxTurn;
+            this.gamePhase == "evaluating";
         }
         // 最終ラウンドまで来たら、result表示 => ゲームを終了させる。
-        if (this.roundCounter == this.maxTurn) {
-        }
         if (this.gamePhase == "dealer turn") this.gamePhase = "betting";
         else if (this.gamePhase == "evaluating") {
             console.log("ROUND  OWARI!!!!");
@@ -557,6 +555,7 @@ export default class pokerTable extends Table {
             this.moveToNextDealer();
             this.gamePhase = "blinding";
             console.log("ラウンド終了次はblinding", this.gamePhase);
+            console.log(this.resultsLog);
             return;
         }
 

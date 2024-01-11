@@ -10,17 +10,10 @@ export class PokerView extends BaseScene {
     private height: number = 0;
     private table: pokerTable | null = null;
 
-    // button
-    private callButton: Button | null = null;
-    private raiseButton: Button | null = null;
-    private foldButton: Button | null = null;
-    private checkButton: Button | null = null;
-    private allInButton: Button | null = null;
-
     // playerInfo
-    private chipsInfo: Text | null = null;
-    private nameInfo: Text | null = null;
-    private handInfo: Text | null = null;
+    // private chipsInfo: Text | null = null;
+    // private nameInfo: Text | null = null;
+    // private handInfo: Text | null = null;
     private potInfo: Text | null = null;
     private turnData: Text | null = null;
     private currBetInfo: Text | null = null;
@@ -53,165 +46,260 @@ export class PokerView extends BaseScene {
         this.table = data.table;
 
         this.renderScene();
+        // this.renderResultLog();
+    }
+
+    getResultTableData(): (string | number)[][] {
+        let tableData: (string | number)[][] = [[]];
+        for (let i = 0; i < this.table?.maxTurn! + 1; i++) {
+            if (i == 0) {
+                tableData[0].push("Name");
+            } else {
+                tableData[0].push(`Round${i}`);
+            }
+        }
+        for (let i = 0; i < this.table?.players.length!; i++) {
+            let currPlayer = this.table!.players[i];
+            tableData.push([currPlayer.name]);
+        }
+
+        for (let i = 0; i < this.table?.resultsLog.length!; i++) {
+            let currResult = this.table?.resultsLog[i];
+            let round_i = currResult?.split(",");
+            for (let i = 0; i < round_i?.length!; i++) {
+                tableData[i + 1].push(round_i![i]);
+            }
+        }
+        return tableData;
+    }
+
+    renderResultLog() {
+        this.destroyAllInfo();
+        const tableData = this.getResultTableData();
+        
+        // セルの幅と高さ
+        const cellWidth = 100;
+        const cellHeight = 40;
+        
+        // テーブルの幅と高さ
+        const tableWidth = tableData[0].length * cellWidth;
+        const tableHeight = tableData.length * cellHeight;      
+    
+        // テーブルの位置
+        const tableX = this.width / 2 - tableWidth /2 ;
+        const tableY = this.height / 2 - tableHeight / 2;
+
+        // テーブル作成
+        for (let i = 0; i < tableData.length; i++) {
+            for (let j = 0; j < tableData[i].length; j++) {
+                const cellX = tableX + j * cellWidth;
+                const cellY = tableY + i * cellHeight;
+
+                // セルを作成
+                const cellText = this.add.text(
+                    cellX + cellWidth / 2,
+                    cellY + cellHeight / 2,
+                    tableData[i][j],
+                    {
+                        fontFamily: "Arial",
+                        fontSize: "18px",
+                        color: "#ffffff",
+                    }
+                );
+                cellText.setOrigin(0.5, 0.5);
+
+                // セルの背景を追加（デザインの一部として）
+                const cellBackground = this.add.rectangle(
+                    cellX + cellWidth / 2,
+                    cellY + cellHeight / 2,
+                    cellWidth,
+                    cellHeight
+                );
+                cellBackground.setStrokeStyle(2, 0xffffff);
+            }
+        }
+    }
+
+    destroyAllInfo() {
+        this.playerNameInfo.forEach((name) => name.destroy());
+        this.playerChipsInfo.forEach((chip) => chip.destroy());
+        this.playerHandInfo.forEach((hand) => hand.destroy());
+        this.actionButtons.forEach(button => button.destroy());
+        this.playerBetInfo.forEach(bet => bet.destroy());
+        this.dealerHandInfo.forEach(hand => hand.destroy());
+        this.dealerCoinInfo.forEach(coin => coin.destroy());
+        this.potInfo?.destroy();
+        this.currBetInfo?.destroy();
+        this.turnData?.destroy();
     }
 
     renderScene() {
-        this.playerInfo();
-        this.tableInfo();
+        console.log(
+            "ROUNDCOUNTER",
+            this.table!.roundCounter,
+            "MAXTURN",
+            this.table!.maxTurn
+        );
+        if (this.table!.roundCounter == this.table!.maxTurn) {
+            this.renderResultLog();
+            // this.renderBackButton();
+        } else {
+            this.playerInfo();
+            this.tableInfo();
 
-        setTimeout(() => {
-            this.putDealerCoin();
-        }, 300);
-
-        const turnPlayer = this.table!.getTurnPlayer();
-        const beforePlayer = this.table?.getoneBeforePlayer();
-        console.log("THIS.TABLE.PHASE", this.table?.gamePhase);
-        console.log("現在のdelarIndx", this.table?.dealerIndex);
-
-        if (
-            this.table?.gamePhase == "betting" &&
-            this.playerhandsImages[0] === undefined
-        ) {
-            this.dealInitialHands();
-        }
-
-        if (this.table?.gamePhase == "evaluating") {
             setTimeout(() => {
-                this.filpCard();
-                setTimeout(() => {
-                    this.clearAllHand();
-                    this.clearDealerCard();
-                    this.clearDealrCoin();
-                    setTimeout(() => {
-                        this.table?.haveTurn();
-                        this.renderScene();
-                    }, 1000);
-                }, 2000);
-            }, 1000);
-            return;
-        }
-        if (this.table?.gamePhase == "dealer turn") {
-            console.log(
-                "ディーラーきた",
-                turnPlayer.name,
-                this.table.dealer.hand
-            );
-            setTimeout(() => {
-                this.setDealerCard();
-                setTimeout(() => {
-                    this.playerHandText();
-                    this.table?.haveTurn();
-                    this.renderScene();
-                }, 2000);
-            }, 1000);
-            return;
-        }
+                this.putDealerCoin();
+            }, 300);
 
-        // テーブル全員がallin or foldの場合
-        if (this.table?.allplayerAllInOrFold()) {
-            console.log("PLPAYER全員が何もできない状況です。");
-            this.table?.haveTurn();
-            this.renderScene();
-        }
+            const turnPlayer = this.table!.getTurnPlayer();
+            const beforePlayer = this.table?.getoneBeforePlayer();
+            console.log("THIS.TABLE.PHASE", this.table?.gamePhase);
+            console.log("現在のdelarIndx", this.table?.dealerIndex);
 
-        switch (turnPlayer.type) {
-            case "player":
-                console.log(
-                    "PLAYER",
-                    turnPlayer.name,
-                    "STATUS",
-                    turnPlayer.gameStatus,
-                    this.table?.turnCounter,
-                    this.table?.dealerIndex
-                );
-                if (this.table!.allPlayerActionResolved()) {
+            if (
+                this.table?.gamePhase == "betting" &&
+                this.playerhandsImages[0] === undefined
+            ) {
+                this.dealInitialHands();
+            }
+
+            if (this.table?.gamePhase == "evaluating") {
+                setTimeout(() => {
+                    this.filpCard();
                     setTimeout(() => {
-                        this.table?.haveTurn();
-                        this.renderScene();
-                    }, 500);
-                    break;
-                }
-                if (this.table?.gamePhase != "blinding") {
-                    if (
-                        turnPlayer.gameStatus == "fold" ||
-                        turnPlayer.gameStatus == "allin" ||
-                        turnPlayer.chips == 0
-                    ) {
-                        // 何もボタンは表示しない.
-                        console.log("player は allIn or Fold");
+                        this.clearAllHand();
+                        this.clearDealerCard();
+                        this.clearDealrCoin();
                         setTimeout(() => {
                             this.table?.haveTurn();
                             this.renderScene();
-                        }, 500);
-                        break;
-                    }
-                    if (
-                        beforePlayer?.gameStatus == "check" ||
-                        this.table?.playerIndexCounter ==
-                            this.table?.dealerIndex! + 1
-                    ) {
-                        if (turnPlayer.chips <= this.table?.betMoney!) {
-                            this.createCheckButton(600);
-                            this.createAllInButton(640);
-                            this.createFoldButton(690);
-                        } else {
-                            // チェックも選択肢にあり
-                            this.createCheckButton(570);
-                            this.createCallButton(610);
-                            this.createRaiseButton(650);
-                            this.createFoldButton(690);
-                        }
-                    } else {
-                        if (turnPlayer.chips <= this.table?.betMoney!) {
-                            this.createAllInButton(630);
-                            this.createFoldButton(670);
-                        } else if (
-                            turnPlayer.chips * 2 <=
-                            this.table?.betMoney!
-                        ) {
-                            this.createAllInButton(630);
-                            this.createFoldButton(670);
-                        } else {
-                            if (
-                                turnPlayer.gameStatus == "bet" &&
-                                this.table?.playerIndexCounter ==
-                                    (this.table?.dealerIndex! + 2) %
-                                        this.table?.players.length!
-                                         && this.table.turnCounter == 0
-                            ) {
-                                this.createPassButton(610);
-                                this.createRaiseButton(650);
-                                this.createFoldButton(690);
-                            } else {
-                                this.createCallButton(600);
-                                this.createRaiseButton(640);
-                                this.createFoldButton(690);
-                            }
-                        }
-                    }
-                } else {
+                        }, 1000);
+                    }, 2000);
+                }, 1000);
+                return;
+            }
+            if (this.table?.gamePhase == "dealer turn") {
+                console.log(
+                    "ディーラーきた",
+                    turnPlayer.name,
+                    this.table.dealer.hand
+                );
+                setTimeout(() => {
+                    this.setDealerCard();
+                    setTimeout(() => {
+                        this.playerHandText();
+                        this.table?.haveTurn();
+                        this.renderScene();
+                    }, 2000);
+                }, 1000);
+                return;
+            }
+
+            // テーブル全員がallin or foldの場合
+            if (this.table?.allplayerAllInOrFold()) {
+                console.log("PLPAYER全員が何もできない状況です。");
+                this.table?.haveTurn();
+                this.renderScene();
+            }
+
+            switch (turnPlayer.type) {
+                case "player":
+                    console.log(
+                        "PLAYER",
+                        turnPlayer.name,
+                        "STATUS",
+                        turnPlayer.gameStatus,
+                        this.table?.turnCounter,
+                        this.table?.dealerIndex
+                    );
                     if (this.table!.allPlayerActionResolved()) {
                         setTimeout(() => {
                             this.table?.haveTurn();
                             this.renderScene();
                         }, 500);
                         break;
-                    } else {
-                        setTimeout(() => {
-                            this.table?.haveTurn();
-                            this.renderScene();
-                        }, 1000);
                     }
-                }
-                break;
-            default:
-                setTimeout(() => {
-                    this.table?.haveTurn();
-                    this.renderScene();
-                }, 1000);
-                break;
+                    if (this.table?.gamePhase != "blinding") {
+                        if (
+                            turnPlayer.gameStatus == "fold" ||
+                            turnPlayer.gameStatus == "allin" ||
+                            turnPlayer.chips == 0
+                        ) {
+                            // 何もボタンは表示しない.
+                            console.log("player は allIn or Fold");
+                            setTimeout(() => {
+                                this.table?.haveTurn();
+                                this.renderScene();
+                            }, 500);
+                            break;
+                        }
+                        if (
+                            beforePlayer?.gameStatus == "check" ||
+                            this.table?.playerIndexCounter ==
+                                this.table?.dealerIndex! + 1
+                        ) {
+                            if (turnPlayer.chips <= this.table?.betMoney!) {
+                                this.createCheckButton(600);
+                                this.createAllInButton(640);
+                                this.createFoldButton(690);
+                            } else {
+                                // チェックも選択肢にあり
+                                this.createCheckButton(570);
+                                this.createCallButton(610);
+                                this.createRaiseButton(650);
+                                this.createFoldButton(690);
+                            }
+                        } else {
+                            if (turnPlayer.chips <= this.table?.betMoney!) {
+                                this.createAllInButton(630);
+                                this.createFoldButton(670);
+                            } else if (
+                                turnPlayer.chips * 2 <=
+                                this.table?.betMoney!
+                            ) {
+                                this.createAllInButton(630);
+                                this.createFoldButton(670);
+                            } else {
+                                if (
+                                    turnPlayer.gameStatus == "bet" &&
+                                    this.table?.playerIndexCounter ==
+                                        (this.table?.dealerIndex! + 2) %
+                                            this.table?.players.length! &&
+                                    this.table.turnCounter == 0
+                                ) {
+                                    this.createPassButton(610);
+                                    this.createRaiseButton(650);
+                                    this.createFoldButton(690);
+                                } else {
+                                    this.createCallButton(600);
+                                    this.createRaiseButton(640);
+                                    this.createFoldButton(690);
+                                }
+                            }
+                        }
+                    } else {
+                        if (this.table!.allPlayerActionResolved()) {
+                            setTimeout(() => {
+                                this.table?.haveTurn();
+                                this.renderScene();
+                            }, 500);
+                            break;
+                        } else {
+                            setTimeout(() => {
+                                this.table?.haveTurn();
+                                this.renderScene();
+                            }, 1000);
+                        }
+                    }
+                    break;
+                default:
+                    setTimeout(() => {
+                        this.table?.haveTurn();
+                        this.renderScene();
+                    }, 1000);
+                    break;
+            }
         }
-        console.log(turnPlayer);
     }
 
     putDealerCoin() {
@@ -535,7 +623,8 @@ export class PokerView extends BaseScene {
                         : this.height / 2 + 150,
                     currPlayer.gameStatus == "fold"
                         ? "fold"
-                        : "Hand: " + currPlayer?.getHandScore(this.table.dealer),
+                        : "Hand: " +
+                              currPlayer?.getHandScore(this.table.dealer),
                     {
                         fontSize: "15px",
                         color: "#ffffff",
@@ -710,7 +799,7 @@ export class PokerView extends BaseScene {
     }
 
     createRaiseButton(y: number) {
-        this.raiseButton = new Button(
+        const raiseButton = new Button(
             this,
             750,
             y,
@@ -724,6 +813,6 @@ export class PokerView extends BaseScene {
                 this.playerInfo();
             }
         );
-        this.actionButtons.push(this.raiseButton);
+        this.actionButtons.push(raiseButton);
     }
 }

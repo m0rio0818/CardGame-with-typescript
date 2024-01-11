@@ -1,5 +1,5 @@
 import { PokerController } from "./controller/PokerController.js";
 import pokerTable from "./model/poker/pokerTable.js";
-let table = new pokerTable("poker", 4);
+let table = new pokerTable("poker", 1);
 PokerController.startGame(table);
 //# sourceMappingURL=app.js.map
